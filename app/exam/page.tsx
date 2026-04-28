@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import { ExamEngine } from "@/components/ExamEngine";
@@ -155,7 +155,7 @@ export default function ExamPage() {
                 <div className="space-y-6">
                   <div>
                     <label className="block text-xs font-bold text-slate-400 mb-3 ml-1 uppercase">Questions Count</label>
-                    <input
+                    <input aria-label="Questions Count"
                       type="range"
                       min={4}
                       max={20}

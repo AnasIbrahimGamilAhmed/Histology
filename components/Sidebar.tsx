@@ -61,6 +61,8 @@ export function Sidebar() {
 
         <div className="px-3 pt-6 border-t border-slate-800 space-y-2">
           <button 
+            type="button"
+            aria-label="Sign Out"
             onClick={() => signOut({ callbackUrl: "/" })}
             className="w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl text-slate-500 hover:bg-rose-500/10 hover:text-rose-400 transition-all group"
           >
@@ -85,6 +87,8 @@ export function Sidebar() {
           );
         })}
         <button 
+          type="button"
+          aria-label="Sign Out"
           onClick={() => signOut({ callbackUrl: "/" })}
           className="p-2 rounded-xl text-slate-500"
         >

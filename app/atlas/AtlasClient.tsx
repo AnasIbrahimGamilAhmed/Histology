@@ -130,7 +130,7 @@ export default function AtlasClient({ samples }: { samples: SampleWithVariations
         >
           {/* Main Microscope View */}
           <div className="flex-1 relative flex items-center justify-center p-4 lg:p-12">
-            <button className="absolute top-8 left-8 w-14 h-14 rounded-full bg-white/5 hover:bg-white/10 text-white flex items-center justify-center transition-all z-[110] border border-white/10" onClick={() => setSelectedImage(null)}>
+            <button  type ="button" aria-label="Back" className="absolute top-8 left-8 w-14 h-14 rounded-full bg-white/5 hover:bg-white/10 text-white flex items-center justify-center transition-all z-[110] border border-white/10" onClick={() => setSelectedImage(null)}>
               <ArrowLeft size={28} />
             </button>
 
