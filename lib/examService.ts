@@ -532,7 +532,7 @@ export async function getExamQuestionsForMode(
   const exam = await createExamInstance(userId, { mode: options.mode, limit, forceConfusionDrill: options.forceConfusionDrill });
   return {
     examId: exam.id,
-    questions: exam.questions.map((question) => ({
+    questions: exam.questions.map((question: any) => ({
       examId: exam.id,
       id: question.id,
       sampleId: question.sampleId,
