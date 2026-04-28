@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { sendVerificationEmail } from "@/lib/mailService";
 
 export async function POST(req: Request) {
   try {
@@ -25,8 +26,8 @@ export async function POST(req: Request) {
         }
       });
 
-      console.log(`[MOCK EMAIL] Verification Code for ${email}: ${code}`);
-      return NextResponse.json({ success: true, debugCode: code }); // Return code for easy testing in dev
+      await sendVerificationEmail(email, code);
+      return NextResponse.json({ success: true }); 
     }
 
     return NextResponse.json({ success: true }); // Still return true for security

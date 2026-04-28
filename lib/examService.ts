@@ -302,6 +302,13 @@ async function getUniqueSamplePool(userId: string, limit: number, mode: ExamMode
   const allAvailable = await prisma.sample.findMany({ include: { variations: true } });
   if (allAvailable.length === 0) return [];
 
+  // ONLY include samples that have at least one micro or revision image
+  const poolWithMicro = allAvailable.filter(s => 
+    s.variations.some(v => v.image.toLowerCase().includes("micro") || v.image.toLowerCase().includes("revision"))
+  );
+
+  if (poolWithMicro.length === 0) return [];
+
   // Exclude samples from the last few exams to ensure high variety
   const recentSampleIds = new Set(
     (await prisma.examQuestionInstance.findMany({
@@ -314,8 +321,8 @@ async function getUniqueSamplePool(userId: string, limit: number, mode: ExamMode
     })).map((item) => item.sampleId)
   );
 
-  const filteredPool = allAvailable.filter((s) => !recentSampleIds.has(s.id));
-  const poolToUse = filteredPool.length >= limit ? filteredPool : allAvailable;
+  const filteredPool = poolWithMicro.filter((s) => !recentSampleIds.has(s.id));
+  const poolToUse = filteredPool.length >= limit ? filteredPool : poolWithMicro;
 
   return shuffle(poolToUse).slice(0, limit);
 }
