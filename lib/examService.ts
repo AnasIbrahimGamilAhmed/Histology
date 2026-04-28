@@ -346,8 +346,12 @@ async function createExamInstance(userId: string, options: { mode: ExamMode; lim
 
   for (const sample of samplePool) {
     // FORCE usage of ONLY micro images as requested by the user
-    const microVariations = sample.variations.filter(v => v.image.toLowerCase().includes("micro"));
-    const variation = randomElement(microVariations.length > 0 ? microVariations : sample.variations);
+    const microVariations = sample.variations.filter(v => v.image.toLowerCase().includes("micro") || v.image.toLowerCase().includes("revision"));
+    
+    // Strictly skip samples that don't have a micro (or revision) image
+    if (microVariations.length === 0) continue;
+    
+    const variation = randomElement(microVariations);
     if (!variation) continue;
 
     const typeCandidates = buildQuestionTypeWeightList()
