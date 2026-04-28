@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Advanced Histology Image Bank</title>
+    <style>
+        body { 
+            background: #0a0a0a; 
+            color: #fff; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            padding: 40px; 
+            margin: 0;
+        }
+        h1 {
+            text-align: center;
+            font-size: 3rem;
+            background: linear-gradient(to right, #4facfe 0%, #00f2fe 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 40px;
+        }
+        .section-title {
+            color: #4af;
+            border-bottom: 2px solid #333;
+            padding-bottom: 10px;
+            margin-top: 60px;
+            margin-bottom: 30px;
+            font-size: 2rem;
+            text-transform: capitalize;
+        }
+        .grid { 
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            justify-content: center;
+        }
+        .card { 
+            background: #1a1a1a; 
+            border-radius: 16px; 
+            border: 1px solid #333;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            width: fit-content;
+            max-width: 100%;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 0 20px rgba(74, 175, 255, 0.2);
+            border-color: #4af;
+        }
+        .card img { 
+            display: block;
+            width: auto;
+            max-width: 100%;
+            height: auto; 
+            background: #000;
+            border-radius: 16px 16px 0 0;
+        }
+        .card .label { 
+            padding: 15px; 
+            font-size: 16px; 
+            font-weight: bold; 
+            color: #fff;
+            background: #222;
+            border-top: 1px solid #333;
+            text-align: center;
+        }
+        .card .type-tag {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-left: 10px;
+            text-transform: uppercase;
+        }
+        .tag-micro { background: #4af; color: #000; }
+        .tag-normal { background: #333; color: #ccc; }
+        
+        .raw-section {
+            margin-top: 100px;
+            opacity: 0.7;
+        }
+    </style>
+</head>
+<body>
+    <h1>Microscopic Image Bank</h1>
+
+    <div id="content"></div>
+
+    <script>
+        const data = {"adipose tissue": ["adipose tissue micro.png", "adipose tissue.png"], "blood film of rabbit": ["blood film of rabbit micro.png", "blood film of rabbit.png"], "blood film of toad": ["blood film of toad micro.png", "blood film offf toad.png"], "cardiac muscle structre": ["cardiac micro.png", "cardiac muscular tissue.png"], "compact bone": ["compact bone .png", "compact bone micro.png"], "demse ct": ["dense ct micro.png", "dense ct.png"], "elastic cartilage": ["elastic cartilage micro.png", "elastic cartilage.png"], "elastic connective tissue": ["elastic connective micro.png", "elastic connective.png"], "hyaline cartilage": ["hyaline cartilage micro.png", "hyaline cartilage.png"], "illeum": ["illeum micro.png", "illeum.png"], "keratized stratified": ["keratized .png", "kertaized micro.png"], "kidney": ["kidney micro.png", "kidney.png"], "liver": ["liver micro.png", "liver.png"], "loose areolar": ["areolar micro.png", "loose areolar.png"], "motor neuron": ["motor neuron.png"], "mucos connective": ["mucos connective micro.png", "mucous connective.png"], "non keratinized stratified": ["non keratinized micro.png", "non keratinized.png"], "osephoges": ["oesophagus micro.png", "osephoges .png"], "pancereaas": ["pancereas micro.png", "pancereas.png"], "pseudostratified columnar": ["pseudostratified columnar micro.png", "pseudostratified columnar.png"], "reticular tissue": ["reticular tissue micro.png", "reticular tissue.png"], "sciatic nerve": ["motor neuron.png"], "simple columnar": ["simple columnar micro.png", "simple columnar.png"], "simple cubodial": ["simple cubodial micro.png", "simple cubodial.png"], "simple squamous": ["simple squamous micro.png", "simple squamous.png"], "skeletal muscle": ["skeletal muscle  micro.png", "skeletal muscle.png"], "skin": ["skin micro.png", "skin.png"], "smooth muscle": ["muscular muscle.png", "smooth micro.png"], "spinal cord": ["spinal cord micro.png", "spinal cord.png"], "spongy bone": ["spongy bone micro.png", "spongy bone.png"], "stomach": ["stomach micro.png", "stomach.png"], "testes": ["tesesss.png", "testes micro.png"], "trachea": ["trachea micro.png", "trachea.png"], "transitional epithelem": ["transitional micro.png", "transitional.png"]};
+
+        const container = document.getElementById('content');
+
+        for (const [folder, files] of Object.entries(data)) {
+            if (files.length === 0) continue;
+            
+            const section = document.createElement('div');
+            section.innerHTML = `<h2 class="section-title">${folder}</h2>`;
+            const grid = document.createElement('div');
+            grid.className = 'grid';
+            
+            files.sort().forEach(file => {
+                const isMicro = file.toLowerCase().includes('micro');
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `
+                    <img src="/images/${folder}/${file}" alt="${file}">
+                    <div class="label">
+                        ${file}
+                        <span class="type-tag ${isMicro ? 'tag-micro' : 'tag-normal'}">${isMicro ? 'Micro' : 'Full'}</span>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+            
+            section.appendChild(grid);
+            container.appendChild(section);
+        }
+    </script>
+
+    <div class="raw-section">
+        <h2 class="section-title">Previous Raw Extractions</h2>
+        <div class="grid">
+            <div class="card"><img src="/images/tissues/raw/ep_sample_p1.jpeg"><div class="label">ep_sample_p1</div></div>
+            <div class="card"><img src="/images/tissues/raw/ep_sample_p2.jpeg"><div class="label">ep_sample_p2</div></div>
+            <div class="card"><img src="/images/tissues/raw/ct_sample_p1.jpeg"><div class="label">ct_sample_p1</div></div>
+            <div class="card"><img src="/images/tissues/raw/ct_sample_p2.jpeg"><div class="label">ct_sample_p2</div></div>
+            <div class="card"><img src="/images/tissues/raw/musc_sample_p1.jpeg"><div class="label">musc_sample_p1</div></div>
+            <div class="card"><img src="/images/tissues/raw/nerv_sample_p1.jpeg"><div class="label">nerv_sample_p1</div></div>
+            <div class="card"><img src="/images/tissues/raw/org_sample_p1.jpeg"><div class="label">org_sample_p1</div></div>
+        </div>
+    </div>
+</body>
+</html>

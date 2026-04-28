@@ -1,0 +1,233 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Sample {
+  id                 String                  @id @default(cuid())
+  name               String                  @unique
+  nameAr             String?
+  description        String
+  keyFeatures        Json
+  confusionTags      Json
+  variations         Variation[]
+  questions          Question[]
+  examQuestionInstances ExamQuestionInstance[]
+  performances       SamplePerformance[]
+  schedules          ReviewSchedule[]
+  attempts           AttemptHistory[]
+}
+
+model Variation {
+  id                 String                 @id @default(cuid())
+  sampleId           String
+  image              String
+  type               VariationType
+  notes              String?
+  sourceType         VariationSourceType @default(dataset_seeded)
+  isApproved         Boolean              @default(true)
+  sample             Sample               @relation(fields: [sampleId], references: [id], onDelete: Cascade)
+  questions          Question[]
+  examQuestionInstances ExamQuestionInstance[]
+}
+
+model Question {
+  id                   String            @id @default(cuid())
+  sampleId             String
+  variationId          String?
+  type                 QuestionType
+  difficulty           DifficultyLevel   @default(medium)
+  prompt               String
+  image                String
+  choices              Json?
+  acceptedAnswers      Json
+  sample               Sample            @relation(fields: [sampleId], references: [id], onDelete: Cascade)
+  variation            Variation?        @relation(fields: [variationId], references: [id], onDelete: SetNull)
+  examQuestionInstances ExamQuestionInstance[]
+}
+
+model UserProgress {
+  id             String              @id @default(cuid())
+  userId         String              @unique
+  correctAnswers Int                 @default(0)
+  wrongAnswers   Int                 @default(0)
+  weakSamples    Json
+  lastActivityAt DateTime?
+  lastActivityPath String?
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+  performances   SamplePerformance[]
+  confusionPairs ConfusionPair[]
+  schedules      ReviewSchedule[]
+  attempts       AttemptHistory[]
+}
+
+model SamplePerformance {
+  id             String       @id @default(cuid())
+  userProgressId String
+  sampleId       String
+  correctCount   Int          @default(0)
+  wrongCount     Int          @default(0)
+  masteryScore   Int          @default(0)
+  confusionRate  Float        @default(0)
+  lastAnsweredAt DateTime?
+  userProgress   UserProgress @relation(fields: [userProgressId], references: [id], onDelete: Cascade)
+  sample         Sample       @relation(fields: [sampleId], references: [id], onDelete: Cascade)
+
+  @@unique([userProgressId, sampleId])
+}
+
+model ConfusionPair {
+  id               String       @id @default(cuid())
+  userProgressId   String
+  sampleAId        String
+  sampleBId        String
+  count            Int          @default(1)
+  lastConfusedAt   DateTime     @default(now())
+  userProgress     UserProgress @relation(fields: [userProgressId], references: [id], onDelete: Cascade)
+
+  @@unique([userProgressId, sampleAId, sampleBId])
+}
+
+model ReviewSchedule {
+  id               String        @id @default(cuid())
+  userProgressId   String
+  sampleId         String
+  stage            ReviewStage   @default(day_1_learning)
+  nextReviewAt     DateTime
+  mistakeFrequency Int           @default(0)
+  confusionRate    Float         @default(0)
+  userProgress     UserProgress  @relation(fields: [userProgressId], references: [id], onDelete: Cascade)
+  sample           Sample        @relation(fields: [sampleId], references: [id], onDelete: Cascade)
+
+  @@unique([userProgressId, sampleId])
+}
+
+model AttemptHistory {
+  id               String        @id @default(cuid())
+  userProgressId   String
+  examInstanceId   String?
+  sampleId         String
+  questionId       String?
+  questionType     QuestionType
+  mode             ExamMode       @default(standard)
+  variationType    VariationType?
+  timeSpentSeconds Int?
+  isCorrect        Boolean
+  chosenSampleName String?
+  masteryAfter     Int
+  accuracyAfter    Float
+  answeredAt       DateTime      @default(now())
+  userProgress     UserProgress  @relation(fields: [userProgressId], references: [id], onDelete: Cascade)
+  examInstance     ExamInstance? @relation(fields: [examInstanceId], references: [id], onDelete: SetNull)
+  sample           Sample        @relation(fields: [sampleId], references: [id], onDelete: Cascade)
+}
+
+model ExamInstance {
+  id              String                @id @default(cuid())
+  userId          String
+  mode            ExamMode             @default(standard)
+  status          ExamStatus           @default(active)
+  questionCount   Int
+  uniqueSignature String                @unique
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
+  questions       ExamQuestionInstance[]
+  attempts        AttemptHistory[]
+}
+
+model ExamQuestionInstance {
+  id                 String            @id @default(cuid())
+  examInstanceId     String
+  questionTemplateId String?
+  sampleId           String
+  variationId        String?
+  type               QuestionType
+  reasoningPattern   QuestionPattern
+  difficulty         DifficultyLevel
+  prompt             String
+  image              String
+  choices            Json?
+  acceptedAnswers    Json
+  microscopyConfig   Json?
+  variationType      VariationType?
+  fingerprint        String            @unique
+
+  examInstance       ExamInstance      @relation(fields: [examInstanceId], references: [id], onDelete: Cascade)
+  questionTemplate   Question?         @relation(fields: [questionTemplateId], references: [id], onDelete: SetNull)
+  sample             Sample            @relation(fields: [sampleId], references: [id], onDelete: Cascade)
+  variation          Variation?        @relation(fields: [variationId], references: [id], onDelete: SetNull)
+}
+
+model StudentAccount {
+  id               String    @id @default(cuid())
+  universityId     String    @unique
+  name             String
+  email            String?   @unique
+  password         String
+  resetToken       String?
+  resetTokenExpiry DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+}
+
+enum VariationType {
+  stain_variation
+  section_variation
+  magnification_variation
+  region_variation
+  exam_tricky_view
+}
+
+enum QuestionType {
+  identify_sample
+  list_features
+  identify_tissue_type
+  compare_samples
+  interpret_partial_slide
+  identify_structure
+  describe_features
+}
+
+enum QuestionPattern {
+  identify_specimen
+  identify_tissue_type
+  describe_features
+  compare_views
+  interpret_partial_slide
+  identify_structure
+}
+
+enum ExamStatus {
+  active
+  completed
+  cancelled
+}
+
+enum ReviewStage {
+  day_1_learning
+  day_3_review
+  day_7_reinforcement
+  pre_exam_final_revision
+}
+
+enum DifficultyLevel {
+  easy
+  medium
+  hard
+}
+
+enum VariationSourceType {
+  dataset_seeded
+  user_approved_upload
+}
+
+enum ExamMode {
+  standard
+  pressure
+}
+
