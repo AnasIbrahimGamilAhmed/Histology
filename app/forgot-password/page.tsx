@@ -148,12 +148,6 @@ export default function ForgotPasswordPage() {
               <p className="text-slate-400 leading-relaxed">
                 We've sent a 6-digit code to <span className="text-indigo-400">{email}</span>.
               </p>
-              {debugCode && (
-                <div className="mt-4 p-3 bg-indigo-500/10 border border-indigo-500/20 rounded-xl text-center">
-                  <p className="text-xs text-indigo-300 font-bold uppercase tracking-widest mb-1">Debug Mode: Your Code</p>
-                  <p className="text-2xl font-black text-white tracking-[0.5em]">{debugCode}</p>
-                </div>
-              )}
             </div>
             <form onSubmit={handleVerifyCode} className="space-y-6">
               <div>
