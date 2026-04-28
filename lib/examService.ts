@@ -399,40 +399,76 @@ async function createExamInstance(userId: string, options: { mode: ExamMode; lim
 
   const uniqueSignature = crypto.createHash("sha256").update(questions.map((question) => question.fingerprint).join("|")).digest("hex");
 
-  const created = await prisma.examInstance.create({
-    data: {
+  try {
+    const created = await prisma.examInstance.create({
+      data: {
+        userId,
+        mode: options.mode,
+        status: "active",
+        questionCount: questions.length,
+        uniqueSignature,
+        questions: {
+          create: questions.map((question) => ({
+            sampleId: question.sampleId,
+            variationId: question.variationId,
+            type: question.type,
+            difficulty: question.difficulty,
+            prompt: question.prompt,
+            image: question.image,
+            variationType: question.variationType,
+            choices: question.choices,
+            acceptedAnswers: question.acceptedAnswers,
+            microscopyConfig: question.microscopyConfig,
+            reasoningPattern: question.reasoningPattern,
+            fingerprint: question.fingerprint
+          }))
+        }
+      },
+      include: {
+        questions: {
+          include: {
+            sample: true
+          }
+        }
+      }
+    });
+
+    return created;
+  } catch (error) {
+    console.warn("Falling back to stateless exam due to database write error (e.g. Vercel SQLite read-only).", error);
+    const mockExamId = "stateless-exam-" + Date.now();
+    return {
+      id: mockExamId,
       userId,
       mode: options.mode,
       status: "active",
       questionCount: questions.length,
       uniqueSignature,
-      questions: {
-        create: questions.map((question) => ({
-          sampleId: question.sampleId,
-          variationId: question.variationId,
-          type: question.type,
-          difficulty: question.difficulty,
-          prompt: question.prompt,
-          image: question.image,
-          variationType: question.variationType,
-          choices: question.choices,
-          acceptedAnswers: question.acceptedAnswers,
-          microscopyConfig: question.microscopyConfig,
-          reasoningPattern: question.reasoningPattern,
-          fingerprint: question.fingerprint
-        }))
-      }
-    },
-    include: {
-      questions: {
-        include: {
-          sample: true
-        }
-      }
-    }
-  });
-
-  return created;
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      questions: questions.map((q, i) => {
+        const fullSample = availableSamples.find((s) => s.id === q.sampleId);
+        return {
+          id: "stateless-q-" + i,
+          examInstanceId: mockExamId,
+          questionTemplateId: null,
+          sampleId: q.sampleId,
+          variationId: q.variationId || null,
+          type: q.type,
+          reasoningPattern: q.reasoningPattern,
+          difficulty: q.difficulty,
+          prompt: q.prompt,
+          image: q.image,
+          choices: q.choices,
+          acceptedAnswers: q.acceptedAnswers,
+          microscopyConfig: q.microscopyConfig,
+          variationType: q.variationType || null,
+          fingerprint: q.fingerprint,
+          sample: fullSample || { name: "", description: "", keyFeatures: [] }
+        };
+      })
+    } as any;
+  }
 }
 
 async function findActiveExam(userId: string, mode: ExamMode, limit: number) {

@@ -211,8 +211,8 @@ export const histologyData: TissueSection[] = [
         description: "Tough cartilage with thick collagen bundles.",
         practicalTips: ["Chondrocytes often arranged in distinct rows between thick collagen bundles.", "NO perichondrium.", "Found in intervertebral discs."],
         confusionWarning: "Can be confused with Dense Regular CT. The key difference: Fibrocartilage has chondrocytes trapped in distinct rounded lacunae (bubbles), whereas Dense Regular CT has squashed flat fibroblasts.",
-        imageUrl: "/images/fibro cartilage/fibro cartilage.png",
-        imageUrls: ["/images/fibro cartilage/fibro cartilage.png"]
+        imageUrl: "/images/fibrocartilage/fibrocartilage.png",
+        imageUrls: ["/images/fibrocartilage/fibrocartilage.png"]
       },
       {
         id: "compact-bone",

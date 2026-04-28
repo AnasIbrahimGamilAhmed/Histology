@@ -33,18 +33,22 @@ export async function POST(request: Request) {
 
   const body = (await request.json()) as FeedbackRequestBody;
 
-  await recordExamAttempt({
-    userId,
-    sampleId: body.sampleId,
-    examId: body.examId,
-    questionId: body.questionId,
-    questionType: body.questionType,
-    variationType: body.variationType,
-    mode: body.mode,
-    timeSpentSeconds: body.timeSpentSeconds,
-    isCorrect: body.isCorrect,
-    chosenSampleName: body.chosenSample
-  });
+  try {
+    await recordExamAttempt({
+      userId,
+      sampleId: body.sampleId,
+      examId: body.examId,
+      questionId: body.questionId,
+      questionType: body.questionType,
+      variationType: body.variationType,
+      mode: body.mode,
+      timeSpentSeconds: body.timeSpentSeconds,
+      isCorrect: body.isCorrect,
+      chosenSampleName: body.chosenSample
+    });
+  } catch (error) {
+    console.warn("Skipping attempt tracking due to DB write error (Vercel SQLite read-only)", error);
+  }
 
   const feedback = await generateTutorFeedback(body);
   return NextResponse.json(feedback);
