@@ -508,8 +508,8 @@ export async function getExamQuestionsForMode(
         prompt: question.prompt,
         image: question.image,
         variationType: question.variationType,
-        choices: Array.isArray(question.choices) ? question.choices.filter((item): item is string => typeof item === "string") : [],
-        acceptedAnswers: Array.isArray(question.acceptedAnswers) ? question.acceptedAnswers.filter((item): item is string => typeof item === "string") : [],
+        choices: Array.isArray(question.choices) ? question.choices.filter((item: any): item is string => typeof item === "string") : [],
+        acceptedAnswers: Array.isArray(question.acceptedAnswers) ? question.acceptedAnswers.filter((item: any): item is string => typeof item === "string") : [],
         pressureConfig:
           options.mode === "pressure"
             ? {
@@ -523,7 +523,7 @@ export async function getExamQuestionsForMode(
         sample: {
           name: question.sample.name,
           description: question.sample.description,
-          keyFeatures: Array.isArray(question.sample.keyFeatures) ? question.sample.keyFeatures.filter((item): item is string => typeof item === "string") : []
+          keyFeatures: Array.isArray(question.sample.keyFeatures) ? question.sample.keyFeatures.filter((item: any): item is string => typeof item === "string") : []
         }
       }))
     };
@@ -541,8 +541,8 @@ export async function getExamQuestionsForMode(
       prompt: question.prompt,
       image: question.image,
       variationType: question.variationType,
-      choices: Array.isArray(question.choices) ? question.choices.filter((item): item is string => typeof item === "string") : [],
-      acceptedAnswers: Array.isArray(question.acceptedAnswers) ? question.acceptedAnswers.filter((item): item is string => typeof item === "string") : [],
+      choices: Array.isArray(question.choices) ? question.choices.filter((item: any): item is string => typeof item === "string") : [],
+      acceptedAnswers: Array.isArray(question.acceptedAnswers) ? question.acceptedAnswers.filter((item: any): item is string => typeof item === "string") : [],
       pressureConfig:
         options.mode === "pressure"
           ? {
@@ -556,7 +556,7 @@ export async function getExamQuestionsForMode(
       sample: {
         name: question.sample.name,
         description: question.sample.description,
-        keyFeatures: Array.isArray(question.sample.keyFeatures) ? question.sample.keyFeatures.filter((item): item is string => typeof item === "string") : []
+        keyFeatures: Array.isArray(question.sample.keyFeatures) ? question.sample.keyFeatures.filter((item: any): item is string => typeof item === "string") : []
       }
     }))
   };
