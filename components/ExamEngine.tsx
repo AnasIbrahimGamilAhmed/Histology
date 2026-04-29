@@ -27,20 +27,44 @@ function isCorrectAnswer(question: ExamQuestion, userAnswer: string): boolean {
     return false;
   }
 
+  const getLevenshteinDistance = (a: string, b: string): number => {
+    const tmp = [];
+    for (let i = 0; i <= a.length; i++) tmp[i] = [i];
+    for (let j = 0; j <= b.length; j++) tmp[0][j] = j;
+    for (let i = 1; i <= a.length; i++) {
+      for (let j = 1; j <= b.length; j++) {
+        tmp[i][j] = Math.min(
+          tmp[i - 1][j] + 1,
+          tmp[i][j - 1] + 1,
+          tmp[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1)
+        );
+      }
+    }
+    return tmp[a.length][b.length];
+  };
+
+  const isFuzzyMatch = (s1: string, s2: string) => {
+    if (s1.length < 4) return s1 === s2;
+    const distance = getLevenshteinDistance(s1, s2);
+    const threshold = s1.length > 7 ? 2 : 1;
+    return distance <= threshold;
+  };
+
   const checkMatch = (expected: string, actual: string) => {
     const normExp = normalize(expected);
     const normAct = normalize(actual);
     
     if (normExp === normAct) return true;
     
-    // Split into tokens and sort them to handle word order
-    const expTokens = normExp.split(" ").filter(t => t.length > 1).sort();
-    const actTokens = normAct.split(" ").filter(t => t.length > 1).sort();
+    const expTokens = normExp.split(" ").filter(t => t.length > 2).sort();
+    const actTokens = normAct.split(" ").filter(t => t.length > 2).sort();
     
     if (expTokens.length === 0 || actTokens.length === 0) return normExp === normAct;
 
-    // Check if all essential tokens from expected are in actual
-    return expTokens.every(token => actTokens.includes(token));
+    // Check if every essential token from expected has a fuzzy match in actual
+    return expTokens.every(eToken => 
+      actTokens.some(aToken => isFuzzyMatch(eToken, aToken))
+    );
   };
 
   if (question.choices.length > 0) {

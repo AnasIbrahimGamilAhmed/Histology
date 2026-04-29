@@ -8,32 +8,54 @@ import { motion, AnimatePresence } from "framer-motion";
 import MicroscopeLoader from "@/components/MicroscopeLoader";
 import StudyGuideExporter from "@/components/StudyGuideExporter";
 
-function ComparisonCard({ sample, isComparison = false }: { sample: TissueSection; isComparison?: boolean }) {
+function ComparisonCard({ sample, isComparison = false, opposingSample }: { sample: TissueSection; isComparison?: boolean; opposingSample?: TissueSection }) {
+  const microImage = sample.imageUrls?.find(url => url.toLowerCase().includes("micro")) || sample.imageUrl;
+  
   return (
-    <div className={`flex flex-col rounded-[3rem] overflow-hidden border ${isComparison ? "border-indigo-500/30 bg-indigo-500/5" : "border-slate-800 bg-slate-900/40"} backdrop-blur-xl shadow-2xl`}>
+    <div className={`flex flex-col rounded-[3rem] overflow-hidden border ${isComparison ? "border-indigo-500/30 bg-indigo-500/5" : "border-slate-800 bg-slate-900/40"} backdrop-blur-xl shadow-2xl h-full`}>
       <div className="p-8 border-b border-white/5">
         <h3 className="text-2xl font-black text-white mb-2">{sample.title}</h3>
         <p className="text-slate-400 text-sm font-medium line-clamp-2">{sample.description}</p>
       </div>
-      <div className="aspect-video relative overflow-hidden bg-black">
-        <img src={sample.imageUrl || sample.imageUrls?.[0]} alt={sample.title} className="w-full h-full object-cover" />
-        <div className="absolute top-4 left-4 px-3 py-1 rounded-full bg-black/40 backdrop-blur-md border border-white/10 text-[9px] font-black uppercase tracking-tighter text-white">
-          {isComparison ? "Comparison Specimen" : "Original View"}
+      
+      <div className="grid grid-cols-2 bg-black h-48 border-b border-white/5">
+        <div className="relative overflow-hidden group">
+          <img src={sample.imageUrl || sample.imageUrls?.[0]} alt={sample.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+          <div className="absolute inset-0 bg-black/20" />
+          <span className="absolute bottom-3 left-3 text-[8px] font-black uppercase text-white/60 bg-black/40 px-2 py-1 rounded-md">General View</span>
+        </div>
+        <div className="relative overflow-hidden border-l border-white/10 group">
+          <img src={microImage} alt={`${sample.title} Micro`} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+          <div className="absolute inset-0 bg-indigo-500/10" />
+          <span className="absolute bottom-3 left-3 text-[8px] font-black uppercase text-indigo-400 bg-black/40 px-2 py-1 rounded-md">Micro-View</span>
         </div>
       </div>
-      <div className="p-8 space-y-6">
-        <h4 className="text-xs font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
-          <Lightbulb size={14} className="text-indigo-400" />
-          Key Characteristics
-        </h4>
-        <ul className="space-y-3">
-          {sample.practicalTips?.slice(0, 3).map((tip, i) => (
-            <li key={i} className="flex gap-3 text-sm text-slate-300 font-semibold leading-relaxed">
-              <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 shrink-0 mt-1.5" />
-              {tip}
-            </li>
-          ))}
-        </ul>
+
+      <div className="p-8 space-y-6 flex-1">
+        <div className="space-y-4">
+          <h4 className="text-xs font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
+            <Lightbulb size={14} className="text-indigo-400" />
+            Diagnostic Differentiator
+          </h4>
+          <div className="p-4 rounded-2xl bg-white/5 border border-white/10 text-sm text-indigo-200 font-bold leading-relaxed italic">
+            "{opposingSample ? `Unlike ${opposingSample.title}, this specimen shows ${sample.practicalTips?.[0].toLowerCase()}.` : sample.practicalTips?.[0]}"
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          <h4 className="text-xs font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
+            <Sparkles size={14} className="text-emerald-400" />
+            Cellular Detail
+          </h4>
+          <ul className="space-y-3">
+            {sample.practicalTips?.slice(1, 3).map((tip, i) => (
+              <li key={i} className="flex gap-3 text-sm text-slate-300 font-semibold leading-relaxed">
+                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0 mt-1.5" />
+                {tip}
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
     </div>
   );
@@ -114,8 +136,8 @@ export default function StudyPage() {
             </div>
 
             <div className="grid lg:grid-cols-2 gap-10 max-w-7xl mx-auto w-full">
-              <ComparisonCard sample={selectedSection} />
-              <ComparisonCard sample={comparisonSample} isComparison />
+              <ComparisonCard sample={selectedSection} opposingSample={comparisonSample} />
+              <ComparisonCard sample={comparisonSample} isComparison opposingSample={selectedSection} />
             </div>
           </motion.div>
         )}
