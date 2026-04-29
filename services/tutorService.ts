@@ -46,11 +46,11 @@ function classifyMistake(input: TutorFeedbackInput): MistakeClass {
 
 function fallbackExplanation(input: TutorFeedbackInput, classification: MistakeClass | null): string {
   if (input.isCorrect) {
-    return `Your answer matches the expected diagnosis for ${input.sample.name}. The key diagnostic features in this sample are: ${input.sample.keyFeatures.join(", ")}. Keep focusing on these features when the view changes.`;
+    return `Excellent! You correctly identified ${input.sample.name}. Diagnostic features to remember: ${input.sample.keyFeatures.slice(0, 2).join(", ")}.`;
   }
 
-  const chosen = input.chosenSample ? ` You selected: ${input.chosenSample}.` : "";
-  return `Your answer is not accepted for this question.${chosen} Correct reference: ${input.sample.name}. Focus on these key features: ${input.sample.keyFeatures.join(", ")}. Error type: ${classification ?? "Feature omission error"}.`;
+  const chosen = input.chosenSample ? ` (You noted: ${input.chosenSample}).` : "";
+  return `Not quite.${chosen} The correct identification is ${input.sample.name}. Look for these key markers: ${input.sample.keyFeatures.slice(0, 2).join(", ")}. Don't worry, histology takes practice!`;
 }
 
 export async function generateTutorFeedback(input: TutorFeedbackInput): Promise<TutorFeedbackResult> {

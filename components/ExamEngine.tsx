@@ -44,9 +44,10 @@ function isCorrectAnswer(question: ExamQuestion, userAnswer: string): boolean {
   };
 
   const isFuzzyMatch = (s1: string, s2: string) => {
-    if (s1.length < 4) return s1 === s2;
+    if (s1.length <= 3) return s1 === s2;
     const distance = getLevenshteinDistance(s1, s2);
-    const threshold = s1.length > 7 ? 2 : 1;
+    // Extremely lenient: allow 2 errors for short words, 3 for long ones
+    const threshold = s1.length > 8 ? 3 : 2;
     return distance <= threshold;
   };
 
@@ -56,12 +57,14 @@ function isCorrectAnswer(question: ExamQuestion, userAnswer: string): boolean {
     
     if (normExp === normAct) return true;
     
-    const expTokens = normExp.split(" ").filter(t => t.length > 2).sort();
-    const actTokens = normAct.split(" ").filter(t => t.length > 2).sort();
+    // Core tokens (ignore words like 'the', 'is', 'a')
+    const stopWords = ["the", "is", "a", "an", "of", "with", "and"];
+    const expTokens = normExp.split(" ").filter(t => t.length > 2 && !stopWords.includes(t)).sort();
+    const actTokens = normAct.split(" ").filter(t => t.length > 2 && !stopWords.includes(t)).sort();
     
-    if (expTokens.length === 0 || actTokens.length === 0) return normExp === normAct;
+    if (expTokens.length === 0) return normExp === normAct;
 
-    // Check if every essential token from expected has a fuzzy match in actual
+    // If student types the essential scientific tokens, it's correct
     return expTokens.every(eToken => 
       actTokens.some(aToken => isFuzzyMatch(eToken, aToken))
     );
