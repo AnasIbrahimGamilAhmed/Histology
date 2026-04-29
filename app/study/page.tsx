@@ -24,24 +24,30 @@ function ComparisonCard({ sample, isComparison = false, opposingSample }: { samp
           <div className="absolute inset-0 bg-black/20" />
           <span className="absolute bottom-3 left-3 text-[8px] font-black uppercase text-white/60 bg-black/40 px-2 py-1 rounded-md">General View</span>
         </div>
-        <div className="relative overflow-hidden border-l border-white/10 group">
+        <div className="relative overflow-hidden border-l border-white/10 group cursor-crosshair">
           <img src={microImage} alt={`${sample.title} Micro`} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
           <div className="absolute inset-0 bg-indigo-500/10" />
           
-          {/* VIRTUAL LASER POINTER / ANNOTATION */}
-          <motion.div 
-            animate={{ scale: [1, 1.2, 1], opacity: [0.5, 1, 0.5] }}
-            transition={{ duration: 2, repeat: Infinity }}
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 bg-indigo-500 rounded-full shadow-[0_0_20px_rgba(99,102,241,0.8)] border-2 border-white pointer-events-none"
-          />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 translate-y-4 px-3 py-1.5 rounded-xl bg-indigo-600/90 backdrop-blur-md border border-white/20 text-[10px] font-black text-white whitespace-nowrap shadow-2xl pointer-events-none">
-            <span className="flex flex-col items-center">
-              <span>Diagnostic Key Feature</span>
-              <span className="text-[8px] opacity-70 font-arabic">السمة التشخيصية الفاصلة</span>
-            </span>
+          {/* REFINED VIRTUAL TARGETING SYSTEM */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+            <motion.div 
+              animate={{ scale: [1, 1.5, 1], rotate: [0, 90, 180] }}
+              transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+              className="w-12 h-12 border border-indigo-400/30 rounded-full flex items-center justify-center"
+            >
+              <div className="w-1 h-1 bg-white rounded-full shadow-[0_0_10px_white]" />
+            </motion.div>
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-px bg-indigo-500/50" />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-px h-8 bg-indigo-500/50" />
           </div>
 
-          <span className="absolute bottom-3 left-3 text-[8px] font-black uppercase text-indigo-400 bg-black/40 px-2 py-1 rounded-md">Micro-View</span>
+          <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
+            <div className="px-3 py-1.5 rounded-xl bg-black/60 backdrop-blur-md border border-white/10 text-[9px] font-black text-white whitespace-nowrap shadow-2xl">
+              Focus: Diagnostic Region
+            </div>
+          </div>
+
+          <span className="absolute bottom-3 left-3 text-[8px] font-black uppercase text-indigo-400 bg-black/40 px-2 py-1 rounded-md tracking-tighter">Microscope Context</span>
         </div>
       </div>
 
