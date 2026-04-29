@@ -110,14 +110,13 @@ function buildMicroscopyConfig(variation: { image: string, type: VariationType }
                  imgLower.includes("stomach") || 
                  imgLower.includes("ileum");
   
-  // If it's a dual image, we crop 50% width.
-  // We use a deterministic approach based on the image path to decide which side to show.
+  // For dual circular images, focus exactly on the left (25%) or right (75%) circle center
   const useRightSide = variation.image.length % 2 === 0;
-  const cropRect = isDual ? { x: useRightSide ? 50 : 0, y: 0, width: 50, height: 100 } : undefined;
+  const cropRect = isDual ? { x: useRightSide ? 75 : 25, y: 50, width: 50, height: 100 } : undefined;
   
   const partialView = Math.random() < 0.2;
   const zoomLevel = (Math.random() < 0.1 ? 3 : Math.random() < 0.3 ? 2 : 1) as 1 | 2 | 3;
-  const blurPx = Math.random() * 0.3;
+  const blurPx = Math.random() * 0.2; // Keep it clear
   const contrast = 1;
   const rotationDeg = 0;
 

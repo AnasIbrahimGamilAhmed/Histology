@@ -257,17 +257,19 @@ export function ExamEngine({ questions, mode }: ExamEngineProps) {
               <div className="relative h-[400px] w-full rounded-[2.5rem] overflow-hidden border border-slate-800 shadow-2xl bg-slate-950">
                 <motion.img
                   initial={{ scale: 1.2, opacity: 0 }}
-                  animate={{ scale: zoomFactor * (currentQuestion.microscopy?.cropRect ? 2 : 1), opacity: 1 }}
+                  animate={{ 
+                    scale: zoomFactor * (currentQuestion.microscopy?.cropRect ? 2 : 1), 
+                    opacity: 1 
+                  }}
                   src={currentQuestion.image}
                   alt="Histology Specimen"
-                  className="absolute h-full object-cover"
+                  className="absolute inset-0 h-full w-full object-cover"
                   style={{
                     filter: `blur(${currentQuestion.microscopy?.blurPx ?? 0}px) contrast(${currentQuestion.microscopy?.contrast ?? 1})`,
                     transform: `rotate(${currentQuestion.microscopy?.rotationDeg ?? 0}deg)`,
                     objectPosition: currentQuestion.microscopy?.cropRect
                       ? `${currentQuestion.microscopy.cropRect.x}% ${currentQuestion.microscopy.cropRect.y}%`
                       : "center",
-                    width: currentQuestion.microscopy?.cropRect ? "200%" : "100%",
                   }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-950/50 to-transparent pointer-events-none" />
@@ -370,7 +372,7 @@ export function ExamEngine({ questions, mode }: ExamEngineProps) {
                             objectPosition: currentQuestion.microscopy?.cropRect
                               ? `${currentQuestion.microscopy.cropRect.x}% ${currentQuestion.microscopy.cropRect.y}%`
                               : "center",
-                            width: currentQuestion.microscopy?.cropRect ? "200%" : "100%",
+                            transform: currentQuestion.microscopy?.cropRect ? "scale(2)" : "none"
                           }}
                         />
                         
