@@ -302,9 +302,9 @@ async function getUniqueSamplePool(userId: string, limit: number, mode: ExamMode
   const allAvailable = await prisma.sample.findMany({ include: { variations: true } });
   if (allAvailable.length === 0) return [];
 
-  // ONLY include samples that have at least one micro or revision image
+  // ONLY include samples that have at least one micro image
   const poolWithMicro = allAvailable.filter(s => 
-    s.variations.some(v => v.image.toLowerCase().includes("micro") || v.image.toLowerCase().includes("revision"))
+    s.variations.some(v => v.image.toLowerCase().includes("micro"))
   );
 
   if (poolWithMicro.length === 0) return [];
@@ -353,7 +353,7 @@ async function createExamInstance(userId: string, options: { mode: ExamMode; lim
 
   for (const sample of samplePool) {
     // FORCE usage of ONLY micro images as requested by the user
-    const microVariations = sample.variations.filter(v => v.image.toLowerCase().includes("micro") || v.image.toLowerCase().includes("revision"));
+    const microVariations = sample.variations.filter(v => v.image.toLowerCase().includes("micro"));
     
     // Strictly skip samples that don't have a micro (or revision) image
     if (microVariations.length === 0) continue;
