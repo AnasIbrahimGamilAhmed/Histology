@@ -286,11 +286,17 @@ export const histologyData: TissueSection[] = [
         description: "Transverse section of a large peripheral nerve bundle.",
         practicalTips: [
           "Nerve fibers are grouped into distinct bundles (fascicles).",
+          "Outer protective layer called Epineurium.",
           "Looks like a collection of tiny circles (axons surrounded by myelin)."
         ],
-        confusionWarning: "In cross section, it looks like bundles of tiny bubbles/circles clustered together.",
-        imageUrl: "/images/sciatic nerve/motor neuron.png",
-        imageUrls: ["/images/sciatic nerve/motor neuron.png"],
+        practicalTipsAr: [
+          "الألياف العصبية مجمعة في حزم واضحة (Fascicles).",
+          "طبقة حماية خارجية تسمى Epineurium.",
+          "تشبه مجموعة من الدوائر الصغيرة (المحاور محاطة بالمايلين)."
+        ],
+        confusionWarning: "In cross section, it looks like bundles of tiny bubbles/circles clustered together. Don't confuse with Smooth Muscle in T.S.",
+        imageUrl: "/images/sciatic nerve/sciatic micro.png",
+        imageUrls: ["/images/sciatic nerve/sciatic micro.png", "/images/sciatic nerve/sciatic outer micro.png"],
       }
     ]
   },

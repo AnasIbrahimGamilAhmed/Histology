@@ -72,29 +72,6 @@ export function Sidebar() {
         </div>
       </aside>
 
-      {/* MOBILE BOTTOM NAV */}
-      <nav className="fixed bottom-0 left-0 right-0 h-16 bg-[#020617]/80 backdrop-blur-xl border-t border-slate-800 z-[100] flex md:hidden items-center justify-around px-4">
-        {navItems.map((item) => {
-          const isActive = pathname.startsWith(item.href);
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`p-2 rounded-xl transition-all ${isActive ? "text-indigo-400 bg-indigo-500/10" : "text-slate-500"}`}
-            >
-              {item.icon}
-            </Link>
-          );
-        })}
-        <button 
-          type="button"
-          aria-label="Sign Out"
-          onClick={() => signOut({ callbackUrl: "/" })}
-          className="p-2 rounded-xl text-slate-500"
-        >
-          <LogOut size={20} />
-        </button>
-      </nav>
     </>
   );
 }
