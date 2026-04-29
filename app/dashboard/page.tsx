@@ -85,7 +85,7 @@ export default function DashboardPage() {
             <div>
               <p className="text-[10px] text-slate-500 uppercase font-black tracking-widest mb-0.5">Growth Trend</p>
               <p className="text-lg font-black text-white">
-                {data.trend.delta > 0 ? "+" : ""}{data.trend.delta}% <span className="text-xs font-medium text-slate-400 ml-1">this period</span>
+                {data?.trend?.delta > 0 ? "+" : ""}{data?.trend?.delta ?? 0}% <span className="text-xs font-medium text-slate-400 ml-1">this period</span>
               </p>
             </div>
           </motion.div>
@@ -122,10 +122,10 @@ export default function DashboardPage() {
 
         {/* Stats Grid */}
         <section className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
-          <StatCard label="Total Identified" value={data.overall.totalQuestionsAnswered} icon={<Activity size={20} />} delay={0.4} />
-          <StatCard label="Overall Accuracy" value={`${data.overall.accuracyPercentage}%`} icon={<Target size={20} />} delay={0.5} />
-          <StatCard label="Critical Area" value={data.overall.weakSamplesCount} icon={<ShieldAlert size={20} />} color="text-rose-400" delay={0.6} />
-          <StatCard label="Mastered Elite" value={data.overall.strongSamplesCount} icon={<CheckCircle2 size={20} />} color="text-emerald-400" delay={0.7} />
+          <StatCard label="Total Identified" value={data?.overall?.totalQuestionsAnswered ?? 0} icon={<Activity size={20} />} delay={0.4} />
+          <StatCard label="Overall Accuracy" value={`${data?.overall?.accuracyPercentage ?? 0}%`} icon={<Target size={20} />} delay={0.5} />
+          <StatCard label="Critical Area" value={data?.overall?.weakSamplesCount ?? 0} icon={<ShieldAlert size={20} />} color="text-rose-400" delay={0.6} />
+          <StatCard label="Mastered Elite" value={data?.overall?.strongSamplesCount ?? 0} icon={<CheckCircle2 size={20} />} color="text-emerald-400" delay={0.7} />
         </section>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 mb-12">
