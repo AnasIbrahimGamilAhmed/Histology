@@ -177,7 +177,7 @@ export async function getDashboardData(userId: string): Promise<DashboardData> {
     insights.push("Warning: You are relying too much on 'Color'. Histology is about 'Structure'. Practice with the grayscale mode in the Atlas.");
   }
 
-  const zoomWrongRate = progress.attempts.filter((attempt) => attempt.variationType === "zoom_variation" && !attempt.isCorrect).length;
+  const zoomWrongRate = progress.attempts.filter((attempt) => attempt.variationType === "magnification_variation" && !attempt.isCorrect).length;
   if (zoomWrongRate >= 3) {
     insights.push("Identification Alert: You struggle with High-Power views. Spend more time in 'Magnifier Mode' to recognize cellular details.");
   }

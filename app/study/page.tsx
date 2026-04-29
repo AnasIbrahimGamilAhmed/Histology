@@ -6,6 +6,7 @@ import Link from "next/link";
 import { ChevronRight, Microscope, Lightbulb, BookOpen, Brain, ArrowLeft, AlertOctagon, Sparkles, Search, Languages } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import MicroscopeLoader from "@/components/MicroscopeLoader";
+import StudyGuideExporter from "@/components/StudyGuideExporter";
 
 function ComparisonCard({ sample, isComparison = false }: { sample: TissueSection; isComparison?: boolean }) {
   return (
@@ -159,11 +160,13 @@ export default function StudyPage() {
                     if (found) setComparisonSample(found);
                   }
                 }}
-                className="w-full py-4 rounded-2xl bg-indigo-600/20 border border-indigo-500/30 text-indigo-400 font-black uppercase tracking-widest text-xs hover:bg-indigo-600 hover:text-white transition-all shadow-xl shadow-indigo-500/5 flex items-center justify-center gap-3"
+                className="flex-1 py-4 px-6 rounded-2xl bg-indigo-600/20 border border-indigo-500/30 text-indigo-400 font-black uppercase tracking-widest text-xs hover:bg-indigo-600 hover:text-white transition-all shadow-xl shadow-indigo-500/5 flex items-center justify-center gap-3"
               >
                 <Sparkles size={16} />
                 Analyze Differences Side-by-Side
               </button>
+              
+              <StudyGuideExporter section={selectedSection} />
             </div>
           </motion.div>
         )}

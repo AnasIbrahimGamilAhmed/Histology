@@ -362,6 +362,18 @@ async function createExamInstance(userId: string, options: { mode: ExamMode; lim
     fingerprint: string;
   }>;
 
+  // Calculate student performance to identify "Elite" users for adaptive challenges
+  const userProgress = await prisma.userProgress.findUnique({
+    where: { userId },
+    include: { performances: true }
+  });
+
+  const totalAnswers = (userProgress?.correctAnswers || 0) + (userProgress?.wrongAnswers || 0);
+  const accuracyPercentage = totalAnswers > 0 
+    ? ((userProgress?.correctAnswers || 0) / totalAnswers) * 100 
+    : 0;
+  const strongSamplesCount = userProgress?.performances.filter(p => p.masteryScore >= 80).length || 0;
+
   const isEliteUser = accuracyPercentage > 85 && strongSamplesCount > 10;
   
   for (const sample of samplePool) {
