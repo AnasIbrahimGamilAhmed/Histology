@@ -127,7 +127,7 @@ export default function DashboardPage() {
           <ActionCard 
             href="/atlas"
             icon={<Microscope size={32} />}
-            title="Micro Atlas"
+            title="Micro Tree"
             desc="Browse high-res slides with active magnifier."
             color="from-slate-800 to-slate-900"
             border

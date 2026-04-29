@@ -21,7 +21,7 @@ export function Sidebar() {
     { name: "Dashboard", href: "/dashboard", icon: <LayoutDashboard size={20} /> },
     { name: "Study Navigator", href: "/study", icon: <BookOpen size={20} /> },
     { name: "Exam Simulator", href: "/exam", icon: <Brain size={20} /> },
-    { name: "Histology Atlas", href: "/atlas", icon: <Microscope size={20} /> },
+    { name: "Histology Tree", href: "/atlas", icon: <Microscope size={20} /> },
   ];
 
   if (pathname === "/" || pathname === "/login" || pathname === "/forgot-password") return null;

@@ -40,7 +40,7 @@ export default function AtlasClient({ samples }: { samples: SampleWithVariations
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
             <div>
               <h1 className="text-4xl md:text-6xl font-black tracking-tight text-white">
-                Histology <span className="text-indigo-500">Atlas</span>
+                Histology <span className="text-indigo-500">Tree</span>
               </h1>
               <p className="mt-4 text-slate-400 text-lg max-w-2xl">
                 Explore high-resolution microscopic specimens with the <span className="text-white font-bold">Smart Magnifier</span>. Perfect for clinical diagnosis training.
@@ -70,7 +70,7 @@ export default function AtlasClient({ samples }: { samples: SampleWithVariations
           />
         </div>
 
-        {/* Atlas Grid */}
+        {/* Tree Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {filteredSamples.map((sample) => (
             sample.variations.map((variation) => (
@@ -153,7 +153,7 @@ export default function AtlasClient({ samples }: { samples: SampleWithVariations
                 <>
                   <header className="mb-10">
                     <div className="flex items-center gap-3 mb-6">
-                      <div className="px-4 py-1.5 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[10px] font-black uppercase tracking-widest">Scientific Atlas</div>
+                      <div className="px-4 py-1.5 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[10px] font-black uppercase tracking-widest">Scientific Tree</div>
                       <div className="px-4 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-black uppercase tracking-widest">Verified View</div>
                     </div>
                     <h2 className="text-4xl font-black text-white leading-tight mb-4">{sample?.name}</h2>

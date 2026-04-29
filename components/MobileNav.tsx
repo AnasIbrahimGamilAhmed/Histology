@@ -10,7 +10,7 @@ import { useSession } from "next-auth/react";
 
 const navItems = [
   { name: "Dashboard", icon: Home, href: "/dashboard" },
-  { name: "Atlas", icon: Microscope, href: "/atlas" },
+  { name: "Tree", icon: Microscope, href: "/atlas" },
   { name: "Study", icon: BookOpen, href: "/study" },
   { name: "Exam", icon: Brain, href: "/exam" },
 ];

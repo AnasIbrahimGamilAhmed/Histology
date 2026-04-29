@@ -334,7 +334,7 @@ function StudyContent() {
                   <h2 className="px-6 py-5 text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] border-b border-slate-800/50 mb-4 flex justify-between items-center">
                     <span>{activeParent.title}</span>
                   </h2>
-                  <div className="space-y-2 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar scroll-smooth">
+                  <div className="space-y-2 max-h-[40vh] lg:max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar scroll-smooth overscroll-contain">
                     {activeParent.subSections?.map((sub) => (
                       <button
                         key={sub.id}
@@ -600,7 +600,7 @@ function StudyContent() {
                   onClick={() => setShowExtraStudy(false)}
                   className="mt-16 w-full py-5 rounded-2xl bg-white text-black font-black uppercase tracking-[0.2em] hover:bg-indigo-50 transition-all shadow-xl shadow-white/5"
                 >
-                  Return to Atlas
+                  Return to Tree
                 </button>
               </div>
             </motion.div>
