@@ -1,10 +1,12 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
+
 import { Home, BookOpen, Microscope, Brain, Menu, X, User } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import { useSession } from "next-auth/react";
 
 const navItems = [
   { name: "Dashboard", icon: Home, href: "/dashboard" },
@@ -14,8 +16,12 @@ const navItems = [
 ];
 
 export default function MobileNav() {
+  const { data: session, status } = useSession();
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
+
+  const isLoading = status === "loading";
+  const isAuthenticated = status === "authenticated";
 
   return (
     <>
@@ -54,7 +60,7 @@ export default function MobileNav() {
             initial={{ opacity: 0, y: "100%" }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: "100%" }}
-            className="fixed inset-0 z-[60] bg-[#020617] p-8 lg:hidden flex flex-col"
+            className="fixed inset-0 z-[60] bg-[#020617] p-8 lg:hidden flex flex-col overflow-y-auto"
           >
             <div className="flex justify-between items-center mb-16">
               <h2 className="text-2xl font-black text-white italic tracking-tighter">HISTO<span className="text-indigo-500">PRO</span></h2>
@@ -82,16 +88,37 @@ export default function MobileNav() {
               ))}
             </div>
 
-            <div className="mt-auto pt-12 border-t border-white/5">
-              <div className="flex items-center gap-4 p-6 rounded-3xl bg-indigo-500/5 border border-indigo-500/10">
-                <div className="w-12 h-12 rounded-2xl bg-indigo-600 flex items-center justify-center text-white">
-                  <User size={24} />
+            <div className="mt-12 pt-12 border-t border-white/5">
+              {isAuthenticated ? (
+                <div className="flex items-center gap-4 p-6 rounded-3xl bg-indigo-500/5 border border-indigo-500/10">
+                  <div className="w-12 h-12 rounded-2xl bg-indigo-600 flex items-center justify-center text-white">
+                    <User size={24} />
+                  </div>
+                  <div>
+                    <p className="text-white font-black">{session?.user?.name || "Student"}</p>
+                    <p className="text-indigo-400 text-xs font-bold uppercase tracking-widest">Mastery Portal</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-white font-black">Student Portal</p>
-                  <p className="text-indigo-400 text-xs font-bold uppercase tracking-widest">Mastery Level: Advanced</p>
+              ) : (
+                <div className="grid grid-cols-2 gap-4">
+                  <Link 
+                    href="/login"
+                    onClick={() => setIsOpen(false)}
+                    className="flex flex-col items-center justify-center p-6 rounded-3xl bg-slate-900 border border-white/5 text-white font-bold"
+                  >
+                    Login
+                    <span className="text-[10px] opacity-50 uppercase tracking-widest">تسجيل دخول</span>
+                  </Link>
+                  <Link 
+                    href="/signup"
+                    onClick={() => setIsOpen(false)}
+                    className="flex flex-col items-center justify-center p-6 rounded-3xl bg-indigo-600 text-white font-bold shadow-lg shadow-indigo-500/20"
+                  >
+                    Sign Up
+                    <span className="text-[10px] opacity-80 uppercase tracking-widest">حساب جديد</span>
+                  </Link>
                 </div>
-              </div>
+              )}
             </div>
           </motion.div>
         )}

@@ -217,13 +217,23 @@ async function registerAction(formData: FormData) {
   }
 
   try {
-    await prisma.studentAccount.create({
-      data: {
-        universityId,
-        name,
-        email,
-        password
-      }
+    await prisma.$transaction(async (tx) => {
+      await tx.studentAccount.create({
+        data: {
+          universityId,
+          name,
+          email,
+          password
+        }
+      });
+
+      // Initialize progress record for the new student
+      await tx.userProgress.create({
+        data: {
+          userId: universityId,
+          weakSamples: []
+        }
+      });
     });
 
     return signIn("credentials", {

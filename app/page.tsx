@@ -73,13 +73,13 @@ export default function HomePage() {
               className="group px-10 py-5 bg-indigo-600 hover:bg-indigo-500 text-white font-black uppercase tracking-widest rounded-2xl transition-all shadow-2xl shadow-indigo-500/20 hover:scale-105 active:scale-95 flex items-center gap-3"
             >
               <PlayCircle size={24} />
-              Get Started Now
+              Start Learning
             </Link>
             <Link 
-              href="/study" 
-              className="px-10 py-5 bg-slate-900 hover:bg-slate-800 text-white font-black uppercase tracking-widest rounded-2xl border border-slate-800 transition-all hover:scale-105 active:scale-95 shadow-xl"
+              href="/signup" 
+              className="px-10 py-5 bg-white/5 hover:bg-white/10 text-white font-black uppercase tracking-widest rounded-2xl border border-white/10 transition-all hover:scale-105 active:scale-95 shadow-xl"
             >
-              Explore Study Tree
+              Sign Up / تسجيل جديد
             </Link>
           </motion.div>
         </div>

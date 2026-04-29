@@ -23,14 +23,25 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         const account = await prisma.studentAccount.findFirst({
           where: {
             OR: [
-              { universityId: universityId },
-              { email: universityId.toLowerCase() }
+              { universityId: { equals: universityId, mode: 'insensitive' } },
+              { email: { equals: universityId, mode: 'insensitive' } }
             ]
           }
         });
 
         if (!account || account.password !== password) {
           return null;
+        }
+
+        // Safety fallback: Ensure UserProgress exists even for old accounts
+        const progress = await prisma.userProgress.findUnique({
+          where: { userId: account.universityId }
+        });
+        
+        if (!progress) {
+          await prisma.userProgress.create({
+            data: { userId: account.universityId, weakSamples: [] }
+          });
         }
 
         return {

@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { AuthError } from "next-auth";
+import Link from "next/link";
 import { auth, signIn } from "@/auth";
 import { getLastActivityPath } from "@/services/adaptiveLearningService";
 
@@ -48,12 +49,15 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
 
         <section className="rounded-[2rem] border border-slate-200 bg-white p-8 shadow-sm">
           <div className="mb-6 space-y-3">
-            <h2 className="text-3xl font-semibold text-slate-900">Login to your account / تسجيل الدخول</h2>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <h2 className="text-3xl font-semibold text-slate-900">Login / دخول</h2>
+              <Link href="/signup" className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-50 text-indigo-700 text-sm font-bold hover:bg-indigo-100 transition-colors">
+                New student? Sign Up here
+                <span className="text-xs">/ تسجيل طالب جديد</span>
+              </Link>
+            </div>
             <p className="text-sm text-slate-600">
-              Use your university ID and password to continue. Your progress and review history will be saved.
-            </p>
-            <p className="text-sm text-slate-600">
-              استخدم رقم الجامعة وكلمة المرور لحفظ تقدمك ومتابعة المراجعات.
+              Use your university ID and password to continue.
             </p>
           </div>
 
