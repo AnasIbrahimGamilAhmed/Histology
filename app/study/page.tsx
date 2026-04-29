@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { histologyData, TissueSection } from "@/lib/data/histologyData";
 import Link from "next/link";
 import { ChevronRight, Microscope, Lightbulb, BookOpen, Brain, ArrowLeft, AlertOctagon, Sparkles, Search, Languages } from "lucide-react";
@@ -111,19 +112,52 @@ const itemVariants = {
   visible: { opacity: 1, y: 0 }
 };
 
-export default function StudyPage() {
+function StudyContent() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  
+  const categoryId = searchParams.get("category");
+  const sampleId = searchParams.get("sample");
+
   const [selectedSection, setSelectedSection] = useState<TissueSection | null>(null);
   const [activeParent, setActiveParent] = useState<TissueSection | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [comparisonSample, setComparisonSample] = useState<TissueSection | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
+  useEffect(() => {
+    if (categoryId) {
+      const cat = histologyData.find(c => c.id === categoryId);
+      if (cat) {
+        setActiveParent(cat);
+        if (sampleId) {
+          const sample = cat.subSections?.find(s => s.id === sampleId);
+          if (sample) setSelectedSection(sample);
+        }
+      }
+    } else {
+      setActiveParent(null);
+      setSelectedSection(null);
+    }
+  }, [categoryId, sampleId]);
+
+  const updateUrl = (catId: string | null, sampId: string | null) => {
+    const params = new URLSearchParams();
+    if (catId) params.set("category", catId);
+    if (sampId) params.set("sample", sampId);
+    router.push(`?${params.toString()}`, { scroll: false });
+  };
+
   const handleSetParent = (category: TissueSection | null) => {
     setIsLoading(true);
     setTimeout(() => {
-      setActiveParent(category);
+      updateUrl(category?.id || null, null);
       setIsLoading(false);
     }, 800);
+  };
+
+  const handleSetSample = (sample: TissueSection | null) => {
+    updateUrl(activeParent?.id || null, sample?.id || null);
   };
 
   const findSampleByName = (name: string): TissueSection | null => {
@@ -179,54 +213,6 @@ export default function StudyPage() {
       </AnimatePresence>
 
       <main className="relative z-10 mx-auto max-w-7xl px-6 py-12">
-        {/* ... (keep existing main content) */}
-
-        {/* Updated Confusion Warning with Comparison Button */}
-        {selectedSection?.confusionWarning && (
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="p-10 rounded-[3.5rem] bg-rose-500/5 border border-rose-500/10 backdrop-blur-md shadow-2xl"
-          >
-            <h4 className="flex items-center gap-4 text-white font-black mb-10 text-xl tracking-tight">
-              <div className="p-3 bg-rose-500/10 text-rose-400 rounded-2xl">
-                <AlertOctagon size={24} />
-              </div>
-              Confusion Warning
-            </h4>
-            <div className="p-8 rounded-[2rem] bg-rose-500/10 border border-rose-500/20 space-y-6 relative overflow-hidden group">
-              <div className="absolute -right-8 -top-8 w-24 h-24 bg-rose-500/5 blur-[30px]" />
-              <p className="text-rose-100/90 leading-relaxed font-bold text-sm relative z-10">{selectedSection.confusionWarning}</p>
-              {selectedSection.confusionWarningAr && (
-                <p className="text-rose-400/80 text-xs text-right font-black border-t border-rose-500/20 pt-6 relative z-10">{selectedSection.confusionWarningAr}</p>
-              )}
-            </div>
-            
-            <div className="mt-8 flex flex-col sm:flex-row items-center gap-4">
-              <button 
-                onClick={() => {
-                  const match = selectedSection.confusionWarning?.match(/with\s+([A-Za-z\s-]+)/i);
-                  if (match) {
-                    const found = findSampleByName(match[1].trim());
-                    if (found) setComparisonSample(found);
-                  } else {
-                    // Fallback search
-                    const words = selectedSection.confusionWarning?.split(" ") || [];
-                    const found = words.map(w => findSampleByName(w)).find(f => f !== null);
-                    if (found) setComparisonSample(found);
-                  }
-                }}
-                className="flex-1 py-4 px-6 rounded-2xl bg-indigo-600/20 border border-indigo-500/30 text-indigo-400 font-black uppercase tracking-widest text-xs hover:bg-indigo-600 hover:text-white transition-all shadow-xl shadow-indigo-500/5 flex items-center justify-center gap-3"
-              >
-                <Sparkles size={16} />
-                Analyze Differences Side-by-Side
-              </button>
-              
-              <StudyGuideExporter section={selectedSection} />
-            </div>
-          </motion.div>
-        )}
         <header className="mb-16">
           <Link href="/dashboard" className="inline-flex items-center gap-2 text-slate-500 hover:text-indigo-400 transition-colors mb-8 text-sm font-bold uppercase tracking-widest">
             <ArrowLeft size={16} /> Back to Dashboard
@@ -351,7 +337,7 @@ export default function StudyPage() {
                     {activeParent.subSections?.map((sub) => (
                       <button
                         key={sub.id}
-                        onClick={() => setSelectedSection(sub)}
+                        onClick={() => handleSetSample(sub)}
                         className={`w-full flex flex-col p-5 rounded-[1.5rem] text-left transition-all relative overflow-hidden group ${
                           selectedSection?.id === sub.id 
                           ? "bg-indigo-600 text-white shadow-xl shadow-indigo-500/20" 
@@ -478,7 +464,7 @@ export default function StudyPage() {
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.3 }}
-                            className="p-10 rounded-[3.5rem] bg-rose-500/5 border border-rose-500/10 backdrop-blur-md shadow-2xl"
+                            className="p-10 rounded-[3.5rem] bg-rose-500/5 border border-rose-500/10 backdrop-blur-md shadow-2xl col-span-1 md:col-span-2"
                           >
                             <h4 className="flex items-center gap-4 text-white font-black mb-10 text-xl tracking-tight">
                               <div className="p-3 bg-rose-500/10 text-rose-400 rounded-2xl">
@@ -493,11 +479,28 @@ export default function StudyPage() {
                                 <p className="text-rose-400/80 text-xs text-right font-black border-t border-rose-500/20 pt-6 relative z-10">{selectedSection.confusionWarningAr}</p>
                               )}
                             </div>
-                            <div className="mt-10 p-6 rounded-2xl bg-white/5 border border-white/10">
-                              <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Study Advice</p>
-                              <p className="text-xs text-slate-400 font-medium italic leading-relaxed">
-                                Pay close attention to the structural patterns mentioned above. These subtle differences are what university exams focus on.
-                              </p>
+                            
+                            <div className="mt-8 flex flex-col sm:flex-row items-center gap-4">
+                              <button 
+                                onClick={() => {
+                                  const match = selectedSection.confusionWarning?.match(/with\s+([A-Za-z\s-]+)/i);
+                                  if (match) {
+                                    const found = findSampleByName(match[1].trim());
+                                    if (found) setComparisonSample(found);
+                                  } else {
+                                    // Fallback search
+                                    const words = selectedSection.confusionWarning?.split(" ") || [];
+                                    const found = words.map(w => findSampleByName(w)).find(f => f !== null);
+                                    if (found) setComparisonSample(found);
+                                  }
+                                }}
+                                className="flex-1 py-4 px-6 rounded-2xl bg-indigo-600/20 border border-indigo-500/30 text-indigo-400 font-black uppercase tracking-widest text-xs hover:bg-indigo-600 hover:text-white transition-all shadow-xl shadow-indigo-500/5 flex items-center justify-center gap-3"
+                              >
+                                <Sparkles size={16} />
+                                Analyze Differences Side-by-Side
+                              </button>
+                              
+                              <StudyGuideExporter section={selectedSection} />
                             </div>
                           </motion.div>
                         )}
@@ -511,5 +514,13 @@ export default function StudyPage() {
         </AnimatePresence>
       </main>
     </div>
+  );
+}
+
+export default function StudyPage() {
+  return (
+    <Suspense fallback={<MicroscopeLoader />}>
+      <StudyContent />
+    </Suspense>
   );
 }
