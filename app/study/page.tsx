@@ -1,14 +1,82 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { histologyData, TissueSection } from "@/lib/data/histologyData";
 import Link from "next/link";
-import { ChevronRight, ChevronDown, Microscope, Lightbulb, BookOpen, Brain, ArrowLeft, AlertOctagon, Image as ImageIcon, Sparkles, Search } from "lucide-react";
+import { ChevronRight, Microscope, Lightbulb, BookOpen, Brain, ArrowLeft, AlertOctagon, Sparkles, Search, Languages } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import MicroscopeLoader from "@/components/MicroscopeLoader";
+
+function ComparisonCard({ sample, isComparison = false }: { sample: TissueSection; isComparison?: boolean }) {
+  return (
+    <div className={`flex flex-col rounded-[3rem] overflow-hidden border ${isComparison ? "border-indigo-500/30 bg-indigo-500/5" : "border-slate-800 bg-slate-900/40"} backdrop-blur-xl shadow-2xl`}>
+      <div className="p-8 border-b border-white/5">
+        <h3 className="text-2xl font-black text-white mb-2">{sample.title}</h3>
+        <p className="text-slate-400 text-sm font-medium line-clamp-2">{sample.description}</p>
+      </div>
+      <div className="aspect-video relative overflow-hidden bg-black">
+        <img src={sample.imageUrl || sample.imageUrls?.[0]} alt={sample.title} className="w-full h-full object-cover" />
+        <div className="absolute top-4 left-4 px-3 py-1 rounded-full bg-black/40 backdrop-blur-md border border-white/10 text-[9px] font-black uppercase tracking-tighter text-white">
+          {isComparison ? "Comparison Specimen" : "Original View"}
+        </div>
+      </div>
+      <div className="p-8 space-y-6">
+        <h4 className="text-xs font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
+          <Lightbulb size={14} className="text-indigo-400" />
+          Key Characteristics
+        </h4>
+        <ul className="space-y-3">
+          {sample.practicalTips?.slice(0, 3).map((tip, i) => (
+            <li key={i} className="flex gap-3 text-sm text-slate-300 font-semibold leading-relaxed">
+              <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 shrink-0 mt-1.5" />
+              {tip}
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
+}
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1
+    }
+  }
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0 }
+};
 
 export default function StudyPage() {
   const [selectedSection, setSelectedSection] = useState<TissueSection | null>(null);
   const [activeParent, setActiveParent] = useState<TissueSection | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [comparisonSample, setComparisonSample] = useState<TissueSection | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSetParent = (category: TissueSection | null) => {
+    setIsLoading(true);
+    setTimeout(() => {
+      setActiveParent(category);
+      setIsLoading(false);
+    }, 800);
+  };
+
+  const findSampleByName = (name: string): TissueSection | null => {
+    for (const cat of histologyData) {
+      if (cat.subSections) {
+        const found = cat.subSections.find(s => s.title.toLowerCase().includes(name.toLowerCase()));
+        if (found) return found;
+      }
+    }
+    return null;
+  };
 
   const filteredData = histologyData.filter(cat => 
     cat.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -20,201 +88,367 @@ export default function StudyPage() {
   );
 
   return (
-    <div className="min-h-screen bg-[#020617] text-slate-200 selection:bg-indigo-500/30 pb-20">
-      {/* Background decoration */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 right-0 w-[50%] h-[50%] rounded-full bg-indigo-500/5 blur-[120px]" />
-        <div className="absolute bottom-0 left-0 w-[40%] h-[40%] rounded-full bg-blue-500/5 blur-[100px]" />
-      </div>
+    <div className="min-h-screen bg-[#020617] text-slate-200 selection:bg-indigo-500/30 pb-20 overflow-x-hidden">
+      {/* ... (keep background decoration) */}
+
+      <AnimatePresence>
+        {comparisonSample && selectedSection && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] bg-[#020617]/98 backdrop-blur-2xl flex flex-col p-6 overflow-y-auto"
+          >
+            <div className="flex items-center justify-between mb-8 max-w-7xl mx-auto w-full">
+              <h2 className="text-3xl font-black text-white flex items-center gap-4">
+                <Sparkles className="text-indigo-400" />
+                Comparison Mode | طور المقارنة
+              </h2>
+              <button 
+                onClick={() => setComparisonSample(null)}
+                className="px-8 py-3 bg-white text-black font-black uppercase tracking-widest rounded-xl hover:bg-indigo-50 transition-all"
+              >
+                Close Comparison
+              </button>
+            </div>
+
+            <div className="grid lg:grid-cols-2 gap-10 max-w-7xl mx-auto w-full">
+              <ComparisonCard sample={selectedSection} />
+              <ComparisonCard sample={comparisonSample} isComparison />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <main className="relative z-10 mx-auto max-w-7xl px-6 py-12">
-        <header className="mb-12">
-          <Link href="/dashboard" className="inline-flex items-center gap-2 text-slate-500 hover:text-indigo-400 transition-colors mb-6 text-sm font-medium">
+        {/* ... (keep existing main content) */}
+
+        {/* Updated Confusion Warning with Comparison Button */}
+        {selectedSection?.confusionWarning && (
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="p-10 rounded-[3.5rem] bg-rose-500/5 border border-rose-500/10 backdrop-blur-md shadow-2xl"
+          >
+            <h4 className="flex items-center gap-4 text-white font-black mb-10 text-xl tracking-tight">
+              <div className="p-3 bg-rose-500/10 text-rose-400 rounded-2xl">
+                <AlertOctagon size={24} />
+              </div>
+              Confusion Warning
+            </h4>
+            <div className="p-8 rounded-[2rem] bg-rose-500/10 border border-rose-500/20 space-y-6 relative overflow-hidden group">
+              <div className="absolute -right-8 -top-8 w-24 h-24 bg-rose-500/5 blur-[30px]" />
+              <p className="text-rose-100/90 leading-relaxed font-bold text-sm relative z-10">{selectedSection.confusionWarning}</p>
+              {selectedSection.confusionWarningAr && (
+                <p className="text-rose-400/80 text-xs text-right font-black border-t border-rose-500/20 pt-6 relative z-10">{selectedSection.confusionWarningAr}</p>
+              )}
+            </div>
+            
+            <div className="mt-8 flex flex-col sm:flex-row items-center gap-4">
+              <button 
+                onClick={() => {
+                  const match = selectedSection.confusionWarning?.match(/with\s+([A-Za-z\s-]+)/i);
+                  if (match) {
+                    const found = findSampleByName(match[1].trim());
+                    if (found) setComparisonSample(found);
+                  } else {
+                    // Fallback search
+                    const words = selectedSection.confusionWarning?.split(" ") || [];
+                    const found = words.map(w => findSampleByName(w)).find(f => f !== null);
+                    if (found) setComparisonSample(found);
+                  }
+                }}
+                className="w-full py-4 rounded-2xl bg-indigo-600/20 border border-indigo-500/30 text-indigo-400 font-black uppercase tracking-widest text-xs hover:bg-indigo-600 hover:text-white transition-all shadow-xl shadow-indigo-500/5 flex items-center justify-center gap-3"
+              >
+                <Sparkles size={16} />
+                Analyze Differences Side-by-Side
+              </button>
+            </div>
+          </motion.div>
+        )}
+        <header className="mb-16">
+          <Link href="/dashboard" className="inline-flex items-center gap-2 text-slate-500 hover:text-indigo-400 transition-colors mb-8 text-sm font-bold uppercase tracking-widest">
             <ArrowLeft size={16} /> Back to Dashboard
           </Link>
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-10">
             <div className="flex-1">
-              <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">
-                Histology Navigator
-              </h1>
-              <p className="mt-4 text-slate-400 text-lg max-w-2xl">
-                Explore the cellular architecture of the human body. Select a category or search for a specimen.
-              </p>
+              <motion.h1 
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="text-4xl md:text-7xl font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-500"
+              >
+                Study Navigator
+              </motion.h1>
+              <motion.p 
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.1 }}
+                className="mt-6 text-slate-400 text-lg max-w-2xl leading-relaxed font-medium"
+              >
+                Explore the cellular architecture of the human body. Master pathognomonic features across <span className="text-indigo-400 font-bold">50+ histological specimens</span>.
+              </motion.p>
             </div>
-            {!activeParent && (
-              <div className="relative w-full md:w-80">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
-                <input 
-                  type="text" 
-                  placeholder="Quick search..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full bg-slate-900/50 border border-slate-800 rounded-2xl py-3 pl-11 pr-4 text-white outline-none focus:border-indigo-500 transition-all text-sm"
-                />
-              </div>
-            )}
-            <Link 
-              href="/exam" 
-              className="group relative inline-flex items-center gap-3 px-8 py-4 bg-indigo-600 text-white font-bold rounded-2xl overflow-hidden transition-all hover:scale-105 active:scale-95"
+            
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="flex flex-col sm:flex-row items-center gap-6 w-full md:w-auto"
             >
-              <Brain size={20} />
-              <span>Test Knowledge</span>
-            </Link>
+              {!activeParent && (
+                <div className="relative w-full md:w-80 group">
+                  <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-600 group-focus-within:text-indigo-400 transition-colors" size={18} />
+                  <input 
+                    type="text" 
+                    placeholder="Search specimens..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full bg-slate-900/50 border border-slate-800 rounded-[1.5rem] py-4 pl-14 pr-6 text-white outline-none focus:border-indigo-500/50 focus:ring-4 focus:ring-indigo-500/10 transition-all text-sm font-medium backdrop-blur-xl shadow-xl"
+                  />
+                </div>
+              )}
+              <Link 
+                href="/exam" 
+                className="w-full sm:w-auto group relative inline-flex items-center justify-center gap-3 px-10 py-4 bg-indigo-600 text-white font-black uppercase tracking-widest rounded-2xl overflow-hidden transition-all hover:scale-105 active:scale-95 shadow-2xl shadow-indigo-500/20"
+              >
+                <Brain size={20} />
+                <span>Quick Exam</span>
+              </Link>
+            </motion.div>
           </div>
         </header>
 
-        {!activeParent ? (
-          /* CATEGORY GRID */
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            {filteredData.map((category) => (
-              <button
-                key={category.id}
-                onClick={() => setActiveParent(category)}
-                className="group p-8 rounded-[2.5rem] bg-slate-900/50 border border-slate-800 hover:border-indigo-500/30 text-left transition-all hover:shadow-2xl hover:shadow-indigo-500/5 backdrop-blur-sm"
-              >
-                <div className="w-14 h-14 rounded-2xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                  <BookOpen size={28} />
-                </div>
-                <h3 className="text-2xl font-bold text-white mb-2 group-hover:text-indigo-400 transition-colors flex items-center justify-between">
-                  {category.title}
-                  {category.titleAr && <span className="text-sm font-black text-slate-500 ml-2">{category.titleAr}</span>}
-                </h3>
-                <p className="text-slate-400 leading-relaxed text-sm mb-4">
-                  {category.description}
-                </p>
-                {category.descriptionAr && <p className="text-slate-500 text-xs italic mb-6 text-right leading-relaxed">{category.descriptionAr}</p>}
-                <div className="flex items-center gap-2 text-xs font-bold text-indigo-400 uppercase tracking-widest">
-                  View {category.subSections?.length || 0} Sub-sections <ChevronRight size={14} />
-                </div>
-              </button>
-            ))}
-          </div>
-        ) : (
-          /* SUB-SECTION SELECTOR & CONTENT VIEW */
-          <div className="flex flex-col lg:grid lg:grid-cols-[350px_1fr] gap-10 animate-in fade-in slide-in-from-left-4 duration-500">
-            {/* Sidebar List */}
-            <aside className="space-y-4">
-              <button 
-                onClick={() => { setActiveParent(null); setSelectedSection(null); }}
-                className="flex items-center gap-2 text-indigo-400 font-bold hover:text-indigo-300 transition-colors mb-6"
-              >
-                <ArrowLeft size={18} /> Back to Categories
-              </button>
-              
-              <div className="p-2 rounded-3xl bg-slate-900/50 border border-slate-800 backdrop-blur-sm">
-                <h2 className="px-4 py-3 text-xs font-black text-slate-500 uppercase tracking-widest border-b border-slate-800 mb-2 flex justify-between items-center">
-                  <span>{activeParent.title}</span>
-                  <span className="text-[10px] font-black text-slate-600">{activeParent.titleAr}</span>
-                </h2>
-                <div className="space-y-1 max-h-[60vh] overflow-y-auto custom-scrollbar">
-                  {activeParent.subSections?.map((sub) => (
-                    <button
-                      key={sub.id}
-                      onClick={() => setSelectedSection(sub)}
-                      className={`w-full flex flex-col p-4 rounded-2xl text-left transition-all ${
-                        selectedSection?.id === sub.id 
-                        ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/20" 
-                        : "text-slate-400 hover:bg-slate-800 hover:text-slate-200"
-                      }`}
-                    >
-                      <div className="flex items-center justify-between w-full">
-                        <span className="font-semibold text-sm">{sub.title}</span>
-                        <ChevronRight size={16} className={selectedSection?.id === sub.id ? "opacity-100" : "opacity-0"} />
-                      </div>
-                      {sub.titleAr && <span className={`text-[10px] font-bold mt-1 ${selectedSection?.id === sub.id ? "text-indigo-200" : "text-slate-600"}`}>{sub.titleAr}</span>}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </aside>
-
-            {/* Content Area */}
-            <section className="min-h-[500px]">
-              {!selectedSection ? (
-                <div className="h-full flex flex-col items-center justify-center text-center p-12 rounded-[3rem] border-2 border-dashed border-slate-800 bg-slate-900/20">
-                  <div className="w-20 h-20 bg-indigo-500/10 text-indigo-400 rounded-3xl flex items-center justify-center mb-6">
-                    <Sparkles size={40} />
+        <AnimatePresence mode="wait">
+          {isLoading ? (
+            <motion.div 
+              key="loader"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="py-32"
+            >
+              <MicroscopeLoader />
+            </motion.div>
+          ) : !activeParent ? (
+            /* CATEGORY GRID */
+            <motion.div 
+              key="grid"
+              variants={containerVariants}
+              initial="hidden"
+              animate="visible"
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+            >
+              {filteredData.map((category) => (
+                <motion.button
+                  key={category.id}
+                  variants={itemVariants}
+                  whileHover={{ y: -10 }}
+                  onClick={() => handleSetParent(category)}
+                  className="group p-10 rounded-[3rem] bg-slate-900/40 border border-slate-800/60 hover:border-indigo-500/30 text-left transition-all hover:shadow-2xl hover:shadow-indigo-500/5 backdrop-blur-md relative overflow-hidden h-full flex flex-col"
+                >
+                  <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-indigo-500/5 blur-[40px] group-hover:bg-indigo-500/10 transition-all" />
+                  <div className="w-16 h-16 rounded-2xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center mb-8 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500 shadow-xl border border-white/5">
+                    <BookOpen size={32} />
                   </div>
-                  <h3 className="text-2xl font-bold text-white mb-2">Select a Sample</h3>
-                  <p className="text-slate-400 max-w-xs">Pick a specific specimen from the list to view its microscopic characteristics and identification tips.</p>
-                </div>
-              ) : (
-                <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-                  <header className="mb-8">
-                    <h2 className="text-4xl font-black text-white mb-2 flex items-baseline gap-4">
-                      {selectedSection.title}
-                      {selectedSection.titleAr && <span className="text-xl font-black text-indigo-500/60">{selectedSection.titleAr}</span>}
-                    </h2>
-                    <p className="text-slate-400 text-lg leading-relaxed">{selectedSection.description}</p>
-                    {selectedSection.descriptionAr && <p className="text-slate-500 italic mt-2 text-sm">{selectedSection.descriptionAr}</p>}
-                  </header>
-
-                  {/* Image Gallery */}
-                  {selectedSection.imageUrls && selectedSection.imageUrls.length > 0 && (
-                    <div className="mb-10">
-                      <div className={`grid gap-6 ${selectedSection.imageUrls.length > 1 ? "grid-cols-1 md:grid-cols-2" : "grid-cols-1"}`}>
-                        {selectedSection.imageUrls.map((url, idx) => (
-                          <div key={idx} className="relative group rounded-[2rem] overflow-hidden border border-slate-800 bg-black shadow-2xl">
-                            <img 
-                              src={url} 
-                              alt={`${selectedSection.title} view ${idx + 1}`}
-                              className="w-full h-[350px] object-contain transition-transform duration-700 group-hover:scale-110"
-                            />
-                            <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black via-black/40 to-transparent backdrop-blur-[2px] text-[10px] uppercase tracking-widest font-black text-slate-300 border-t border-white/5 flex justify-between items-center">
-                              <span>{url.toLowerCase().includes("micro") ? "Microscope View" : "Overview"} </span>
-                              <span className="text-indigo-400">Verified Specimen</span>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  <div className="grid md:grid-cols-2 gap-6">
-                    {/* Practical Tips */}
-                    <div className="p-8 rounded-[2.5rem] bg-emerald-500/5 border border-emerald-500/10 backdrop-blur-sm">
-                      <h4 className="flex items-center gap-3 text-emerald-400 font-bold mb-6 text-lg">
-                        <Microscope size={22} />
-                        Practical Identification | التعرف العملي
-                      </h4>
-                      <ul className="space-y-4">
-                        {selectedSection.practicalTips?.map((tip, idx) => (
-                          <li key={idx} className="flex flex-col gap-1 group">
-                            <div className="flex items-start gap-3 text-emerald-100/80">
-                              <div className="mt-1 p-1 bg-emerald-500/20 rounded-lg text-emerald-400 group-hover:bg-emerald-500 group-hover:text-white transition-all">
-                                <Lightbulb size={14} />
-                              </div>
-                              <span className="leading-relaxed font-medium">{tip}</span>
-                            </div>
-                            {selectedSection.practicalTipsAr?.[idx] && (
-                              <p className="text-emerald-500/60 text-xs mr-6 text-right font-bold">{selectedSection.practicalTipsAr[idx]}</p>
-                            )}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-
-                    {/* Common Confusion */}
-                    {selectedSection.confusionWarning && (
-                      <div className="p-8 rounded-[2.5rem] bg-rose-500/5 border border-rose-500/10 backdrop-blur-sm">
-                        <h4 className="flex items-center gap-3 text-rose-400 font-bold mb-6 text-lg">
-                          <AlertOctagon size={22} />
-                          Common Confusion | اللبس الشائع
-                        </h4>
-                        <div className="p-5 rounded-2xl bg-rose-500/10 border border-rose-500/20 space-y-3">
-                          <p className="text-rose-100/90 leading-relaxed font-medium">{selectedSection.confusionWarning}</p>
-                          {selectedSection.confusionWarningAr && (
-                            <p className="text-rose-400/80 text-sm text-right font-black border-t border-rose-500/10 pt-3">{selectedSection.confusionWarningAr}</p>
-                          )}
+                  <h3 className="text-3xl font-black text-white mb-3 group-hover:text-indigo-400 transition-colors flex items-center justify-between tracking-tight">
+                    {category.title}
+                  </h3>
+                  {category.titleAr && <p className="text-sm font-black text-slate-500 mb-6 flex items-center gap-2"><Languages size={14} /> {category.titleAr}</p>}
+                  <p className="text-slate-400 leading-relaxed font-medium text-sm mb-10 flex-grow">
+                    {category.description}
+                  </p>
+                  <div className="mt-auto flex items-center gap-3 text-[10px] font-black text-indigo-400 uppercase tracking-[0.2em]">
+                    Explore {category.subSections?.length || 0} Modules <ChevronRight size={16} />
+                  </div>
+                </motion.button>
+              ))}
+            </motion.div>
+          ) : (
+            /* SUB-SECTION SELECTOR & CONTENT VIEW */
+            <motion.div 
+              key="content"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              className="flex flex-col lg:grid lg:grid-cols-[350px_1fr] gap-12"
+            >
+              {/* Sidebar List */}
+              <aside className="space-y-6">
+                <button 
+                  onClick={() => { setActiveParent(null); setSelectedSection(null); }}
+                  className="flex items-center gap-3 text-indigo-400 font-black uppercase tracking-widest text-xs hover:text-indigo-300 transition-all mb-8 bg-indigo-500/5 px-6 py-3 rounded-xl border border-indigo-500/10"
+                >
+                  <ArrowLeft size={16} /> Categories
+                </button>
+                
+                <div className="p-3 rounded-[2.5rem] bg-slate-900/40 border border-slate-800/60 backdrop-blur-md shadow-2xl overflow-hidden">
+                  <h2 className="px-6 py-5 text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] border-b border-slate-800/50 mb-4 flex justify-between items-center">
+                    <span>{activeParent.title}</span>
+                  </h2>
+                  <div className="space-y-2 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar scroll-smooth">
+                    {activeParent.subSections?.map((sub) => (
+                      <button
+                        key={sub.id}
+                        onClick={() => setSelectedSection(sub)}
+                        className={`w-full flex flex-col p-5 rounded-[1.5rem] text-left transition-all relative overflow-hidden group ${
+                          selectedSection?.id === sub.id 
+                          ? "bg-indigo-600 text-white shadow-xl shadow-indigo-500/20" 
+                          : "text-slate-400 hover:bg-slate-800/80 hover:text-slate-200"
+                        }`}
+                      >
+                        <div className="flex items-center justify-between w-full relative z-10">
+                          <span className="font-bold text-sm tracking-tight">{sub.title}</span>
+                          <ChevronRight size={16} className={`transition-transform ${selectedSection?.id === sub.id ? "translate-x-1" : "opacity-0"}`} />
                         </div>
-                      </div>
-                    )}
+                        {sub.titleAr && (
+                          <span className={`text-[10px] font-black mt-2 relative z-10 opacity-60`}>
+                            {sub.titleAr}
+                          </span>
+                        )}
+                        {selectedSection?.id === sub.id && (
+                          <motion.div layoutId="active-bg" className="absolute inset-0 bg-indigo-600 z-0" />
+                        )}
+                      </button>
+                    ))}
                   </div>
                 </div>
-              )}
-            </section>
-          </div>
-        )}
+              </aside>
+
+              {/* Content Area */}
+              <section className="min-h-[600px]">
+                <AnimatePresence mode="wait">
+                  {!selectedSection ? (
+                    <motion.div 
+                      key="empty"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="h-full flex flex-col items-center justify-center text-center p-20 rounded-[4rem] border-2 border-dashed border-slate-800 bg-slate-900/20"
+                    >
+                      <div className="w-24 h-24 bg-indigo-500/10 text-indigo-400 rounded-[2rem] flex items-center justify-center mb-8 animate-pulse shadow-2xl">
+                        <Sparkles size={48} />
+                      </div>
+                      <h3 className="text-3xl font-black text-white mb-4">Select Specimen</h3>
+                      <p className="text-slate-500 max-w-sm font-medium leading-relaxed">Pick a tissue module from the sidebar to begin analyzing its diagnostic features.</p>
+                    </motion.div>
+                  ) : (
+                    <motion.div 
+                      key={selectedSection.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -20 }}
+                      transition={{ duration: 0.4 }}
+                    >
+                      <header className="mb-12">
+                        <div className="flex items-baseline gap-6 mb-4">
+                          <h2 className="text-5xl font-black text-white tracking-tight">
+                            {selectedSection.title}
+                          </h2>
+                          {selectedSection.titleAr && <span className="text-2xl font-black text-indigo-500/40">{selectedSection.titleAr}</span>}
+                        </div>
+                        <p className="text-slate-400 text-xl leading-relaxed font-medium max-w-3xl">{selectedSection.description}</p>
+                      </header>
+
+                      {/* Image Gallery */}
+                      {selectedSection.imageUrls && selectedSection.imageUrls.length > 0 && (
+                        <div className="mb-12">
+                          <div className={`grid gap-8 ${selectedSection.imageUrls.length > 1 ? "grid-cols-1 md:grid-cols-2" : "grid-cols-1"}`}>
+                            {selectedSection.imageUrls.map((url, idx) => (
+                              <motion.div 
+                                key={idx}
+                                whileHover={{ scale: 1.02 }}
+                                className="relative group rounded-[3rem] overflow-hidden border border-slate-800 bg-black shadow-2xl cursor-zoom-in"
+                              >
+                                <img 
+                                  src={url} 
+                                  alt={`${selectedSection.title} view ${idx + 1}`}
+                                  className="w-full h-[450px] object-contain transition-transform duration-1000 group-hover:scale-110"
+                                />
+                                <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent backdrop-blur-[2px] text-[10px] uppercase tracking-[0.3em] font-black text-slate-400 border-t border-white/5 flex justify-between items-center">
+                                  <div className="flex items-center gap-2">
+                                    <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                                    {url.toLowerCase().includes("micro") ? "Microscope Field" : "Gross View"}
+                                  </div>
+                                  <span className="text-indigo-500">Click to focus</span>
+                                </div>
+                              </motion.div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="grid md:grid-cols-2 gap-10">
+                        {/* Practical Tips */}
+                        <motion.div 
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.2 }}
+                          className="p-10 rounded-[3.5rem] bg-indigo-500/5 border border-indigo-500/10 backdrop-blur-md shadow-2xl relative overflow-hidden"
+                        >
+                          <div className="absolute top-0 right-0 p-8 opacity-[0.03] rotate-12">
+                            <Microscope size={120} />
+                          </div>
+                          <h4 className="flex items-center gap-4 text-white font-black mb-10 text-xl tracking-tight">
+                            <div className="p-3 bg-indigo-500/10 text-indigo-400 rounded-2xl">
+                              <Microscope size={24} />
+                            </div>
+                            Diagnostic Identification
+                          </h4>
+                          <ul className="space-y-6">
+                            {selectedSection.practicalTips?.map((tip, idx) => (
+                              <li key={idx} className="flex flex-col gap-3 group">
+                                <div className="flex items-start gap-4 text-slate-300">
+                                  <div className="mt-1 p-1.5 bg-indigo-500/10 rounded-xl text-indigo-400 group-hover:bg-indigo-500 group-hover:text-white transition-all shadow-lg">
+                                    <Lightbulb size={16} />
+                                  </div>
+                                  <span className="leading-relaxed font-semibold text-sm">{tip}</span>
+                                </div>
+                                {selectedSection.practicalTipsAr?.[idx] && (
+                                  <p className="text-indigo-400/50 text-xs mr-10 text-right font-black border-r-2 border-indigo-500/20 pr-4">{selectedSection.practicalTipsAr[idx]}</p>
+                                )}
+                              </li>
+                            ))}
+                          </ul>
+                        </motion.div>
+
+                        {/* Common Confusion */}
+                        {selectedSection.confusionWarning && (
+                          <motion.div 
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.3 }}
+                            className="p-10 rounded-[3.5rem] bg-rose-500/5 border border-rose-500/10 backdrop-blur-md shadow-2xl"
+                          >
+                            <h4 className="flex items-center gap-4 text-white font-black mb-10 text-xl tracking-tight">
+                              <div className="p-3 bg-rose-500/10 text-rose-400 rounded-2xl">
+                                <AlertOctagon size={24} />
+                              </div>
+                              Confusion Warning
+                            </h4>
+                            <div className="p-8 rounded-[2rem] bg-rose-500/10 border border-rose-500/20 space-y-6 relative overflow-hidden group">
+                              <div className="absolute -right-8 -top-8 w-24 h-24 bg-rose-500/5 blur-[30px]" />
+                              <p className="text-rose-100/90 leading-relaxed font-bold text-sm relative z-10">{selectedSection.confusionWarning}</p>
+                              {selectedSection.confusionWarningAr && (
+                                <p className="text-rose-400/80 text-xs text-right font-black border-t border-rose-500/20 pt-6 relative z-10">{selectedSection.confusionWarningAr}</p>
+                              )}
+                            </div>
+                            <div className="mt-10 p-6 rounded-2xl bg-white/5 border border-white/10">
+                              <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Study Advice</p>
+                              <p className="text-xs text-slate-400 font-medium italic leading-relaxed">
+                                Pay close attention to the structural patterns mentioned above. These subtle differences are what university exams focus on.
+                              </p>
+                            </div>
+                          </motion.div>
+                        )}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </section>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </main>
     </div>
   );

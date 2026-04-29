@@ -66,59 +66,50 @@ export async function generateTutorFeedback(input: TutorFeedbackInput): Promise<
   }
 
   const systemPrompt =
-    "You are a histology exam feedback tutor. Use ONLY the provided sample data and student answer. Do not add external medical facts. Keep explanation short, educational, and simple.";
+    "You are an expert Histology Tutor. Your goal is to help medical students master tissue identification under a microscope. Be encouraging, educational, and precise. Use ONLY the provided sample data.";
 
-  const userPrompt = JSON.stringify(
-    {
-      task: "Generate educational feedback after an exam answer.",
-      requiredOutput: {
-        format: "plain text, max 120 words",
-        mustInclude: [
-          "why answer is correct or incorrect",
-          "key diagnostic features from provided sample only",
-          "improvement advice for next question"
-        ]
-      },
-      data: {
-        questionType: input.questionType,
-        questionPrompt: input.prompt,
-        variationType: input.variationType,
-        resultStatus: status,
-        errorClassification: classification,
-        userAnswer: input.userAnswer,
-        correctReferenceSample: input.sample.name,
-        correctReferenceDescription: input.sample.description,
-        correctReferenceFeatures: input.sample.keyFeatures,
-        correctAnswer: input.correctAnswer,
-        chosenSample: input.chosenSample
-      },
-      hardRules: [
-        "Do not invent histology knowledge",
-        "Do not mention unknown structures",
-        "Do not use any source outside provided data"
-      ]
-    },
-    null,
-    2
-  );
+  const userPrompt = `
+    TASK: Provide feedback for a histology exam question.
+    
+    STUDENT ANSWER: "${input.userAnswer}"
+    CORRECT DIAGNOSIS: "${input.sample.name}"
+    RESULT: ${status}
+    ERROR TYPE: ${classification ?? "None"}
+    
+    SAMPLE DATA:
+    - Description: ${input.sample.description}
+    - Key Features: ${input.sample.keyFeatures.join(", ")}
+    - Variation in this question: ${input.variationType ?? "Standard view"}
+    
+    INSTRUCTIONS:
+    1. If correct, explain WHY (mentioning pathognomonic features).
+    2. If incorrect, gently explain the confusion and highlight what feature they missed.
+    3. Specifically address the variation (${input.variationType}) if present, explaining how it might change the look (e.g., stain, cut angle).
+    4. Keep it under 100 words.
+    5. Be professional and educational.
+  `;
 
   try {
-    const response = await fetch("https://api.openai.com/v1/responses", {
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${process.env.OPENAI_API_KEY}`
       },
       body: JSON.stringify({
-        model: "gpt-4.1-mini",
-        input: [
-          { role: "system", content: [{ type: "input_text", text: systemPrompt }] },
-          { role: "user", content: [{ type: "input_text", text: userPrompt }] }
-        ]
+        model: "gpt-4o-mini",
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userPrompt }
+        ],
+        max_tokens: 200,
+        temperature: 0.7
       })
     });
 
     if (!response.ok) {
+      const errText = await response.text();
+      console.error("OpenAI API error:", errText);
       return {
         status,
         errorClassification: classification,
@@ -126,14 +117,16 @@ export async function generateTutorFeedback(input: TutorFeedbackInput): Promise<
       };
     }
 
-    const data = (await response.json()) as { output_text?: string };
+    const data = await response.json();
+    const explanation = data.choices?.[0]?.message?.content?.trim();
 
     return {
       status,
       errorClassification: classification,
-      explanation: data.output_text?.trim() || fallbackExplanation(input, classification)
+      explanation: explanation || fallbackExplanation(input, classification)
     };
-  } catch {
+  } catch (err) {
+    console.error("Tutor feedback generation failed:", err);
     return {
       status,
       errorClassification: classification,

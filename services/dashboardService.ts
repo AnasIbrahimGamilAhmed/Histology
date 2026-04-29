@@ -151,22 +151,44 @@ export async function getDashboardData(userId: string): Promise<DashboardData> {
     delta > 1 ? { direction: "increase" as const, delta } : delta < -1 ? { direction: "decrease" as const, delta } : { direction: "stable" as const, delta };
 
   const insights: string[] = [];
-  if (sampleMastery.some((item) => item.sampleName.toLowerCase().includes("epithelium") && item.status === "Weak")) {
-    insights.push("You are currently weak in epithelial tissue recognition.");
+  
+  // Categorical Analysis
+  const weakSamples = sampleMastery.filter(s => s.status === "Weak");
+  const weakCategories = new Set(weakSamples.map(s => {
+    const name = s.sampleName.toLowerCase();
+    if (name.includes("epitheli")) return "Epithelial Tissue";
+    if (name.includes("muscle")) return "Muscle Tissue";
+    if (name.includes("bone") || name.includes("cartilage")) return "Skeletal Tissue";
+    if (name.includes("blood")) return "Hematology";
+    return "Organ Systems";
+  }));
+
+  if (weakCategories.has("Epithelial Tissue")) {
+    insights.push("Focus on the 'Basement Membrane' and 'Cell Shape' for Epithelial samples. You seem to confuse simple vs stratified layers.");
+  }
+  
+  if (weakCategories.has("Muscle Tissue")) {
+    insights.push("Diagnostic Tip: Look for 'Striations' and 'Nuclei Position' to differentiate between Skeletal (peripheral) and Cardiac (central) muscle.");
   }
 
+  // Error Pattern Analysis
   const stainWrongRate = progress.attempts.filter((attempt) => attempt.variationType === "stain_variation" && !attempt.isCorrect).length;
-  if (stainWrongRate >= 2) {
-    insights.push("You confuse stain variations frequently. Re-check color and contrast cues.");
+  if (stainWrongRate >= 3) {
+    insights.push("Warning: You are relying too much on 'Color'. Histology is about 'Structure'. Practice with the grayscale mode in the Atlas.");
   }
 
-  const boneSample = sampleMastery.find((item) => item.sampleName.toLowerCase().includes("bone"));
-  if (boneSample && boneSample.masteryScore >= 70) {
-    insights.push("Bone-related samples are improving. Keep reinforcing osteon-related features.");
+  const zoomWrongRate = progress.attempts.filter((attempt) => attempt.variationType === "zoom_variation" && !attempt.isCorrect).length;
+  if (zoomWrongRate >= 3) {
+    insights.push("Identification Alert: You struggle with High-Power views. Spend more time in 'Magnifier Mode' to recognize cellular details.");
+  }
+
+  // Mastery Praise
+  if (strongSamplesCount > 5) {
+    insights.push(`Excellent work! You have mastered ${strongSamplesCount} specimens. Try the 'Pressure Mode' to test your speed.`);
   }
 
   if (insights.length === 0) {
-    insights.push("Performance is stable. Continue mixed practice to improve medium-mastery samples.");
+    insights.push("Your performance is stable. We recommend taking a 'Mixed Practice' exam to discover new areas for improvement.");
   }
 
   const predictions = await getPredictionInsights(userId);

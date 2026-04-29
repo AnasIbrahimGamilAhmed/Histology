@@ -1,4 +1,5 @@
-import { auth, signOut } from "@/auth";
+import { auth } from "@/auth";
+import { handleSignOut } from "@/lib/actions/authActions";
 
 export async function UserProfileBar() {
   const session = await auth();
@@ -15,12 +16,7 @@ export async function UserProfileBar() {
         </p>
       </div>
 
-      <form
-        action={async () => {
-          "use server";
-          await signOut({ redirectTo: `/login?logout=${Date.now()}` });
-        }}
-      >
+      <form action={handleSignOut}>
         <button
           type="submit"
           className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"

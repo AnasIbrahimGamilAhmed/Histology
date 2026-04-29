@@ -362,31 +362,22 @@ async function createExamInstance(userId: string, options: { mode: ExamMode; lim
     fingerprint: string;
   }>;
 
+  const isEliteUser = accuracyPercentage > 85 && strongSamplesCount > 10;
+  
   for (const sample of samplePool) {
     if (questions.length >= options.limit) break;
 
-    // FORCE usage of ONLY micro images as requested by the user
     const microVariations = sample.variations.filter(v => v.image.toLowerCase().includes("micro"));
-    
-    // Strictly skip samples that don't have a micro (or revision) image
     if (microVariations.length === 0) continue;
     
     const variation = microVariations[Math.floor(Math.random() * microVariations.length)];
     if (!variation) continue;
 
-    const typeCandidates = buildQuestionTypeWeightList()
-      .map((entry) => ({ type: entry.type, weight: entry.weight }))
-      .filter((entry) => {
-        const existingPatterns = previousPatterns.get(sample.id);
-        if (!existingPatterns) return true;
-        return entry.type !== "list_features"
-          ? true
-          : true;
-      });
-
+    const typeCandidates = buildQuestionTypeWeightList();
     const selectedType = weightedChoice(typeCandidates);
     const difficulty: DifficultyLevel = variation.type === "exam_tricky_view" ? "hard" : Math.random() < 0.4 ? "hard" : Math.random() < 0.6 ? "medium" : "easy";
     const template = buildQuestionTemplate(sample, allSamples, selectedType.type, difficulty, variation);
+    
     const fingerprint = fingerprintForQuestion({
       prompt: template.prompt,
       sampleId: sample.id,
@@ -397,7 +388,25 @@ async function createExamInstance(userId: string, options: { mode: ExamMode; lim
       reasoningPattern: template.reasoningPattern
     });
 
-    if (existingFingerprints.has(fingerprint)) {
+    const isAlreadySeen = existingFingerprints.has(fingerprint);
+
+    // INNOVATIVE FALLBACK: If elite student has seen this, don't skip! 
+    // Instead, "Challenge" them by applying extreme filters.
+    let microscopyConfig = buildMicroscopyConfig(variation);
+    let finalPrompt = template.prompt;
+
+    if (isAlreadySeen && isEliteUser) {
+      // Apply "Microscope Challenge" filters
+      microscopyConfig = {
+        ...microscopyConfig,
+        zoomLevel: 3, // Force high power
+        contrast: 1.8, // Harsh lighting
+        blurPx: 2.5, // Out of focus simulation
+        rotationDeg: Math.random() * 360, // Total disorientation
+      };
+      finalPrompt = `[ELITE CHALLENGE] ${finalPrompt} (Artifacts & poor focus simulated)`;
+    } else if (isAlreadySeen) {
+      // Still skip for normal students to maintain uniqueness
       continue;
     }
 
@@ -405,20 +414,22 @@ async function createExamInstance(userId: string, options: { mode: ExamMode; lim
       sampleId: sample.id,
       variationId: variation.id,
       type: selectedType.type,
-      difficulty,
-      prompt: template.prompt,
+      difficulty: isAlreadySeen ? "hard" : difficulty,
+      prompt: finalPrompt,
       image: variation.image,
       variationType: variation.type,
       choices: template.choices,
       acceptedAnswers: template.acceptedAnswers,
       reasoningPattern: template.reasoningPattern,
-      microscopyConfig: buildMicroscopyConfig(variation),
-      fingerprint
+      microscopyConfig,
+      fingerprint: isAlreadySeen ? `${fingerprint}|challenge|${Math.random()}` : fingerprint
     });
   }
 
   if (questions.length === 0) {
-    throw new Error("Failed to create a unique exam. Try again later.");
+    // Last resort fallback: force allow duplicates with challenge mode
+    // (This ensures students NEVER hit a 'No questions left' wall)
+    return createExamInstance(userId, { ...options, forceConfusionDrill: true }); 
   }
 
   const uniqueSignature = crypto.createHash("sha256").update(questions.map((question) => question.fingerprint).join("|")).digest("hex");

@@ -2,6 +2,9 @@
 
 import { useEffect, useMemo, useState } from "react";
 import type { ExamQuestion } from "@/lib/examService";
+import Link from "next/link";
+import { motion, AnimatePresence } from "framer-motion";
+import { CheckCircle2, XCircle, Loader2, Microscope, ArrowRight, Lightbulb, AlertCircle, Timer } from "lucide-react";
 
 type ExamEngineProps = {
   questions: ExamQuestion[];
@@ -15,20 +18,36 @@ type FeedbackPayload = {
 };
 
 function normalize(text: string): string {
-  return text.trim().toLowerCase().replace(/\s+/g, " ");
+  return text.trim().toLowerCase().replace(/[.,/#!$%^&*;:{}=\-_`~()]/g, "").replace(/\s+/g, " ");
 }
 
 function isCorrectAnswer(question: ExamQuestion, userAnswer: string): boolean {
-  const normalized = normalize(userAnswer);
-  if (!normalized) {
+  const normalizedUser = normalize(userAnswer);
+  if (!normalizedUser) {
     return false;
   }
 
+  const checkMatch = (expected: string, actual: string) => {
+    const normExp = normalize(expected);
+    const normAct = normalize(actual);
+    
+    if (normExp === normAct) return true;
+    
+    // Split into tokens and sort them to handle word order
+    const expTokens = normExp.split(" ").filter(t => t.length > 1).sort();
+    const actTokens = normAct.split(" ").filter(t => t.length > 1).sort();
+    
+    if (expTokens.length === 0 || actTokens.length === 0) return normExp === normAct;
+
+    // Check if all essential tokens from expected are in actual
+    return expTokens.every(token => actTokens.includes(token));
+  };
+
   if (question.choices.length > 0) {
-    return question.acceptedAnswers.some((answer) => normalize(answer) === normalized);
+    return question.acceptedAnswers.some((answer) => normalize(answer) === normalizedUser);
   }
 
-  return question.acceptedAnswers.some((answer) => normalized.includes(normalize(answer)));
+  return question.acceptedAnswers.some((answer) => checkMatch(answer, userAnswer));
 }
 
 export function ExamEngine({ questions, mode }: ExamEngineProps) {
@@ -45,24 +64,11 @@ export function ExamEngine({ questions, mode }: ExamEngineProps) {
   const currentQuestion = questions[currentIndex];
   const progress = useMemo(() => `${currentIndex + 1} / ${questions.length}`, [currentIndex, questions.length]);
 
-  if (questions.length === 0) {
-    return (
-      <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="text-xl font-semibold text-slate-900">No questions available</h2>
-        <p className="mt-2 text-sm text-slate-600">Seed the database to generate exam questions from sample data.</p>
-      </section>
-    );
-  }
-
   const answerValue = answers[currentQuestion.id] ?? "";
   const timerValue = timers[currentQuestion.id] ?? currentQuestion.pressureConfig?.timerSeconds ?? 0;
   const hasViewedImage = imageViewed[currentQuestion.id] ?? mode !== "pressure";
-  const zoomClass =
-    currentQuestion.microscopy?.zoomLevel === 3
-      ? "scale-[2]"
-      : currentQuestion.microscopy?.zoomLevel === 2
-      ? "scale-[1.5]"
-      : "scale-100";
+  
+  const zoomFactor = currentQuestion.microscopy?.zoomLevel ?? 1;
 
   useEffect(() => {
     if (mode !== "pressure" || revealed[currentQuestion.id]) return;
@@ -83,12 +89,10 @@ export function ExamEngine({ questions, mode }: ExamEngineProps) {
     }, 1000);
 
     return () => clearTimeout(timeout);
-  }, [mode, currentQuestion.id, currentQuestion.pressureConfig?.timerSeconds, revealed, timers]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [mode, currentQuestion.id, currentQuestion.pressureConfig?.timerSeconds, revealed, timers]);
 
   const onSubmitAnswer = async (timeUp = false) => {
-    if (revealed[currentQuestion.id]) {
-      return;
-    }
+    if (revealed[currentQuestion.id]) return;
 
     const candidateAnswer = timeUp ? "" : answerValue.trim();
     const correct = isCorrectAnswer(currentQuestion, candidateAnswer);
@@ -111,14 +115,11 @@ export function ExamEngine({ questions, mode }: ExamEngineProps) {
           prompt: currentQuestion.prompt,
           variationType: currentQuestion.variationType,
           mode,
-          timeSpentSeconds:
-            mode === "pressure"
-              ? (currentQuestion.pressureConfig?.timerSeconds ?? 30) - (timers[currentQuestion.id] ?? currentQuestion.pressureConfig?.timerSeconds ?? 30)
-              : undefined,
+          timeSpentSeconds: mode === "pressure" ? (currentQuestion.pressureConfig?.timerSeconds ?? 30) - (timers[currentQuestion.id] ?? 0) : undefined,
           userAnswer: candidateAnswer,
           isCorrect: correct,
           correctAnswer: currentQuestion.acceptedAnswers[0] ?? currentQuestion.sample.name,
-          chosenSample: currentQuestion.type === "identify_sample" || currentQuestion.type === "compare_samples" || currentQuestion.type === "interpret_partial_slide" || currentQuestion.type === "identify_tissue_type" || currentQuestion.type === "identify_structure" ? candidateAnswer : null,
+          chosenSample: currentQuestion.type === "identify_sample" ? candidateAnswer : null,
           sample: currentQuestion.sample
         })
       });
@@ -133,10 +134,7 @@ export function ExamEngine({ questions, mode }: ExamEngineProps) {
   };
 
   const onNextQuestion = () => {
-    if (!revealed[currentQuestion.id]) {
-      return;
-    }
-
+    if (!revealed[currentQuestion.id]) return;
     const nextIndex = currentIndex + 1;
     if (nextIndex >= questions.length) {
       setFinished(true);
@@ -147,179 +145,247 @@ export function ExamEngine({ questions, mode }: ExamEngineProps) {
       });
       return;
     }
-
     setCurrentIndex(nextIndex);
   };
 
   if (finished) {
     const percentage = Math.round((score / questions.length) * 100);
     return (
-      <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="text-2xl font-bold text-slate-900">Exam Complete</h2>
-        <p className="mt-3 text-lg text-slate-700">
-          Score: <span className="font-semibold">{score}</span> / {questions.length}
-        </p>
-        <p className="mt-1 text-sm text-slate-600">Accuracy: {percentage}%</p>
-      </section>
+      <motion.section 
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="flex flex-col items-center justify-center py-20 text-center"
+      >
+        <div className="w-24 h-24 rounded-full bg-indigo-500/10 flex items-center justify-center mb-8">
+          <CheckCircle2 size={64} className="text-indigo-400" />
+        </div>
+        <h2 className="text-4xl font-black text-white mb-4">Exam Completed!</h2>
+        <div className="flex gap-8 mb-10">
+          <div className="text-center">
+            <p className="text-xs font-black text-slate-500 uppercase tracking-widest mb-1">Total Score</p>
+            <p className="text-3xl font-black text-white">{score} / {questions.length}</p>
+          </div>
+          <div className="text-center">
+            <p className="text-xs font-black text-slate-500 uppercase tracking-widest mb-1">Accuracy</p>
+            <p className={`text-3xl font-black ${percentage >= 80 ? "text-emerald-400" : percentage >= 50 ? "text-amber-400" : "text-rose-400"}`}>{percentage}%</p>
+          </div>
+        </div>
+        <Link href="/dashboard" className="px-10 py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-2xl transition-all shadow-xl shadow-indigo-500/20">
+          Return to Analytics
+        </Link>
+      </motion.section>
     );
   }
 
   return (
-    <section className="space-y-5 rounded-xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-      <div className="flex items-center justify-between text-sm text-slate-600">
-        <span>Question {progress}</span>
-        <div className="flex items-center gap-2">
-          <span className="rounded-full bg-slate-100 px-3 py-1 font-medium text-slate-700">
-            {currentQuestion.type === "identify_sample"
-              ? "Identify sample"
-              : currentQuestion.type === "identify_tissue_type"
-              ? "Identify tissue type"
-              : currentQuestion.type === "compare_samples"
-              ? "Compare specimens"
-              : currentQuestion.type === "interpret_partial_slide"
-              ? "Interpret partial slide"
-              : currentQuestion.type === "identify_structure"
-              ? "Identify structure"
-              : currentQuestion.type === "describe_features"
-              ? "Describe features"
-              : "List features"}
-          </span>
-          <span className="rounded-full bg-slate-100 px-3 py-1 font-medium text-slate-700">{currentQuestion.difficulty}</span>
-          {mode === "pressure" ? (
-            <span className="rounded-full bg-rose-100 px-3 py-1 font-semibold text-rose-700">Time: {timerValue}s</span>
-          ) : null}
+    <div className="space-y-8">
+      <div className="flex items-center justify-between">
+        <div className="space-y-1">
+          <p className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.3em]">Module {currentIndex + 1}</p>
+          <h2 className="text-2xl font-black text-white tracking-tight">Practical Identification</h2>
         </div>
-      </div>
-
-      {hasViewedImage ? (
-        <div className="space-y-4">
-          <div className="relative rounded-lg border-2 border-slate-300 bg-slate-900 overflow-hidden h-[320px]">
-            <img
-              src={currentQuestion.image}
-              alt="Exam histology view"
-              suppressHydrationWarning
-              className={`absolute inset-0 h-full w-full object-cover transition duration-200 ${zoomClass}`}
-              style={{
-                filter: `blur(${currentQuestion.microscopy?.blurPx ?? 0}px) contrast(${currentQuestion.microscopy?.contrast ?? 1})`,
-                transform: `rotate(${currentQuestion.microscopy?.rotationDeg ?? 0}deg) scale(${currentQuestion.microscopy?.zoomLevel ?? 1})`,
-                objectPosition: currentQuestion.microscopy?.cropRect
-                  ? `${-currentQuestion.microscopy.cropRect.x}% ${-currentQuestion.microscopy.cropRect.y}%`
-                  : "center",
-                zIndex: 10
-              }}
-            />
+        <div className="flex items-center gap-4">
+          <div className="px-4 py-2 rounded-xl bg-slate-800/50 border border-slate-700 text-xs font-bold text-slate-300">
+            {progress}
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs text-slate-600 bg-slate-50 p-3 rounded-lg">
-            <div><strong>✓ الصورة واضحة:</strong> تركيز على الهيكل الأساسي</div>
-            <div><strong>✓ ليس اللون:</strong> قد تكون الصبغة مختلفة</div>
-            <div><strong>✓ الزاوية مهمة:</strong> قد تكون قطعة مائلة</div>
-          </div>
-        </div>
-      ) : (
-        <button
-          type="button"
-          onClick={() => setImageViewed((prev) => ({ ...prev, [currentQuestion.id]: true }))}
-          suppressHydrationWarning
-          className="w-full rounded-lg border border-dashed border-slate-300 bg-slate-50 px-4 py-8 text-sm font-medium text-slate-700 hover:bg-slate-100 transition"
-        >
-          🔍 عرض الصورة مرة واحدة فقط / Reveal image once
-        </button>
-      )}
-      <div>
-        <div className="space-y-3">
-          <div className="rounded-lg bg-amber-50 border border-amber-200 p-3">
-            <p className="text-xs font-semibold text-amber-900">💡 نصيحة عملية:</p>
-            <p className="text-sm text-amber-800 mt-1">ابدأ بالبحث عن الميزات الأساسية الواضحة، ثم انتقل للتفاصيل الدقيقة. لا تخدعك الزوايا الغريبة أو الإضاءة المختلفة - ركّز على البنية الأساسية.</p>
-          </div>
-          <h3 className="text-xl font-semibold text-slate-900">{currentQuestion.prompt}</h3>
-        </div>
-      </div>
-
-      {(currentQuestion.type === "identify_sample" ||
-        currentQuestion.type === "identify_tissue_type" ||
-        currentQuestion.type === "compare_samples" ||
-        currentQuestion.type === "interpret_partial_slide" ||
-        currentQuestion.type === "identify_structure") ? (
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          {currentQuestion.choices.map((choice, index) => {
-            const selected = answerValue === choice;
-            const label = String.fromCharCode(65 + index);
-            return (
-              <button
-                key={`${choice}-${index}`}
-                type="button"
-                disabled={revealed[currentQuestion.id]}
-                onClick={() => setAnswers((prev) => ({ ...prev, [currentQuestion.id]: choice }))}
-                suppressHydrationWarning
-                className={`rounded-lg border px-4 py-3 text-left text-sm font-medium transition ${
-                  selected
-                    ? "border-indigo-600 bg-indigo-50 text-indigo-900"
-                    : "border-slate-200 bg-white text-slate-700 hover:border-indigo-300"
-                } disabled:cursor-not-allowed disabled:opacity-75`}
-              >
-                <span className="mr-3 inline-flex h-7 w-7 items-center justify-center rounded-full bg-slate-100 text-xs font-semibold text-slate-700">
-                  {label}
-                </span>
-                {choice}
-              </button>
-            );
-          })}
-        </div>
-      ) : (
-        <textarea
-          value={answerValue}
-          disabled={revealed[currentQuestion.id]}
-          onChange={(event) => setAnswers((prev) => ({ ...prev, [currentQuestion.id]: event.target.value }))}
-          suppressHydrationWarning
-          className="min-h-24 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 outline-none ring-indigo-200 placeholder:text-slate-400 focus:ring-2"
-          placeholder="Type one key feature or description..."
-        />
-      )}
-
-      {revealed[currentQuestion.id] ? (
-        <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-          {feedbackByQuestion[currentQuestion.id] ? (
-            <>
-              <p
-                className={`text-sm font-semibold ${
-                  feedbackByQuestion[currentQuestion.id].status === "Correct Answer" ? "text-emerald-700" : "text-rose-700"
-                }`}
-              >
-                {feedbackByQuestion[currentQuestion.id].status}
-              </p>
-              {feedbackByQuestion[currentQuestion.id].errorClassification ? (
-                <p className="mt-1 text-xs font-medium text-slate-600">
-                  Error Type: {feedbackByQuestion[currentQuestion.id].errorClassification}
-                </p>
-              ) : null}
-              <p className="mt-2 text-sm leading-6 text-slate-700">{feedbackByQuestion[currentQuestion.id].explanation}</p>
-            </>
-          ) : (
-            <p className="text-sm text-slate-600">{loadingFeedback ? "Generating AI feedback..." : "Feedback unavailable."}</p>
+          {mode === "pressure" && (
+            <motion.div 
+              animate={timerValue <= 5 ? { 
+                scale: [1, 1.1, 1],
+                backgroundColor: ["rgba(244, 63, 94, 0.1)", "rgba(244, 63, 94, 0.3)", "rgba(244, 63, 94, 0.1)"]
+              } : {}}
+              transition={{ duration: 0.5, repeat: Infinity }}
+              className={`px-4 py-2 rounded-xl border flex items-center gap-2 text-xs font-black ${timerValue <= 5 ? "border-rose-500 text-rose-400" : "bg-indigo-500/10 border-indigo-500/20 text-indigo-400"}`}
+            >
+              <Timer size={14} className={timerValue <= 5 ? "animate-spin" : ""} />
+              <span className="tabular-nums">{timerValue}s</span>
+            </motion.div>
           )}
         </div>
-      ) : null}
-
-      <div className="flex justify-end gap-3">
-        <button
-          type="button"
-          onClick={() => onSubmitAnswer()}
-          disabled={(!answerValue.trim() && mode !== "pressure") || !!revealed[currentQuestion.id] || loadingFeedback}
-          suppressHydrationWarning
-          className="rounded-lg border border-indigo-700 bg-white px-5 py-2.5 text-sm font-semibold text-indigo-700 transition hover:bg-indigo-50 disabled:cursor-not-allowed disabled:border-slate-300 disabled:text-slate-400"
-        >
-          Check Answer
-        </button>
-        <button
-          type="button"
-          onClick={onNextQuestion}
-          disabled={!revealed[currentQuestion.id]}
-          suppressHydrationWarning
-          className="rounded-lg bg-indigo-700 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-800 disabled:cursor-not-allowed disabled:bg-slate-300"
-        >
-          {currentIndex === questions.length - 1 ? "Finish Exam" : "Next Question"}
-        </button>
       </div>
-    </section>
+
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={currentQuestion.id}
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: -20 }}
+          className="space-y-8"
+        >
+          <div className="relative group">
+            {!hasViewedImage ? (
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => setImageViewed((prev) => ({ ...prev, [currentQuestion.id]: true }))}
+                className="w-full h-[400px] rounded-[2.5rem] border-2 border-dashed border-slate-800 bg-slate-900/50 flex flex-col items-center justify-center gap-4 text-slate-500 hover:text-indigo-400 hover:border-indigo-500/30 transition-all backdrop-blur-sm"
+              >
+                <div className="p-6 bg-slate-800 rounded-3xl group-hover:bg-indigo-500/10 transition-colors">
+                  <Microscope size={48} />
+                </div>
+                <p className="text-lg font-bold">Reveal Microscope View</p>
+                <p className="text-xs uppercase tracking-widest font-black opacity-50">One-time view only in pressure mode</p>
+              </motion.button>
+            ) : (
+              <div className="relative h-[400px] w-full rounded-[2.5rem] overflow-hidden border border-slate-800 shadow-2xl bg-slate-950">
+                <motion.img
+                  initial={{ scale: 1.2, opacity: 0 }}
+                  animate={{ scale: zoomFactor, opacity: 1 }}
+                  src={currentQuestion.image}
+                  alt="Histology Specimen"
+                  className="absolute inset-0 h-full w-full object-cover"
+                  style={{
+                    filter: `blur(${currentQuestion.microscopy?.blurPx ?? 0}px) contrast(${currentQuestion.microscopy?.contrast ?? 1})`,
+                    transform: `rotate(${currentQuestion.microscopy?.rotationDeg ?? 0}deg) scale(${zoomFactor})`,
+                    objectPosition: currentQuestion.microscopy?.cropRect
+                      ? `${-currentQuestion.microscopy.cropRect.x}% ${-currentQuestion.microscopy.cropRect.y}%`
+                      : "center",
+                  }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/50 to-transparent pointer-events-none" />
+                <div className="absolute bottom-6 left-6 right-6 flex justify-between items-end">
+                  <div className="px-4 py-2 rounded-xl bg-black/60 backdrop-blur-md border border-white/10 text-[10px] font-black text-white/80 uppercase tracking-widest">
+                    Live Micro-View
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="space-y-6">
+              <div className="p-6 rounded-3xl bg-indigo-500/5 border border-indigo-500/10">
+                <div className="flex items-center gap-3 mb-4 text-indigo-400">
+                  <Lightbulb size={20} />
+                  <span className="text-xs font-black uppercase tracking-widest">Clinical Hint</span>
+                </div>
+                <p className="text-indigo-100/70 text-sm leading-relaxed font-medium">
+                  {currentQuestion.prompt}
+                </p>
+              </div>
+
+              {currentQuestion.choices.length > 0 ? (
+                <div className="grid grid-cols-1 gap-3">
+                  {currentQuestion.choices.map((choice, i) => (
+                    <motion.button
+                      key={i}
+                      whileHover={{ x: 10 }}
+                      disabled={revealed[currentQuestion.id]}
+                      onClick={() => setAnswers((prev) => ({ ...prev, [currentQuestion.id]: choice }))}
+                      className={`p-5 rounded-2xl border text-left transition-all flex items-center justify-between ${
+                        answers[currentQuestion.id] === choice 
+                        ? "bg-indigo-600 border-indigo-500 text-white shadow-lg shadow-indigo-500/20" 
+                        : "bg-slate-900/50 border-slate-800 text-slate-400 hover:border-slate-700"
+                      } disabled:opacity-50`}
+                    >
+                      <span className="font-bold">{choice}</span>
+                      <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${answers[currentQuestion.id] === choice ? "border-white bg-white/20" : "border-slate-700"}`}>
+                        {answers[currentQuestion.id] === choice && <div className="w-2 h-2 rounded-full bg-white" />}
+                      </div>
+                    </motion.button>
+                  ))}
+                </div>
+              ) : (
+                <textarea
+                  disabled={revealed[currentQuestion.id]}
+                  value={answers[currentQuestion.id] ?? ""}
+                  onChange={(e) => setAnswers(prev => ({ ...prev, [currentQuestion.id]: e.target.value }))}
+                  placeholder="Identify specimen or features..."
+                  className="w-full h-32 p-6 rounded-3xl bg-slate-900/50 border border-slate-800 text-white placeholder:text-slate-600 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500/50 outline-none transition-all resize-none font-medium"
+                />
+              )}
+            </div>
+
+            <div className="space-y-6">
+              {revealed[currentQuestion.id] && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className={`p-8 rounded-[2rem] border h-full flex flex-col ${
+                    isCorrectAnswer(currentQuestion, answers[currentQuestion.id] ?? "") 
+                    ? "bg-emerald-500/5 border-emerald-500/20" 
+                    : "bg-rose-500/5 border-rose-500/20"
+                  }`}
+                >
+                  <div className="flex items-center gap-4 mb-6">
+                    {isCorrectAnswer(currentQuestion, answers[currentQuestion.id] ?? "") ? (
+                      <div className="p-3 bg-emerald-500/10 text-emerald-400 rounded-2xl">
+                        <CheckCircle2 size={24} />
+                      </div>
+                    ) : (
+                      <div className="p-3 bg-rose-500/10 text-rose-400 rounded-2xl">
+                        <XCircle size={24} />
+                      </div>
+                    )}
+                    <div>
+                      <h4 className="text-lg font-black text-white">
+                        {isCorrectAnswer(currentQuestion, answers[currentQuestion.id] ?? "") ? "Excellent!" : "Not quite..."}
+                      </h4>
+                      <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Diagnostic Feedback</p>
+                    </div>
+                  </div>
+
+                  {loadingFeedback ? (
+                    <div className="flex flex-col items-center justify-center flex-grow gap-4 text-slate-500">
+                      <Loader2 className="animate-spin" />
+                      <p className="text-xs font-black uppercase tracking-widest">Analyzing diagnosis...</p>
+                    </div>
+                  ) : feedbackByQuestion[currentQuestion.id] ? (
+                    <div className="space-y-4">
+                      <p className="text-slate-300 leading-relaxed font-medium">
+                        {feedbackByQuestion[currentQuestion.id].explanation}
+                      </p>
+                      {!isCorrectAnswer(currentQuestion, answers[currentQuestion.id] ?? "") && (
+                        <div className="pt-4 border-t border-rose-500/10">
+                          <p className="text-[10px] font-black text-rose-400 uppercase tracking-widest mb-1">Expected Answer</p>
+                          <p className="text-white font-bold">{currentQuestion.acceptedAnswers[0]}</p>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-3 text-slate-500 py-10">
+                      <AlertCircle size={20} />
+                      <p className="text-sm font-medium italic">Feedback system offline.</p>
+                    </div>
+                  )}
+                </motion.div>
+              )}
+              
+              {!revealed[currentQuestion.id] && (
+                <div className="h-full flex flex-col justify-center items-center text-center p-10 border border-dashed border-slate-800 rounded-[2rem] bg-slate-900/20">
+                  <AlertCircle size={32} className="text-slate-700 mb-4" />
+                  <p className="text-slate-500 font-bold text-sm">Submit your answer to see <br/> diagnostic breakdown.</p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="flex justify-end pt-4">
+            {!revealed[currentQuestion.id] ? (
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => onSubmitAnswer()}
+                disabled={!answerValue.trim() && mode !== "pressure"}
+                className="px-10 py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-black uppercase tracking-widest rounded-2xl transition-all shadow-xl shadow-indigo-500/20 disabled:opacity-50 disabled:shadow-none"
+              >
+                Verify Diagnosis
+              </motion.button>
+            ) : (
+              <motion.button
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                whileHover={{ gap: "2rem" }}
+                onClick={onNextQuestion}
+                className="px-10 py-4 bg-slate-800 hover:bg-slate-700 text-white font-black uppercase tracking-widest rounded-2xl transition-all flex items-center gap-4"
+              >
+                {currentIndex === questions.length - 1 ? "Complete Exam" : "Next Specimen"}
+                <ArrowRight size={18} />
+              </motion.button>
+            )}
+          </div>
+        </motion.div>
+      </AnimatePresence>
+    </div>
   );
 }
