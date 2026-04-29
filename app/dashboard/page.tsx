@@ -89,6 +89,21 @@ export default function DashboardPage() {
               </p>
             </div>
           </motion.div>
+
+          <motion.div 
+            whileHover={{ scale: 1.05 }}
+            className="flex items-center gap-4 px-6 py-4 rounded-3xl bg-indigo-500/10 border border-indigo-500/20 backdrop-blur-xl shadow-2xl"
+          >
+            <div className="p-3 bg-indigo-500/20 text-indigo-400 rounded-2xl">
+              <Target size={24} />
+            </div>
+            <div>
+              <p className="text-[10px] text-slate-500 uppercase font-black tracking-widest mb-0.5">Syllabus Mastery</p>
+              <p className="text-lg font-black text-white">
+                {Math.round(((data?.overall?.strongSamplesCount ?? 0) / (data?.sampleMastery?.length || 1)) * 100)}% <span className="text-xs font-medium text-slate-400 ml-1">complete</span>
+              </p>
+            </div>
+          </motion.div>
         </motion.header>
 
         {/* Action Grid */}
