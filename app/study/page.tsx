@@ -18,7 +18,7 @@ function ComparisonCard({ sample, isComparison = false, opposingSample }: { samp
         <p className="text-slate-400 text-sm font-medium line-clamp-2">{sample.description}</p>
       </div>
       
-      <div className="grid grid-cols-2 bg-black h-48 border-b border-white/5">
+      <div className="grid grid-cols-2 bg-black h-56 border-b border-white/5 relative">
         <div className="relative overflow-hidden group">
           <img src={sample.imageUrl || sample.imageUrls?.[0]} alt={sample.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
           <div className="absolute inset-0 bg-black/20" />
@@ -27,31 +27,60 @@ function ComparisonCard({ sample, isComparison = false, opposingSample }: { samp
         <div className="relative overflow-hidden border-l border-white/10 group">
           <img src={microImage} alt={`${sample.title} Micro`} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
           <div className="absolute inset-0 bg-indigo-500/10" />
+          
+          {/* VIRTUAL LASER POINTER / ANNOTATION */}
+          <motion.div 
+            animate={{ scale: [1, 1.2, 1], opacity: [0.5, 1, 0.5] }}
+            transition={{ duration: 2, repeat: Infinity }}
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 bg-indigo-500 rounded-full shadow-[0_0_20px_rgba(99,102,241,0.8)] border-2 border-white pointer-events-none"
+          />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 translate-y-4 px-3 py-1.5 rounded-xl bg-indigo-600/90 backdrop-blur-md border border-white/20 text-[10px] font-black text-white whitespace-nowrap shadow-2xl pointer-events-none">
+            <span className="flex flex-col items-center">
+              <span>Diagnostic Key Feature</span>
+              <span className="text-[8px] opacity-70 font-arabic">السمة التشخيصية الفاصلة</span>
+            </span>
+          </div>
+
           <span className="absolute bottom-3 left-3 text-[8px] font-black uppercase text-indigo-400 bg-black/40 px-2 py-1 rounded-md">Micro-View</span>
         </div>
       </div>
 
       <div className="p-8 space-y-6 flex-1">
         <div className="space-y-4">
-          <h4 className="text-xs font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
-            <Lightbulb size={14} className="text-indigo-400" />
-            Diagnostic Differentiator
-          </h4>
-          <div className="p-4 rounded-2xl bg-white/5 border border-white/10 text-sm text-indigo-200 font-bold leading-relaxed italic">
-            "{opposingSample ? `Unlike ${opposingSample.title}, this specimen shows ${sample.practicalTips?.[0].toLowerCase()}.` : sample.practicalTips?.[0]}"
+          <div className="flex items-center justify-between">
+            <h4 className="text-xs font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
+              <Lightbulb size={14} className="text-indigo-400" />
+              Diagnostic Differentiator
+            </h4>
+            <span className="text-[10px] font-bold text-indigo-500/60 font-arabic">المؤشر التشخيصي الفارق</span>
+          </div>
+          <div className="p-5 rounded-2xl bg-indigo-500/5 border border-indigo-500/10 text-sm text-indigo-200 font-bold leading-relaxed italic">
+            <div className="mb-2">
+              "{opposingSample ? `Unlike ${opposingSample.title}, this specimen shows ${sample.practicalTips?.[0].toLowerCase()}.` : sample.practicalTips?.[0]}"
+            </div>
+            {sample.titleAr && (
+              <div className="text-xs text-indigo-400/80 font-arabic text-right border-t border-indigo-500/10 pt-2">
+                على عكس {opposingSample?.titleAr || opposingSample?.title || "العينة الأخرى"}، تتميز هذه العينة بـ {sample.practicalTips?.[0]}
+              </div>
+            )}
           </div>
         </div>
 
         <div className="space-y-4">
-          <h4 className="text-xs font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
-            <Sparkles size={14} className="text-emerald-400" />
-            Cellular Detail
-          </h4>
+          <div className="flex items-center justify-between">
+            <h4 className="text-xs font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
+              <Sparkles size={14} className="text-emerald-400" />
+              Cellular Detail
+            </h4>
+            <span className="text-[10px] font-bold text-emerald-500/60 font-arabic">التفاصيل الخلوية</span>
+          </div>
           <ul className="space-y-3">
-            {sample.practicalTips?.slice(1, 3).map((tip, i) => (
+            {sample.practicalTips?.slice(1, 4).map((tip, i) => (
               <li key={i} className="flex gap-3 text-sm text-slate-300 font-semibold leading-relaxed">
                 <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0 mt-1.5" />
-                {tip}
+                <div className="flex flex-col gap-1">
+                  <span>{tip}</span>
+                </div>
               </li>
             ))}
           </ul>
