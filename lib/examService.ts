@@ -100,16 +100,26 @@ function categoryLabel(name: string) {
   return "Mixed histology";
 }
 
-function buildMicroscopyConfig(variation: { type: VariationType }) {
-  const partialView = Math.random() < 0.3;
-  const zoomLevel = (Math.random() < 0.2 ? 3 : Math.random() < 0.5 ? 2 : 1) as 1 | 2 | 3;
-  // Reduce blur to keep features visible
-  const blurPx = partialView ? 0.5 + Math.random() * 1.5 : Math.random() * 0.5;
-  const contrast = Number((0.85 + Math.random() * 0.3).toFixed(2));
-  const rotationDeg = Math.round((Math.random() - 0.5) * 15);
+function buildMicroscopyConfig(variation: { image: string, type: VariationType }) {
+  const imgLower = variation.image.toLowerCase();
+  const isDual = imgLower.includes("vs") || 
+                 imgLower.includes("compare") ||
+                 imgLower.includes("&") ||
+                 imgLower.includes("spinal") || 
+                 imgLower.includes("esophagus") || 
+                 imgLower.includes("stomach") || 
+                 imgLower.includes("ileum");
   
-  // Disable aggressive random cropping to ensure key diagnostic features are not cut off
-  const cropRect = undefined;
+  // If it's a dual image, we crop 50% width.
+  // We use a deterministic approach based on the image path to decide which side to show.
+  const useRightSide = variation.image.length % 2 === 0;
+  const cropRect = isDual ? { x: useRightSide ? 50 : 0, y: 0, width: 50, height: 100 } : undefined;
+  
+  const partialView = Math.random() < 0.2;
+  const zoomLevel = (Math.random() < 0.1 ? 3 : Math.random() < 0.3 ? 2 : 1) as 1 | 2 | 3;
+  const blurPx = Math.random() * 0.3;
+  const contrast = 1;
+  const rotationDeg = 0;
 
   return { zoomLevel, partialView, blurPx, contrast, rotationDeg, cropRect };
 }
