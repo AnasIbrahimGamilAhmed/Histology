@@ -359,6 +359,43 @@ export function ExamEngine({ questions, mode }: ExamEngineProps) {
                     </div>
                   ) : feedbackByQuestion[currentQuestion.id] ? (
                     <div className="space-y-4">
+                      {/* Image Section */}
+                      <div className="relative group rounded-[2.5rem] overflow-hidden border border-white/10 bg-black shadow-2xl">
+                        <img 
+                          src={currentQuestion.image} 
+                          alt="Exam Specimen" 
+                          className="w-full h-[350px] md:h-[500px] object-contain transition-transform duration-700 group-hover:scale-105"
+                        />
+                        
+                        {/* Dynamic Pointer for "Identify Part" questions */}
+                        {currentQuestion.type === "identify_structure" && (
+                          <motion.div 
+                            initial={{ scale: 0, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 pointer-events-none"
+                          >
+                            <div className="relative">
+                              <motion.div 
+                                animate={{ scale: [1, 1.5, 1], opacity: [0.5, 0.2, 0.5] }}
+                                transition={{ duration: 2, repeat: Infinity }}
+                                className="w-16 h-16 bg-rose-500 rounded-full blur-xl"
+                              />
+                              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+                                <div className="w-4 h-4 bg-white rounded-full shadow-[0_0_20px_rgba(255,255,255,0.8)] border-2 border-rose-500" />
+                                <motion.div 
+                                  animate={{ rotate: 360 }}
+                                  transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+                                  className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 border border-white/40 rounded-full border-dashed"
+                                />
+                              </div>
+                            </div>
+                          </motion.div>
+                        )}
+
+                        <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black via-black/60 to-transparent backdrop-blur-sm">
+                          <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em]">Microscopic Field | High Magnification</p>
+                        </div>
+                      </div>
                       <p className="text-slate-300 leading-relaxed font-medium">
                         {feedbackByQuestion[currentQuestion.id].explanation}
                       </p>
