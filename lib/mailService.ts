@@ -9,10 +9,13 @@ export async function sendVerificationEmail(email: string, code: string) {
     console.warn("SENDGRID_API_KEY not found. Email not sent.");
     return;
   }
+  
+  console.log(`Sending email to ${email}. API Key starts with: ${process.env.SENDGRID_API_KEY.substring(0, 5)}...`);
+  console.log(`Using sender: ${process.env.SENDGRID_FROM_EMAIL || 'no-reply@histopro.edu.eg'}`);
 
   const msg = {
     to: email,
-    from: 'no-reply@histopro.edu.eg', // Change to your verified sender
+    from: process.env.SENDGRID_FROM_EMAIL || 'no-reply@histopro.edu.eg', // Must be your verified sender in SendGrid
     subject: 'Your HistoPro Verification Code',
     text: `Your verification code is: ${code}`,
     html: `
