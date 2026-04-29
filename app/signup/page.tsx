@@ -67,14 +67,14 @@ export default async function SignupPage({ searchParams }: SignupPageProps) {
               {error === "EmailExists"
                 ? "Email already registered. Please use a different email."
                 : error === "UniversityIdExists"
-                ? "University ID already exists. Use a different ID."
-                : error === "PasswordMismatch"
-                ? "Passwords do not match."
-                : error === "PasswordTooShort"
-                ? "Password is too short. Use at least 6 characters."
-                : error === "MissingFields"
-                ? "Please complete all required fields."
-                : "Registration failed. Please try again."}
+                  ? "University ID already exists. Use a different ID."
+                  : error === "PasswordMismatch"
+                    ? "Passwords do not match."
+                    : error === "PasswordTooShort"
+                      ? "Password is too short. Use at least 6 characters."
+                      : error === "MissingFields"
+                        ? "Please complete all required fields."
+                        : "Registration failed. Please try again."}
             </div>
           )}
 

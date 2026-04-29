@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { histologyData, TissueSection } from "@/lib/data/histologyData";
 import Link from "next/link";
-import { ChevronRight, Microscope, Lightbulb, BookOpen, Brain, ArrowLeft, AlertOctagon, Sparkles, Search, Languages } from "lucide-react";
+import { ChevronRight, Microscope, Lightbulb, BookOpen, Brain, ArrowLeft, AlertOctagon, Sparkles, Search, Languages, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import MicroscopeLoader from "@/components/MicroscopeLoader";
 import StudyGuideExporter from "@/components/StudyGuideExporter";
@@ -124,6 +124,7 @@ function StudyContent() {
   const [searchQuery, setSearchQuery] = useState("");
   const [comparisonSample, setComparisonSample] = useState<TissueSection | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [showExtraStudy, setShowExtraStudy] = useState(false);
 
   useEffect(() => {
     if (categoryId) {
@@ -456,6 +457,27 @@ function StudyContent() {
                               </li>
                             ))}
                           </ul>
+
+                          {/* Enhanced Learning Button */}
+                          {selectedSection.extraStudy && (
+                            <motion.button
+                              whileHover={{ scale: 1.02 }}
+                              whileTap={{ scale: 0.98 }}
+                              onClick={() => setShowExtraStudy(true)}
+                              className="mt-12 w-full p-6 rounded-[2.5rem] bg-indigo-600 hover:bg-indigo-500 text-white flex items-center justify-between group shadow-2xl shadow-indigo-500/20 transition-all border border-white/10"
+                            >
+                              <div className="flex items-center gap-4 text-left">
+                                <div className="p-3 bg-white/10 rounded-2xl group-hover:rotate-12 transition-transform">
+                                  <Sparkles size={24} />
+                                </div>
+                                <div>
+                                  <p className="font-black text-sm tracking-tight">{selectedSection.extraStudy.buttonLabel}</p>
+                                  <p className="text-[10px] opacity-70 font-black uppercase tracking-widest">{selectedSection.extraStudy.buttonLabelAr}</p>
+                                </div>
+                              </div>
+                              <ChevronRight size={20} />
+                            </motion.button>
+                          )}
                         </motion.div>
 
                         {/* Common Confusion */}
@@ -483,16 +505,22 @@ function StudyContent() {
                             <div className="mt-8 flex flex-col sm:flex-row items-center gap-4">
                               <button 
                                 onClick={() => {
+                                  // 1. Try to find specimen in confusion warning text
                                   const match = selectedSection.confusionWarning?.match(/with\s+([A-Za-z\s-]+)/i);
-                                  if (match) {
-                                    const found = findSampleByName(match[1].trim());
-                                    if (found) setComparisonSample(found);
-                                  } else {
-                                    // Fallback search
+                                  let found = match ? findSampleByName(match[1].trim()) : null;
+                                  
+                                  // 2. Fallback: Search all words in warning
+                                  if (!found) {
                                     const words = selectedSection.confusionWarning?.split(" ") || [];
-                                    const found = words.map(w => findSampleByName(w)).find(f => f !== null);
-                                    if (found) setComparisonSample(found);
+                                    found = words.map(w => findSampleByName(w)).find(f => f !== null) || null;
                                   }
+
+                                  // 3. Category Fallback: Find any sibling in the same category
+                                  if (!found && activeParent?.subSections) {
+                                    found = activeParent.subSections.find(s => s.id !== selectedSection.id) || null;
+                                  }
+
+                                  if (found) setComparisonSample(found);
                                 }}
                                 className="flex-1 py-4 px-6 rounded-2xl bg-indigo-600/20 border border-indigo-500/30 text-indigo-400 font-black uppercase tracking-widest text-xs hover:bg-indigo-600 hover:text-white transition-all shadow-xl shadow-indigo-500/5 flex items-center justify-center gap-3"
                               >
@@ -511,8 +539,73 @@ function StudyContent() {
               </section>
             </motion.div>
           )}
-        </AnimatePresence>
-      </main>
+      </AnimatePresence>
+
+      {/* ENHANCED LEARNING MODAL (Layers, etc) */}
+      <AnimatePresence>
+        {showExtraStudy && selectedSection?.extraStudy && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[110] bg-[#020617]/95 backdrop-blur-3xl flex items-center justify-center p-6 lg:p-12"
+          >
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0, y: 30 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 30 }}
+              className="max-w-6xl w-full bg-slate-900/50 rounded-[4rem] border border-white/10 shadow-3xl overflow-hidden flex flex-col lg:grid lg:grid-cols-2"
+            >
+              <div className="relative group overflow-hidden bg-black flex items-center justify-center p-12">
+                <img 
+                  src={selectedSection.extraStudy.imageUrl} 
+                  alt={selectedSection.extraStudy.title}
+                  className="max-w-full max-h-[70vh] object-contain transition-transform duration-1000 group-hover:scale-110"
+                />
+                <div className="absolute top-8 left-8 flex items-center gap-3 px-6 py-2 rounded-full bg-indigo-600/20 border border-indigo-500/30 backdrop-blur-md text-[10px] font-black uppercase tracking-widest text-indigo-400">
+                  <Sparkles size={14} /> Enhanced View
+                </div>
+              </div>
+
+              <div className="p-12 lg:p-20 flex flex-col justify-center bg-slate-900/40 backdrop-blur-md border-l border-white/5">
+                <div className="flex justify-end mb-8">
+                  <button 
+                    onClick={() => setShowExtraStudy(false)}
+                    className="p-4 rounded-2xl bg-white/5 hover:bg-rose-500/20 hover:text-rose-400 text-slate-400 transition-all"
+                  >
+                    <X size={24} />
+                  </button>
+                </div>
+                
+                <header className="mb-12">
+                  <h2 className="text-4xl font-black text-white tracking-tighter mb-4">{selectedSection.extraStudy.title}</h2>
+                  {selectedSection.extraStudy.titleAr && (
+                    <p className="text-2xl font-black text-indigo-500/60 mb-8">{selectedSection.extraStudy.titleAr}</p>
+                  )}
+                </header>
+
+                <div className="space-y-8">
+                  <p className="text-slate-300 text-lg leading-relaxed font-medium">
+                    {selectedSection.extraStudy.content}
+                  </p>
+                  {selectedSection.extraStudy.contentAr && (
+                    <p className="text-slate-500 text-right text-sm font-bold border-r-4 border-indigo-500/20 pr-6 leading-relaxed">
+                      {selectedSection.extraStudy.contentAr}
+                    </p>
+                  )}
+                </div>
+
+                <button 
+                  onClick={() => setShowExtraStudy(false)}
+                  className="mt-16 w-full py-5 rounded-2xl bg-white text-black font-black uppercase tracking-[0.2em] hover:bg-indigo-50 transition-all shadow-xl shadow-white/5"
+                >
+                  Return to Atlas
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
