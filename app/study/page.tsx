@@ -549,48 +549,48 @@ function StudyContent() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[110] bg-[#020617]/95 backdrop-blur-3xl flex items-center justify-center p-6 lg:p-12"
+            className="fixed inset-0 z-[110] bg-[#020617]/95 backdrop-blur-3xl flex items-start justify-center p-4 lg:p-12 overflow-y-auto py-10 lg:py-20"
           >
             <motion.div 
               initial={{ scale: 0.9, opacity: 0, y: 30 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.9, opacity: 0, y: 30 }}
-              className="max-w-6xl w-full bg-slate-900/50 rounded-[4rem] border border-white/10 shadow-3xl overflow-hidden flex flex-col lg:grid lg:grid-cols-2"
+              className="max-w-6xl w-full bg-slate-900/50 rounded-[2.5rem] lg:rounded-[4rem] border border-white/10 shadow-3xl overflow-hidden flex flex-col lg:grid lg:grid-cols-2 min-h-min"
             >
-              <div className="relative group overflow-hidden bg-black flex items-center justify-center p-12">
+              <div className="relative group overflow-hidden bg-black flex items-center justify-center p-6 lg:p-12 aspect-square lg:aspect-auto">
                 <img 
                   src={selectedSection.extraStudy.imageUrl} 
                   alt={selectedSection.extraStudy.title}
-                  className="max-w-full max-h-[70vh] object-contain transition-transform duration-1000 group-hover:scale-110"
+                  className="max-w-full max-h-full lg:max-h-[70vh] object-contain transition-transform duration-1000 group-hover:scale-110"
                 />
-                <div className="absolute top-8 left-8 flex items-center gap-3 px-6 py-2 rounded-full bg-indigo-600/20 border border-indigo-500/30 backdrop-blur-md text-[10px] font-black uppercase tracking-widest text-indigo-400">
+                <div className="absolute top-6 left-6 lg:top-8 lg:left-8 flex items-center gap-3 px-4 lg:px-6 py-2 rounded-full bg-indigo-600/20 border border-indigo-500/30 backdrop-blur-md text-[8px] lg:text-[10px] font-black uppercase tracking-widest text-indigo-400">
                   <Sparkles size={14} /> Enhanced View
                 </div>
               </div>
 
-              <div className="p-12 lg:p-20 flex flex-col justify-center bg-slate-900/40 backdrop-blur-md border-l border-white/5">
-                <div className="flex justify-end mb-8">
+              <div className="p-8 lg:p-20 flex flex-col justify-center bg-slate-900/40 backdrop-blur-md border-t lg:border-t-0 lg:border-l border-white/5">
+                <div className="flex justify-end mb-6 lg:mb-8">
                   <button 
                     onClick={() => setShowExtraStudy(false)}
-                    className="p-4 rounded-2xl bg-white/5 hover:bg-rose-500/20 hover:text-rose-400 text-slate-400 transition-all"
+                    className="p-3 lg:p-4 rounded-2xl bg-white/5 hover:bg-rose-500/20 hover:text-rose-400 text-slate-400 transition-all"
                   >
                     <X size={24} />
                   </button>
                 </div>
                 
-                <header className="mb-12">
-                  <h2 className="text-4xl font-black text-white tracking-tighter mb-4">{selectedSection.extraStudy.title}</h2>
+                <header className="mb-8 lg:mb-12">
+                  <h2 className="text-2xl lg:text-4xl font-black text-white tracking-tighter mb-4">{selectedSection.extraStudy.title}</h2>
                   {selectedSection.extraStudy.titleAr && (
-                    <p className="text-2xl font-black text-indigo-500/60 mb-8">{selectedSection.extraStudy.titleAr}</p>
+                    <p className="text-lg lg:text-2xl font-black text-indigo-500/60 mb-6 lg:mb-8">{selectedSection.extraStudy.titleAr}</p>
                   )}
                 </header>
 
-                <div className="space-y-8">
-                  <p className="text-slate-300 text-lg leading-relaxed font-medium">
+                <div className="space-y-6 lg:space-y-8">
+                  <p className="text-slate-300 text-base lg:text-lg leading-relaxed font-medium">
                     {selectedSection.extraStudy.content}
                   </p>
                   {selectedSection.extraStudy.contentAr && (
-                    <p className="text-slate-500 text-right text-sm font-bold border-r-4 border-indigo-500/20 pr-6 leading-relaxed">
+                    <p className="text-slate-500 text-right text-xs lg:text-sm font-bold border-r-4 border-indigo-500/20 pr-4 lg:pr-6 leading-relaxed">
                       {selectedSection.extraStudy.contentAr}
                     </p>
                   )}
@@ -598,7 +598,7 @@ function StudyContent() {
 
                 <button 
                   onClick={() => setShowExtraStudy(false)}
-                  className="mt-16 w-full py-5 rounded-2xl bg-white text-black font-black uppercase tracking-[0.2em] hover:bg-indigo-50 transition-all shadow-xl shadow-white/5"
+                  className="mt-10 lg:mt-16 w-full py-4 lg:py-5 rounded-2xl bg-white text-black font-black uppercase tracking-[0.2em] hover:bg-indigo-50 transition-all shadow-xl shadow-white/5 text-sm lg:text-base"
                 >
                   Return to Tree
                 </button>
