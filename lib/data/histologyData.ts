@@ -202,7 +202,9 @@ export const histologyData: TissueSection[] = [
         title: "Elastic Connective Tissue",
         description: "High concentration of elastic fibers allowing stretch.",
         practicalTips: ["Dark, wavy, parallel elastic fibers.", "Found in walls of large arteries (Aorta)."],
-        confusionWarning: "Confused with Dense Regular CT, but elastic fibers are much darker (often stained black/dark purple) and more wavy/coiled.",
+        practicalTipsAr: ["ألياف مرنة داكنة، مموجة، ومتوازية.", "توجد في جدران الشرايين الكبيرة (الأورطى)."],
+        confusionWarning: "Often confused with Dense Regular CT, but elastic fibers are much darker (often stained black/dark purple) and more wavy/coiled.",
+        confusionWarningAr: "تتشابه مع النسيج الضام الكثيف المنتظم، لكن الألياف المرنة أغمق بكثير ومموجة أكثر.",
         imageUrl: "/images/elastic connective tissue/elastic connective.png",
         imageUrls: ["/images/elastic connective tissue/elastic connective.png", "/images/elastic connective tissue/elastic connective micro.png"]
       },
@@ -211,7 +213,9 @@ export const histologyData: TissueSection[] = [
         title: "Hyaline Cartilage",
         description: "Most common. Glassy matrix.",
         practicalTips: ["Matrix looks smooth and uniform (fibers are invisible).", "Found in trachea rings and joint surfaces."],
+        practicalTipsAr: ["المادة الخلالية تبدو ناعمة ومنتظمة (الألياف غير مرئية).", "توجد في حلقات القصبة الهوائية وأسطح المفاصل."],
         confusionWarning: "Don't confuse with Elastic Cartilage. Hyaline has a clear 'glassy' pink/purple background.",
+        confusionWarningAr: "لا تخلط بينه وبين الغضروف المرن. الغضروف الزجاجي له خلفية 'زجاجية' صافية.",
         imageUrl: "/images/hyaline cartilage/hyaline cartilage.png",
         imageUrls: ["/images/hyaline cartilage/hyaline cartilage.png", "/images/hyaline cartilage/hyaline cartilage micro.png"]
       },
@@ -220,7 +224,9 @@ export const histologyData: TissueSection[] = [
         title: "Elastic Cartilage",
         description: "Contains prominent elastic fibers.",
         practicalTips: ["Dark, branching elastic fibers visible in the matrix.", "Found in the ear pinna and epiglottis."],
-        confusionWarning: "Looks like hyaline but with a dirty/hairy background due to the dark elastic fibers.",
+        practicalTipsAr: ["ألياف مرنة داكنة ومتفرعة مرئية في المادة الخلالية.", "يوجد في صيوان الأذن ولسان المزمار."],
+        confusionWarning: "Looks like hyaline but with a dirty/hairy background due to the dark elastic fibers. Compare with Hyaline Cartilage.",
+        confusionWarningAr: "يشبه الزجاجي لكن بخلفية 'متسخة' بسبب الألياف الداكنة. قارنه مع الغضروف الزجاجي.",
         imageUrl: "/images/elastic cartilage/elastic cartilage.png",
         imageUrls: ["/images/elastic cartilage/elastic cartilage.png", "/images/elastic cartilage/elastic cartilage micro.png"]
       },
@@ -295,7 +301,13 @@ export const histologyData: TissueSection[] = [
           "White matter surrounds the grey matter.",
           "Central canal in the exact middle of the grey matter."
         ],
-        confusionWarning: "Look specifically for the internal butterfly shape (grey matter).",
+        practicalTipsAr: [
+          "مادة رمادية مركزية على شكل حرف 'H' أو فراشة.",
+          "المادة البيضاء تحيط بالمادة الرمادية.",
+          "قناة مركزية في منتصف المادة الرمادية تماماً."
+        ],
+        confusionWarning: "Look specifically for the internal butterfly shape (grey matter). Compare with Sciatic Nerve.",
+        confusionWarningAr: "ابحث عن شكل الفراشة الداخلي. قارنه مع العصب الوركي.",
         imageUrl: "/images/spinal cord/spinal cord.png",
         imageUrls: ["/images/spinal cord/spinal cord.png", "/images/spinal cord/spinal cord micro.png"],
       },
@@ -334,7 +346,13 @@ export const histologyData: TissueSection[] = [
           "Multinucleated, with nuclei pushed to the periphery.",
           "Distinct transverse striations."
         ],
-        confusionWarning: "Skeletal fibers NEVER branch and have multiple peripheral nuclei.",
+        practicalTipsAr: [
+          "ألياف طويلة جداً، أسطوانية، وغير متفرعة.",
+          "متعددة الأنوية، والأنوية مدفوعة نحو الأطراف.",
+          "تخطيطات عرضية واضحة (Striations)."
+        ],
+        confusionWarning: "Skeletal fibers NEVER branch and have multiple peripheral nuclei. Compare with Cardiac Muscle.",
+        confusionWarningAr: "الألياف الهيكلية لا تتفرع أبداً ولها أنوية طرفية. قارنها مع العضلة القلبية.",
         imageUrl: "/images/skeletal muscle/skeletal muscle.png",
         imageUrls: ["/images/skeletal muscle/skeletal muscle.png", "/images/skeletal muscle/skeletal muscle  micro.png"],
       },
@@ -347,7 +365,13 @@ export const histologyData: TissueSection[] = [
           "Usually have a single, centrally located nucleus.",
           "Key feature: Intercalated discs."
         ],
-        confusionWarning: "Look specifically for the dark vertical lines (Intercalated discs).",
+        practicalTipsAr: [
+          "ألياف أسطوانية ولكنها متفرعة.",
+          "عادة تحتوي على نواة واحدة مركزية الموقع.",
+          "الميزة الأساسية: الأقراص البينية (Intercalated discs)."
+        ],
+        confusionWarning: "Look specifically for the dark vertical lines (Intercalated discs). Compare with Smooth Muscle.",
+        confusionWarningAr: "ابحث عن الخطوط الرأسية الداكنة (الأقراص البينية). قارنها مع العضلة الملساء.",
         imageUrl: "/images/cardiac muscle structre/cardiac muscular tissue.png",
         imageUrls: ["/images/cardiac muscle structre/cardiac muscular tissue.png", "/images/cardiac muscle structre/cardiac micro.png"],
       },
@@ -360,7 +384,13 @@ export const histologyData: TissueSection[] = [
           "Single, centrally located oval/cigar-shaped nucleus.",
           "No striations."
         ],
-        confusionWarning: "Smooth muscle has nuclei INSIDE the pink fibers.",
+        practicalTipsAr: [
+          "ألياف مغزلية الشكل (مدببة عند الأطراف).",
+          "نواة واحدة مركزية بيضاوية تشبه 'السيجار'.",
+          "لا توجد تخطيطات."
+        ],
+        confusionWarning: "Smooth muscle has nuclei INSIDE the pink fibers. Compare with Dense Regular CT.",
+        confusionWarningAr: "العضلات الملساء لها أنوية داخل الألياف الوردية. قارنها مع النسيج الضام الكثيف.",
         imageUrl: "/images/smooth muscle/muscular muscle.png",
         imageUrls: ["/images/smooth muscle/muscular muscle.png", "/images/smooth muscle/smooth micro.png"]
       }
