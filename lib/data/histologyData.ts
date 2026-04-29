@@ -112,8 +112,8 @@ export const histologyData: TissueSection[] = [
         extraStudy: {
           title: "Epidermal Layer Analysis",
           titleAr: "تحليل طبقات البشرة",
-          buttonLabel: "View Skin Layers Schematic",
-          buttonLabelAr: "عرض مخطط طبقات الجلد",
+          buttonLabel: "Layers Analysis",
+          buttonLabelAr: "تحليل الطبقات",
           imageUrl: "/images/keratized stratified/layers.png",
           content: "The epidermis of thick skin (keratinized) consists of five distinct layers: 1. Stratum Basale (deepest, mitotic), 2. Stratum Spinosum (prickle cell layer), 3. Stratum Granulosum (keratohyalin granules), 4. Stratum Lucidum (clear layer found only in thick skin), 5. Stratum Corneum (topmost, dead flattened keratinized cells).",
           contentAr: "تتكون البشرة في الجلد السميك (المقرن) من خمس طبقات متمايزة: 1. الطبقة القاعدة (الأعمق، انقسامية)، 2. الطبقة الشائكة، 3. الطبقة الحبيبية، 4. الطبقة الشفافة (توجد في الجلد السميك فقط)، 5. الطبقة القرنية (الأعلى، خلايا ميتة مسطحة)."

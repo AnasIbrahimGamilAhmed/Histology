@@ -540,6 +540,7 @@ function StudyContent() {
             </motion.div>
           )}
       </AnimatePresence>
+      </main>
 
       {/* ENHANCED LEARNING MODAL (Layers, etc) */}
       <AnimatePresence>
