@@ -364,7 +364,7 @@ export function ExamEngine({ questions, mode }: ExamEngineProps) {
                         <img 
                           src={currentQuestion.image} 
                           alt="Exam Specimen" 
-                          className="w-full h-[350px] md:h-[500px] object-contain transition-transform duration-700 group-hover:scale-105"
+                          className="w-full h-[350px] md:h-[500px] object-cover transition-transform duration-700 group-hover:scale-105"
                         />
                         
                         {/* Dynamic Pointer for "Identify Part" questions */}
