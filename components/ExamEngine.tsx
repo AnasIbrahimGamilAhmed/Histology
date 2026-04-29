@@ -258,7 +258,7 @@ export function ExamEngine({ questions, mode }: ExamEngineProps) {
                 <motion.img
                   initial={{ scale: 1.2, opacity: 0 }}
                   animate={{ 
-                    scale: zoomFactor * (currentQuestion.microscopy?.cropRect ? 2 : 1), 
+                    scale: zoomFactor * (currentQuestion.microscopy?.cropRect ? 2.5 : 1), 
                     opacity: 1 
                   }}
                   src={currentQuestion.image}
@@ -372,7 +372,7 @@ export function ExamEngine({ questions, mode }: ExamEngineProps) {
                             objectPosition: currentQuestion.microscopy?.cropRect
                               ? `${currentQuestion.microscopy.cropRect.x}% ${currentQuestion.microscopy.cropRect.y}%`
                               : "center",
-                            transform: currentQuestion.microscopy?.cropRect ? "scale(2)" : "none"
+                            transform: currentQuestion.microscopy?.cropRect ? "scale(2.5)" : "none"
                           }}
                         />
                         

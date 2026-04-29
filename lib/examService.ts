@@ -213,8 +213,15 @@ function buildQuestionTemplate(
       .filter(Boolean) as string[]
   );
 
-  const structureChoices = shuffle([...featureChoices.slice(0, 3), ...structurePool.slice(0, 6)]).slice(0, 4);
-  const structureAnswer = featureChoices[0];
+  const clean = (s: string) => s.trim().replace(/\.+$/, "");
+  const structureAnswer = clean(featureChoices[0]);
+  const cleanedChoices = featureChoices.slice(0, 3).map(clean);
+  const structureChoices = shuffle([...cleanedChoices, ...structurePool.map(clean).slice(0, 6)]).slice(0, 4);
+
+  // Ensure answer is always in choices
+  if (!structureChoices.includes(structureAnswer)) {
+    structureChoices[Math.floor(Math.random() * 4)] = structureAnswer;
+  }
 
   switch (type) {
     case "identify_sample":
@@ -248,7 +255,7 @@ function buildQuestionTemplate(
     case "identify_structure":
       return {
         prompt: `Which specific histological structure is most clearly visible in this high-power region?`,
-        choices: structureChoices.length >= 4 ? structureChoices : [featureChoices[0], "Parallel fibers", "Lacunae", "Central vein"],
+        choices: structureChoices,
         acceptedAnswers: [structureAnswer],
         reasoningPattern: "identify_structure" as const
       };
@@ -257,7 +264,7 @@ function buildQuestionTemplate(
       return {
         prompt: `Identify the pathognomonic feature or practical tip that confirms this as ${sampleLabel}.`,
         choices: [],
-        acceptedAnswers: parsedFeatures.length > 0 ? parsedFeatures : [sample.description],
+        acceptedAnswers: featureChoices.length > 0 ? featureChoices.map(clean) : [clean(sample.description)],
         reasoningPattern: "describe_features" as const
       };
     default:
