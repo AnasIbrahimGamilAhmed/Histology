@@ -101,19 +101,15 @@ function categoryLabel(name: string) {
 }
 
 function buildMicroscopyConfig(variation: { type: VariationType }) {
-  const partialView = Math.random() < 0.45;
-  const zoomLevel = (Math.random() < 0.35 ? 3 : Math.random() < 0.6 ? 2 : 1) as 1 | 2 | 3;
-  const blurPx = partialView ? 2 + Math.random() * 2 : Math.random() * 1.8;
-  const contrast = Number((0.75 + Math.random() * 0.5).toFixed(2));
-  const rotationDeg = Math.round((Math.random() - 0.5) * 24);
-  const cropRect = partialView
-    ? {
-        x: Math.floor(Math.random() * 20),
-        y: Math.floor(Math.random() * 20),
-        width: 70 + Math.floor(Math.random() * 25),
-        height: 70 + Math.floor(Math.random() * 25)
-      }
-    : undefined;
+  const partialView = Math.random() < 0.3;
+  const zoomLevel = (Math.random() < 0.2 ? 3 : Math.random() < 0.5 ? 2 : 1) as 1 | 2 | 3;
+  // Reduce blur to keep features visible
+  const blurPx = partialView ? 0.5 + Math.random() * 1.5 : Math.random() * 0.5;
+  const contrast = Number((0.85 + Math.random() * 0.3).toFixed(2));
+  const rotationDeg = Math.round((Math.random() - 0.5) * 15);
+  
+  // Disable aggressive random cropping to ensure key diagnostic features are not cut off
+  const cropRect = undefined;
 
   return { zoomLevel, partialView, blurPx, contrast, rotationDeg, cropRect };
 }
@@ -151,21 +147,36 @@ function buildQuestionTemplate(
   const parsedFeatures = Array.isArray(sample.keyFeatures) ? sample.keyFeatures : typeof sample.keyFeatures === "string" ? [sample.keyFeatures] : [];
   const featureChoices = parsedFeatures.length > 0 ? parsedFeatures : [sample.description];
 
-  const sampleChoices = shuffle(
+  const parsedConfusionTags = Array.isArray(sample.confusionTags) ? sample.confusionTags.filter(item => typeof item === "string") : [];
+  
+  // Prioritize confusing samples for highly realistic distractors
+  let sampleChoices = shuffle(
     allSamples
-      .filter((candidate) => candidate.id !== sample.id && candidate.category === category)
+      .filter((candidate) => candidate.id !== sample.id && parsedConfusionTags.some(tag => candidate.name.toLowerCase().includes(String(tag).toLowerCase())))
       .map((candidate) => candidate.name)
-  ).slice(0, 3);
+  );
 
-  // If not enough in same category, fill with others
+  // If not enough from confusion tags, add from same category
+  if (sampleChoices.length < 3) {
+    const categoryChoices = shuffle(
+      allSamples
+        .filter((candidate) => candidate.id !== sample.id && candidate.category === category && !sampleChoices.includes(candidate.name))
+        .map((candidate) => candidate.name)
+    );
+    sampleChoices.push(...categoryChoices);
+  }
+
+  // If STILL not enough, add totally random ones
   if (sampleChoices.length < 3) {
     const others = shuffle(
       allSamples
         .filter((candidate) => candidate.id !== sample.id && !sampleChoices.includes(candidate.name))
         .map((candidate) => candidate.name)
-    ).slice(0, 3 - sampleChoices.length);
+    );
     sampleChoices.push(...others);
   }
+  
+  sampleChoices = sampleChoices.slice(0, 3);
 
   const tissueOptions = [
     "Epithelial tissue",
@@ -324,7 +335,7 @@ async function getUniqueSamplePool(userId: string, limit: number, mode: ExamMode
   const filteredPool = poolWithMicro.filter((s) => !recentSampleIds.has(s.id));
   const poolToUse = filteredPool.length >= limit ? filteredPool : poolWithMicro;
 
-  return shuffle(poolToUse).slice(0, limit);
+  return shuffle(poolToUse);
 }
 
 async function createExamInstance(userId: string, options: { mode: ExamMode; limit: number; forceConfusionDrill?: boolean }) {
@@ -352,13 +363,15 @@ async function createExamInstance(userId: string, options: { mode: ExamMode; lim
   }>;
 
   for (const sample of samplePool) {
+    if (questions.length >= options.limit) break;
+
     // FORCE usage of ONLY micro images as requested by the user
     const microVariations = sample.variations.filter(v => v.image.toLowerCase().includes("micro"));
     
     // Strictly skip samples that don't have a micro (or revision) image
     if (microVariations.length === 0) continue;
     
-    const variation = randomElement(microVariations);
+    const variation = microVariations[Math.floor(Math.random() * microVariations.length)];
     if (!variation) continue;
 
     const typeCandidates = buildQuestionTypeWeightList()

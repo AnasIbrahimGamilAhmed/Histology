@@ -20,8 +20,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           return null;
         }
 
-        const account = await prisma.studentAccount.findUnique({
-          where: { universityId }
+        const account = await prisma.studentAccount.findFirst({
+          where: {
+            OR: [
+              { universityId: universityId },
+              { email: universityId.toLowerCase() }
+            ]
+          }
         });
 
         if (!account || account.password !== password) {

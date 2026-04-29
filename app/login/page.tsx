@@ -61,13 +61,13 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
             <input type="hidden" name="callbackUrl" value={callbackUrl ?? "/study"} />
             <div>
               <label htmlFor="universityId" className="mb-2 block text-sm font-medium text-slate-700">
-                University ID / رقم الجامعة
+                University ID or Email / رقم الجامعة أو الإيميل
               </label>
               <input
                 id="universityId"
                 name="universityId"
                 required
-                placeholder="ASU-1001"
+                placeholder="ASU-1001 or email@example.com"
                 suppressHydrationWarning
                 className="w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
               />
