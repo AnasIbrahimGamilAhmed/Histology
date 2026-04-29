@@ -126,6 +126,25 @@ function StudyContent() {
   const [isLoading, setIsLoading] = useState(false);
   const [showExtraStudy, setShowExtraStudy] = useState(false);
 
+  // Handle browser back button to close modals
+  useEffect(() => {
+    const handlePopState = (event: PopStateEvent) => {
+      if (comparisonSample || showExtraStudy) {
+        setComparisonSample(null);
+        setShowExtraStudy(false);
+      }
+    };
+
+    if (comparisonSample || showExtraStudy) {
+      window.history.pushState({ modal: true }, "");
+      window.addEventListener("popstate", handlePopState);
+    }
+
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+    };
+  }, [comparisonSample, showExtraStudy]);
+
   useEffect(() => {
     if (categoryId) {
       const cat = histologyData.find(c => c.id === categoryId);
@@ -198,7 +217,10 @@ function StudyContent() {
                 Comparison Mode | طور المقارنة
               </h2>
               <button 
-                onClick={() => setComparisonSample(null)}
+                onClick={() => {
+                  setComparisonSample(null);
+                  window.history.back();
+                }}
                 className="px-8 py-3 bg-white text-black font-black uppercase tracking-widest rounded-xl hover:bg-indigo-50 transition-all"
               >
                 Close Comparison
@@ -571,7 +593,10 @@ function StudyContent() {
               <div className="p-8 lg:p-20 flex flex-col justify-center bg-slate-900/40 backdrop-blur-md border-t lg:border-t-0 lg:border-l border-white/5">
                 <div className="flex justify-end mb-6 lg:mb-8">
                   <button 
-                    onClick={() => setShowExtraStudy(false)}
+                    onClick={() => {
+                      setShowExtraStudy(false);
+                      window.history.back();
+                    }}
                     className="p-3 lg:p-4 rounded-2xl bg-white/5 hover:bg-rose-500/20 hover:text-rose-400 text-slate-400 transition-all"
                   >
                     <X size={24} />
@@ -597,7 +622,10 @@ function StudyContent() {
                 </div>
 
                 <button 
-                  onClick={() => setShowExtraStudy(false)}
+                  onClick={() => {
+                    setShowExtraStudy(false);
+                    window.history.back();
+                  }}
                   className="mt-10 lg:mt-16 w-full py-4 lg:py-5 rounded-2xl bg-white text-black font-black uppercase tracking-[0.2em] hover:bg-indigo-50 transition-all shadow-xl shadow-white/5 text-sm lg:text-base"
                 >
                   Return to Tree
