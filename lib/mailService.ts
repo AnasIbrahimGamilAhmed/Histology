@@ -1,40 +1,41 @@
-import { Resend } from 'resend';
+import nodemailer from 'nodemailer';
 
-const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.GMAIL_USER,
+    pass: process.env.GMAIL_APP_PASSWORD,
+  },
+});
 
 export async function sendVerificationEmail(email: string, code: string) {
-  // Always log in terminal for development
   console.log(`\n================================================`);
   console.log(`[DEV_MODE] Verification code for ${email} is: ${code}`);
   console.log(`================================================\n`);
 
-  if (!resend) {
-    console.warn("RESEND_API_KEY not set. Email not sent.");
+  if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
+    console.warn("GMAIL_USER or GMAIL_APP_PASSWORD not set. Email not sent.");
     return { success: true, message: "Dev mode: Code logged to terminal" };
   }
 
   try {
-    const { data, error } = await resend.emails.send({
-      from: process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev',
+    const info = await transporter.sendMail({
+      from: `"HistoPro Support" <${process.env.GMAIL_USER}>`,
       to: email,
       subject: "Verification Code - HistoPro",
       html: `
         <div style="font-family: sans-serif; padding: 20px; color: #333;">
           <h2 style="color: #4f46e5;">HistoPro Verification</h2>
-          <p>Your verification code is: <strong>${code}</strong></p>
+          <p>Your verification code is: <strong style="font-size: 24px;">${code}</strong></p>
           <p>This code will expire in 10 minutes.</p>
         </div>
       `,
     });
 
-    if (error) {
-      console.error("Resend Error:", error);
-      return { success: false, error };
-    }
-
-    return { success: true, data };
+    console.log(`Email sent via Gmail: ${info.messageId}`);
+    return { success: true };
   } catch (error) {
-    console.error("Resend Exception:", error);
+    console.error("Nodemailer Error:", error);
     return { success: false, error };
   }
 }
