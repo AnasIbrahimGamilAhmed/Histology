@@ -8,7 +8,7 @@ import { motion, AnimatePresence } from "framer-motion";
 export default function ForgotPasswordPage() {
   const [step, setStep] = useState<"id" | "select-email" | "code" | "reset" | "success">("id");
   const [universityId, setUniversityId] = useState("");
-  const [recoveryOptions, setRecoveryOptions] = useState<{type: 'email' | 'phone', masked: string, full: string}[]>([]);
+  const [recoveryOptions, setRecoveryOptions] = useState<{type: 'email' | 'phone', masked: string, full: string, provider: string}[]>([]);
   const [selectedEmail, setSelectedEmail] = useState("");
   const [code, setCode] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -49,7 +49,7 @@ export default function ForgotPasswordPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ universityId, email: fullEmail }),
       });
-      if (!res.ok) throw new Error("Failed to send email");
+      if (!res.ok) throw new Error("Failed to send code. Please try again later.");
       setStep("code");
     } catch (err: any) {
       setError(err.message);
@@ -184,7 +184,7 @@ export default function ForgotPasswordPage() {
                       {opt.type === 'email' ? <Mail className="w-5 h-5 text-indigo-600" /> : <Smartphone className="w-5 h-5 text-emerald-600" />}
                     </div>
                     <div className="text-left">
-                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider">{opt.type === 'email' ? 'Email Address' : 'Phone Number'}</p>
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider">{opt.provider}</p>
                       <p className="text-slate-700 font-bold">{opt.masked}</p>
                     </div>
                   </div>

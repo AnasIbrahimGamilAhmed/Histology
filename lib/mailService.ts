@@ -40,3 +40,17 @@ export async function sendVerificationEmail(email: string, code: string) {
     console.error("Unexpected error sending email via Resend:", err);
   }
 }
+
+export async function sendVerificationSMS(phone: string, code: string) {
+  console.log(`[SMS_DEBUG] Sending verification code ${code} to ${phone}`);
+  
+  // TO INTEGRATE A REAL SMS SERVICE (like Twilio, Infobip, etc.):
+  // 1. Install the provider's SDK
+  // 2. Add your API keys to .env
+  // 3. Replace the console.log above with the actual API call
+  
+  // Example for logic:
+  // if (process.env.SMS_PROVIDER_KEY) {
+  //    await provider.send(...)
+  // }
+}
