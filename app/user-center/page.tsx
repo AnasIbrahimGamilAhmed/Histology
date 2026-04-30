@@ -52,32 +52,31 @@ export default function UserCenter() {
   };
 
   const providers = [
-    { id: "google", name: "Google", icon: "🌐", color: "bg-red-500 hover:bg-red-600" },
-    { id: "facebook", name: "Facebook", icon: "📘", color: "bg-blue-600 hover:bg-blue-700" },
-    { id: "microsoft-entra-id", name: "Microsoft", icon: "🪟", color: "bg-cyan-600 hover:bg-cyan-700" },
-    { id: "apple", name: "Apple", icon: "🍎", color: "bg-gray-800 hover:bg-gray-900" }
+    { id: "google", name: "Google", icon: "🌐", color: "bg-white text-slate-700 border border-slate-200 hover:bg-slate-50" },
+    { id: "facebook", name: "Facebook", icon: "📘", color: "bg-[#1877F2] text-white hover:bg-[#166fe5]" },
+    { id: "microsoft-entra-id", name: "Microsoft", icon: "🪟", color: "bg-[#00a4ef] text-white hover:bg-[#0089c7]" }
   ];
 
   if (!session) {
     return (
-      <div className="flex h-screen items-center justify-center bg-gray-50/50">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      <div className="flex h-screen items-center justify-center bg-slate-50">
+        <Loader2 className="w-10 h-10 animate-spin text-indigo-600" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50/50 p-4 md:p-8 lg:p-12 pb-32 md:pb-12">
-      <div className="max-w-4xl mx-auto space-y-8">
+    <div className="min-h-screen bg-slate-50 p-4 md:p-8 lg:p-12 pb-32 md:pb-12">
+      <div className="max-w-5xl mx-auto space-y-8">
         
         {/* Header */}
-        <div className="flex items-center gap-4">
-          <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center">
-            <User className="w-8 h-8 text-primary" />
+        <div className="flex flex-col md:flex-row md:items-center gap-6 bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-200/60">
+          <div className="w-20 h-20 bg-indigo-600 rounded-3xl flex items-center justify-center shadow-lg shadow-indigo-200">
+            <User className="w-10 h-10 text-white" />
           </div>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">User Center</h1>
-            <p className="text-gray-500">Manage your account settings and linked accounts</p>
+            <h1 className="text-3xl font-bold text-slate-900">User Center / مركز المستخدم</h1>
+            <p className="text-slate-500 mt-1">Manage your identity and connected learning accounts</p>
           </div>
         </div>
 
@@ -85,91 +84,93 @@ export default function UserCenter() {
           <motion.div 
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            className={`p-4 rounded-xl ${message.type === 'success' ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-red-700 border border-red-200'}`}
+            className={`p-4 rounded-2xl flex items-center gap-3 ${message.type === 'success' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'}`}
           >
-            {message.text}
+            <span className="text-xl">{message.type === 'success' ? '✅' : '❌'}</span>
+            <p className="font-medium">{message.text}</p>
           </motion.div>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           
           {/* Profile Settings */}
-          <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-gray-100">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-bold flex items-center gap-2">
-                <Shield className="w-5 h-5 text-primary" />
-                Profile Details
+          <div className="lg:col-span-2 bg-white rounded-[2.5rem] p-8 shadow-sm border border-slate-200/60">
+            <div className="flex justify-between items-center mb-8">
+              <h2 className="text-xl font-bold flex items-center gap-3 text-slate-800">
+                <Shield className="w-6 h-6 text-indigo-600" />
+                Profile Details / بيانات الحساب
               </h2>
               {!isEditing && (
                 <button 
                   onClick={() => setIsEditing(true)}
-                  className="text-sm font-semibold text-primary hover:text-primary/80"
+                  className="px-4 py-2 text-sm font-bold text-indigo-600 bg-indigo-50 rounded-xl hover:bg-indigo-100 transition-all"
                 >
                   Edit Profile
                 </button>
               )}
             </div>
 
-            <div className="space-y-5">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">University ID (Non-editable)</label>
-                <div className="px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-500 font-mono">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="md:col-span-2">
+                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">University ID (Permanent)</label>
+                <div className="px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-slate-600 font-mono font-bold text-lg">
                   {session.user.id}
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Full Name / الاسم بالكامل</label>
                 <input
                   type="text"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   disabled={!isEditing}
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-primary/20 focus:border-primary disabled:bg-gray-50 disabled:text-gray-500 transition-all"
+                  className="w-full px-5 py-4 rounded-2xl border border-slate-200 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 disabled:bg-slate-50 disabled:text-slate-400 transition-all font-medium"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Email Address / البريد الإلكتروني</label>
                 <input
                   type="email"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   disabled={!isEditing}
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-primary/20 focus:border-primary disabled:bg-gray-50 disabled:text-gray-500 transition-all"
+                  className="w-full px-5 py-4 rounded-2xl border border-slate-200 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 disabled:bg-slate-50 disabled:text-slate-400 transition-all font-medium"
                 />
               </div>
 
               {isEditing && (
-                <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }}>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">New Password (Optional)</label>
+                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="md:col-span-2 mt-2">
+                  <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Change Password / تغيير كلمة المرور</label>
                   <input
                     type="password"
                     placeholder="Leave blank to keep current password"
                     value={formData.password}
                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                    className="w-full px-5 py-4 rounded-2xl border border-slate-200 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-medium"
                   />
+                  <p className="mt-2 text-xs text-slate-400 italic">Only fill this if you want to update your manual login password.</p>
                 </motion.div>
               )}
             </div>
 
             {isEditing && (
-              <div className="flex gap-3 mt-8">
+              <div className="flex flex-col sm:flex-row gap-4 mt-10">
                 <button
                   onClick={handleSave}
                   disabled={isSaving}
-                  className="flex-1 bg-primary text-white py-3 rounded-xl font-semibold flex items-center justify-center gap-2 hover:bg-primary/90 transition-all disabled:opacity-70"
+                  className="flex-1 bg-indigo-600 text-white py-4 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-indigo-700 shadow-lg shadow-indigo-200 transition-all disabled:opacity-70"
                 >
                   {isSaving ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
-                  Save Changes
+                  Save Profile Settings
                 </button>
                 <button
                   onClick={() => {
                     setIsEditing(false);
                     setFormData({ name: session.user.name || "", email: session.user.email || "", password: "" });
                   }}
-                  className="px-6 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-all"
+                  className="px-8 py-4 bg-slate-100 text-slate-600 rounded-2xl font-bold hover:bg-slate-200 transition-all"
                 >
                   Cancel
                 </button>
@@ -178,25 +179,25 @@ export default function UserCenter() {
           </div>
 
           {/* Linked Accounts */}
-          <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-gray-100">
-            <h2 className="text-xl font-bold flex items-center gap-2 mb-2">
-              <LinkIcon className="w-5 h-5 text-primary" />
-              Linked Accounts
+          <div className="bg-white rounded-[2.5rem] p-8 shadow-sm border border-slate-200/60">
+            <h2 className="text-xl font-bold flex items-center gap-3 mb-3 text-slate-800">
+              <LinkIcon className="w-6 h-6 text-indigo-600" />
+              Connected Accounts
             </h2>
-            <p className="text-sm text-gray-500 mb-6">
-              Connect your social accounts to log in quickly without a password.
+            <p className="text-sm text-slate-500 mb-8 leading-relaxed">
+              Link your social profiles to bypass the login form and enter HistoPro instantly.
             </p>
 
             <div className="space-y-4">
               {providers.map((provider) => (
-                <div key={provider.id} className="flex items-center justify-between p-4 border border-gray-100 rounded-2xl hover:border-primary/20 transition-all">
-                  <div className="flex items-center gap-3">
-                    <span className="text-2xl">{provider.icon}</span>
-                    <span className="font-semibold text-gray-700">{provider.name}</span>
+                <div key={provider.id} className="group relative flex items-center justify-between p-5 border border-slate-100 rounded-[1.5rem] hover:border-indigo-200 transition-all bg-slate-50/30">
+                  <div className="flex items-center gap-4">
+                    <span className="text-2xl filter grayscale group-hover:grayscale-0 transition-all">{provider.icon}</span>
+                    <span className="font-bold text-slate-700">{provider.name}</span>
                   </div>
                   <button
                     onClick={() => signIn(provider.id, { callbackUrl: '/user-center' })}
-                    className={`px-4 py-2 text-sm font-semibold text-white rounded-lg transition-all ${provider.color}`}
+                    className={`px-5 py-2.5 text-xs font-bold rounded-xl shadow-sm transition-all active:scale-95 ${provider.color}`}
                   >
                     Connect
                   </button>
@@ -204,11 +205,18 @@ export default function UserCenter() {
               ))}
             </div>
             
-            <div className="mt-6 p-4 bg-amber-50 border border-amber-100 rounded-xl text-sm text-amber-800">
-              <strong>Note:</strong> Connecting an account here will link it to your current ID ({session.user.id}). Next time you log in with {providers[0].name}, you will automatically log into this account.
+            <div className="mt-8 p-5 bg-indigo-50/50 border border-indigo-100 rounded-2xl">
+              <p className="text-xs text-indigo-800 leading-relaxed font-medium">
+                <span className="font-bold block mb-1">💡 Smart Link Technology</span>
+                By connecting an account, you can log in with one click. It is linked specifically to your ID: <span className="font-bold">{session.user.id}</span>.
+              </p>
             </div>
 
           </div>
+
+        </div>
+      </div>
+    </div>
 
         </div>
       </div>
