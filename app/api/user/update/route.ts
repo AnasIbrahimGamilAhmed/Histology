@@ -35,22 +35,6 @@ export async function POST(req: Request) {
       updateData.email = email;
     }
 
-    if (phone) {
-      // Check if phone is already used
-      const existingPhone = await (prisma.studentAccount as any).findFirst({
-        where: {
-          phone: phone,
-          id: { not: session.user.id }
-        }
-      });
-
-      if (existingPhone) {
-        return Response.json({ error: "Phone number is already in use" }, { status: 400 });
-      }
-      
-      updateData.phone = phone;
-    }
-
     if (password && password.trim() !== "") {
       if (password.length < 6) {
         return Response.json({ error: "Password must be at least 6 characters long" }, { status: 400 });
@@ -68,8 +52,7 @@ export async function POST(req: Request) {
       success: true,
       user: {
         name: updatedUser.name,
-        email: updatedUser.email,
-        phone: (updatedUser as any).phone
+        email: updatedUser.email
       }
     });
 

@@ -1,9 +1,7 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import Google from "next-auth/providers/google";
-import Facebook from "next-auth/providers/facebook";
 import MicrosoftEntra from "next-auth/providers/microsoft-entra-id";
-import Apple from "next-auth/providers/apple";
 import { prisma } from "@/lib/prisma";
 import { authConfig } from "./auth.config";
 import { cookies } from "next/headers";
@@ -20,9 +18,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   ...authConfig,
   providers: [
     Google,
-    Facebook,
     MicrosoftEntra,
-    Apple,
     Credentials({
       name: "University ID",
       credentials: {
@@ -42,7 +38,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             OR: [
               { universityId: { equals: universityId, mode: 'insensitive' } },
               { email: { equals: universityId, mode: 'insensitive' } },
-              { phone: { equals: universityId, mode: 'insensitive' } },
               { accounts: { some: { email: { equals: universityId, mode: 'insensitive' } } } }
             ]
           }

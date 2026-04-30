@@ -5,6 +5,8 @@ const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KE
 export async function sendVerificationEmail(email: string, code: string) {
   if (!resend) {
     console.warn("RESEND_API_KEY not found. Email not sent.");
+    // In dev mode, we still log it so you can see it in terminal
+    console.log(`[DEV_MODE] Verification code for ${email} is: ${code}`);
     return;
   }
 
@@ -39,18 +41,4 @@ export async function sendVerificationEmail(email: string, code: string) {
   } catch (err) {
     console.error("Unexpected error sending email via Resend:", err);
   }
-}
-
-export async function sendVerificationSMS(phone: string, code: string) {
-  console.log(`[SMS_DEBUG] Sending verification code ${code} to ${phone}`);
-  
-  // TO INTEGRATE A REAL SMS SERVICE (like Twilio, Infobip, etc.):
-  // 1. Install the provider's SDK
-  // 2. Add your API keys to .env
-  // 3. Replace the console.log above with the actual API call
-  
-  // Example for logic:
-  // if (process.env.SMS_PROVIDER_KEY) {
-  //    await provider.send(...)
-  // }
 }
