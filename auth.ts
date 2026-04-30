@@ -102,35 +102,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         // 1.5 Check if user is already logged in (Linking Flow)
         // We use the cookies to check if there is an active session
         const cookieStore = await cookies();
-        let sessionToken = '';
-        let salt = '';
         const linkingId = cookieStore.get("linking_id")?.value;
-        
-        const cookieNames = [
-          "authjs.session-token",
-          "__Secure-authjs.session-token",
-          "next-auth.session-token",
-          "__Secure-next-auth.session-token"
-        ];
-        
-        for (const name of cookieNames) {
-          const val = cookieStore.get(name)?.value;
-          if (val) {
-            sessionToken = val;
-            salt = name;
-            break;
-          }
-        }
         
         const email = user.email || profile?.email;
         if (!email) return false;
 
-        // 2. Linking Logic: Check if we have an explicit linking ID or a session token
-        const targetUniversityId = linkingId || (sessionToken ? (await decode({ 
-          token: sessionToken, 
-          secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET || "",
-          salt: salt
-        }))?.sub as string : null);
+        // 2. Linking Logic: ONLY allow linking if the explicit 'linking_id' cookie exists
+        // This prevents auto-relinking when a user has an old session active
+        const targetUniversityId = linkingId;
 
         if (targetUniversityId) {
           try {
