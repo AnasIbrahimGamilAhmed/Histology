@@ -7,7 +7,7 @@ import Apple from "next-auth/providers/apple";
 import { prisma } from "@/lib/prisma";
 import { authConfig } from "./auth.config";
 import { cookies } from "next/headers";
-import { decodeJwt } from "jose";
+import { decode } from "next-auth/jwt";
 
 function generateRandomUniversityId() {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -97,8 +97,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         // 1.5 Check if user is already logged in (Linking Flow)
         // We use the cookies to check if there is an active session
         const cookieStore = await cookies();
-        const sessionToken = cookieStore.get("authjs.session-token")?.value || 
-                            cookieStore.get("__Secure-authjs.session-token")?.value;
+        const sessionToken = 
+          cookieStore.get("authjs.session-token")?.value || 
+          cookieStore.get("__Secure-authjs.session-token")?.value ||
+          cookieStore.get("next-auth.session-token")?.value ||
+          cookieStore.get("__Secure-next-auth.session-token")?.value;
         
         // This part is a bit tricky in v5, so we rely on the session token in cookies
         // if the user is already logged in, we link this new provider to their current account.
@@ -109,9 +112,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         // 2. JWT Linking Logic: Check if there's an active session in the cookies
         if (sessionToken) {
           try {
-            // Decode the JWT to get the current user's universityId
-            const payload = decodeJwt(sessionToken);
-            const currentUniversityId = payload.sub as string;
+            // Securely decode the session token using the secret
+            const payload = await decode({ 
+              token: sessionToken, 
+              secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET || "" 
+            });
+            const currentUniversityId = payload?.sub as string;
 
             if (currentUniversityId) {
               const currentUser = await prisma.studentAccount.findUnique({
@@ -140,14 +146,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                     access_token: account.access_token as string | null,
                   }
                 });
-                // CRITICAL: Preserve the original University ID
+                // CRITICAL: Force the session to use the EXISTING universityId
                 user.id = currentUser.universityId;
                 user.name = currentUser.name;
                 return true;
               }
             }
           } catch (e) {
-            console.error("JWT Decode Error during linking:", e);
+            console.error("JWT Linking Error:", e);
           }
         }
 
