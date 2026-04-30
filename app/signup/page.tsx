@@ -179,11 +179,6 @@ export default async function SignupPage({ searchParams }: SignupPageProps) {
                 🌐 Google
               </button>
             </form>
-            <form action={async () => { "use server"; const { signIn } = await import("@/auth"); await signIn("facebook", { redirectTo: "/study" }) }}>
-              <button className="w-full flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 transition">
-                📘 Facebook
-              </button>
-            </form>
             <form action={async () => { "use server"; const { signIn } = await import("@/auth"); await signIn("microsoft-entra-id", { redirectTo: "/study" }) }}>
               <button className="w-full flex items-center justify-center gap-2 rounded-xl bg-[#00a4ef] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#0089c7] transition">
                 🪟 Microsoft
