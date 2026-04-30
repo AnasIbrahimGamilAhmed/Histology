@@ -18,7 +18,7 @@ export async function POST(req: Request) {
       }
 
       // Collect all available emails and phone
-      const emailOptions = [];
+      const emailOptions: { type: 'email' | 'phone'; val: string }[] = [];
       if (student.email) emailOptions.push({ type: 'email', val: student.email });
       if (student.phone) emailOptions.push({ type: 'phone', val: student.phone });
       
