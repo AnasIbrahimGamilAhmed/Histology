@@ -217,9 +217,5 @@ export default function UserCenter() {
         </div>
       </div>
     </div>
-
-        </div>
-      </div>
-    </div>
   );
 }
