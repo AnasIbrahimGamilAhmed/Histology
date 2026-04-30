@@ -307,7 +307,11 @@ export default function UserCenter() {
                         </button>
                       ) : (
                         <button
-                          onClick={() => signIn(p.id, { callbackUrl: '/user-center' })}
+                          onClick={() => {
+                            // Set a temporary cookie to tell the backend which ID to link to
+                            document.cookie = `linking_id=${session.user.id}; path=/; max-age=300; SameSite=Lax`;
+                            signIn(p.id, { callbackUrl: '/user-center' });
+                          }}
                           className="px-5 py-2.5 text-[10px] font-black uppercase tracking-wider text-indigo-600 bg-white border border-indigo-100 rounded-xl shadow-sm hover:bg-indigo-50 transition-all active:scale-95"
                         >
                           Link

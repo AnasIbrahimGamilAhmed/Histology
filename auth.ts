@@ -99,6 +99,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         const cookieStore = await cookies();
         let sessionToken = '';
         let salt = '';
+        const linkingId = cookieStore.get("linking_id")?.value;
+        
         const cookieNames = [
           "authjs.session-token",
           "__Secure-authjs.session-token",
@@ -115,30 +117,24 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           }
         }
         
-        // This part is a bit tricky in v5, so we rely on the session token in cookies
-        // if the user is already logged in, we link this new provider to their current account.
-
         const email = user.email || profile?.email;
         if (!email) return false;
 
-        // 2. JWT Linking Logic: Check if there's an active session in the cookies
-        if (sessionToken) {
-          try {
-            // Securely decode the session token using the secret and salt
-            const payload = await decode({ 
-              token: sessionToken, 
-              secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET || "",
-              salt: salt
-            });
-            const currentUniversityId = payload?.sub as string;
+        // 2. Linking Logic: Check if we have an explicit linking ID or a session token
+        const targetUniversityId = linkingId || (sessionToken ? (await decode({ 
+          token: sessionToken, 
+          secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET || "",
+          salt: salt
+        }))?.sub as string : null);
 
-            if (currentUniversityId) {
-              const currentUser = await prisma.studentAccount.findUnique({
-                where: { universityId: currentUniversityId }
-              });
+        if (targetUniversityId) {
+          try {
+            const currentUser = await prisma.studentAccount.findUnique({
+              where: { universityId: targetUniversityId }
+            });
 
               if (currentUser) {
-                // Link to the account the student is CURRENTLY logged into
+                // Link to the account identified by linkingId or sessionToken
                 await prisma.linkedAccount.upsert({
                   where: {
                     provider_providerAccountId: {
@@ -164,10 +160,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                 user.name = currentUser.name;
                 return true;
               }
+            } catch (e) {
+              console.error("JWT Linking Error:", e);
             }
-          } catch (e) {
-            console.error("JWT Linking Error:", e);
-          }
         }
 
         // 3. Fallback: Check if an account with this email already exists
