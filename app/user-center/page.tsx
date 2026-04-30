@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
-import { User, Mail, Shield, Save, Loader2, Link as LinkIcon, Unlink, CheckCircle2, AlertTriangle } from "lucide-react";
+import { User, Mail, Shield, Save, Loader2, Link as LinkIcon, Unlink, CheckCircle2, AlertTriangle, Smartphone } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { signIn } from "next-auth/react";
 
@@ -35,7 +35,7 @@ const MicrosoftIcon = () => (
 export default function UserCenter() {
   const { data: session, update } = useSession();
   const [isEditing, setIsEditing] = useState(false);
-  const [formData, setFormData] = useState({ name: "", email: "", password: "" });
+  const [formData, setFormData] = useState({ name: "", email: "", password: "", phone: "" });
   const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
   const [linkedProviders, setLinkedProviders] = useState<string[]>([]);
@@ -58,6 +58,7 @@ export default function UserCenter() {
         name: session.user.name || "",
         email: session.user.email || "",
         password: "",
+        phone: (session.user as any).phone || "",
       });
       fetchLinkedAccounts();
     }
@@ -203,6 +204,21 @@ export default function UserCenter() {
                       type="email"
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      disabled={!isEditing}
+                      className="w-full pl-12 pr-6 py-5 rounded-[1.5rem] border border-slate-100 bg-slate-50/50 focus:bg-white focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 disabled:opacity-50 transition-all font-bold text-slate-700"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2 ml-1">Phone Number (Optional)</label>
+                  <div className="relative">
+                    <Smartphone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-300" />
+                    <input
+                      type="tel"
+                      placeholder="+20 1xx xxxx xxx"
+                      value={formData.phone}
+                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                       disabled={!isEditing}
                       className="w-full pl-12 pr-6 py-5 rounded-[1.5rem] border border-slate-100 bg-slate-50/50 focus:bg-white focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 disabled:opacity-50 transition-all font-bold text-slate-700"
                     />

@@ -10,7 +10,7 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
-    const { name, email, password } = body;
+    const { name, email, password, phone } = body;
 
     if (!name) {
       return Response.json({ error: "Name is required" }, { status: 400 });
@@ -35,6 +35,22 @@ export async function POST(req: Request) {
       updateData.email = email;
     }
 
+    if (phone) {
+      // Check if phone is already used
+      const existingPhone = await prisma.studentAccount.findFirst({
+        where: {
+          phone: { equals: phone, mode: 'insensitive' },
+          id: { not: session.user.id }
+        }
+      });
+
+      if (existingPhone) {
+        return Response.json({ error: "Phone number is already in use" }, { status: 400 });
+      }
+      
+      updateData.phone = phone;
+    }
+
     if (password && password.trim() !== "") {
       if (password.length < 6) {
         return Response.json({ error: "Password must be at least 6 characters long" }, { status: 400 });
@@ -52,7 +68,8 @@ export async function POST(req: Request) {
       success: true,
       user: {
         name: updatedUser.name,
-        email: updatedUser.email
+        email: updatedUser.email,
+        phone: updatedUser.phone
       }
     });
 

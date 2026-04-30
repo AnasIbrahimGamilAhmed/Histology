@@ -168,6 +168,7 @@ model StudentAccount {
   universityId     String    @unique
   name             String
   email            String?   @unique
+  phone            String?   @unique
   password         String
   resetToken       String?
   resetTokenExpiry DateTime?

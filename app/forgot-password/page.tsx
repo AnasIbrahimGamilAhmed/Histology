@@ -8,7 +8,7 @@ import { motion, AnimatePresence } from "framer-motion";
 export default function ForgotPasswordPage() {
   const [step, setStep] = useState<"id" | "select-email" | "code" | "reset" | "success">("id");
   const [universityId, setUniversityId] = useState("");
-  const [emailOptions, setEmailOptions] = useState<{masked: string, full: string}[]>([]);
+  const [recoveryOptions, setRecoveryOptions] = useState<{type: 'email' | 'phone', masked: string, full: string}[]>([]);
   const [selectedEmail, setSelectedEmail] = useState("");
   const [code, setCode] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -30,12 +30,7 @@ export default function ForgotPasswordPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "User not found");
       
-      const options = data.emails.map((masked: string, i: number) => ({
-        masked,
-        full: data.fullEmails[i]
-      }));
-      
-      setEmailOptions(options);
+      setRecoveryOptions(data.options);
       setStep("select-email");
     } catch (err: any) {
       setError(err.message);
@@ -177,7 +172,7 @@ export default function ForgotPasswordPage() {
               </p>
             </div>
             <div className="space-y-3">
-              {emailOptions.map((opt, i) => (
+              {recoveryOptions.map((opt, i) => (
                 <button
                   key={i}
                   disabled={isLoading}
@@ -186,10 +181,10 @@ export default function ForgotPasswordPage() {
                 >
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-sm">
-                      <Mail className="w-5 h-5 text-indigo-600" />
+                      {opt.type === 'email' ? <Mail className="w-5 h-5 text-indigo-600" /> : <Smartphone className="w-5 h-5 text-emerald-600" />}
                     </div>
                     <div className="text-left">
-                      <p className="text-xs font-bold text-slate-400 uppercase">Linked Email</p>
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider">{opt.type === 'email' ? 'Email Address' : 'Phone Number'}</p>
                       <p className="text-slate-700 font-bold">{opt.masked}</p>
                     </div>
                   </div>

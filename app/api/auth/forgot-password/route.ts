@@ -17,25 +17,30 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: "User not found" }, { status: 404 });
       }
 
-      // Collect all available emails
+      // Collect all available emails and phone
       const emailOptions = [];
-      if (student.email) emailOptions.push(student.email);
+      if (student.email) emailOptions.push({ type: 'email', val: student.email });
+      if (student.phone) emailOptions.push({ type: 'phone', val: student.phone });
+      
       student.accounts.forEach(acc => {
-        if (acc.email && !emailOptions.includes(acc.email)) {
-          emailOptions.push(acc.email);
+        if (acc.email && !emailOptions.some(e => e.val === acc.email)) {
+          emailOptions.push({ type: 'email', val: acc.email });
         }
       });
 
-      // Mask emails for security: an***@gmail.com
-      const maskedEmails = emailOptions.map(email => {
-        const [user, domain] = email.split("@");
-        return `${user.substring(0, 2)}***@${domain}`;
+      // Mask for security
+      const maskedOptions = emailOptions.map(opt => {
+        if (opt.type === 'email') {
+          const [user, domain] = opt.val.split("@");
+          return { type: 'email', masked: `${user.substring(0, 2)}***@${domain}`, full: opt.val };
+        } else {
+          return { type: 'phone', masked: `${opt.val.substring(0, 4)}****${opt.val.slice(-3)}`, full: opt.val };
+        }
       });
 
       return NextResponse.json({ 
         success: true, 
-        emails: maskedEmails,
-        fullEmails: emailOptions // We'll use index to select on client
+        options: maskedOptions
       });
     }
 
