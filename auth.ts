@@ -42,7 +42,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             OR: [
               { universityId: { equals: universityId, mode: 'insensitive' } },
               { email: { equals: universityId, mode: 'insensitive' } },
-              { phone: { equals: universityId, mode: 'insensitive' } }
+              { phone: { equals: universityId, mode: 'insensitive' } },
+              { accounts: { some: { email: { equals: universityId, mode: 'insensitive' } } } }
             ]
           }
         });
@@ -101,6 +102,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         
         // This part is a bit tricky in v5, so we rely on the session token in cookies
         // if the user is already logged in, we link this new provider to their current account.
+
+        const email = user.email || profile?.email;
+        if (!email) return false;
 
         // 2. JWT Linking Logic: Check if there's an active session in the cookies
         if (sessionToken) {
