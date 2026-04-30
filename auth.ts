@@ -17,8 +17,18 @@ function generateRandomUniversityId() {
 export const { handlers, signIn, signOut, auth } = NextAuth({
   ...authConfig,
   providers: [
-    Google,
-    MicrosoftEntra,
+    Google({
+      clientId: process.env.AUTH_GOOGLE_ID,
+      clientSecret: process.env.AUTH_GOOGLE_SECRET,
+      allowDangerousEmailAccountLinking: false,
+      authorization: { params: { prompt: "select_account" } }
+    }),
+    MicrosoftEntra({
+      clientId: process.env.AUTH_MICROSOFT_ENTRA_ID_ID,
+      clientSecret: process.env.AUTH_MICROSOFT_ENTRA_ID_SECRET,
+      allowDangerousEmailAccountLinking: false,
+      authorization: { params: { prompt: "select_account" } }
+    }),
     Credentials({
       name: "University ID",
       credentials: {
