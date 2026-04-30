@@ -1,44 +1,49 @@
-import { Resend } from 'resend';
+import nodemailer from 'nodemailer';
 
-const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
+const DEV_MODE = process.env.NODE_ENV === 'development';
+
+// Setup Nodemailer transporter
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.GMAIL_USER, // Your Gmail address
+    pass: process.env.GMAIL_APP_PASSWORD, // Your App Password
+  },
+});
 
 export async function sendVerificationEmail(email: string, code: string) {
-  if (!resend) {
-    console.warn("RESEND_API_KEY not found. Email not sent.");
-    // In dev mode, we still log it so you can see it in terminal
-    console.log(`[DEV_MODE] Verification code for ${email} is: ${code}`);
-    return;
+  // Always log in terminal for development
+  console.log(`\n================================================`);
+  console.log(`[DEV_MODE] Verification code for ${email} is: ${code}`);
+  console.log(`================================================\n`);
+
+  if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
+    console.warn("GMAIL_USER or GMAIL_APP_PASSWORD not set. Email not sent.");
+    return { success: true, message: "Dev mode: Code logged to terminal" };
   }
 
-  const fromEmail = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
-
-  console.log(`Sending email to ${email} via Resend. Using sender: ${fromEmail}`);
-
   try {
-    const { data, error } = await resend.emails.send({
-      from: fromEmail,
+    const info = await transporter.sendMail({
+      from: `"HistoPro Support" <${process.env.GMAIL_USER}>`,
       to: email,
-      subject: 'Your HistoPro Verification Code',
+      subject: "Verification Code - HistoPro",
       html: `
-        <div style="font-family: sans-serif; padding: 20px; color: #1e293b;">
+        <div style="font-family: sans-serif; padding: 20px; color: #333;">
           <h2 style="color: #4f46e5;">HistoPro Verification</h2>
-          <p>You requested a verification code for your histology account.</p>
-          <div style="background: #f1f5f9; padding: 15px; border-radius: 8px; font-size: 24px; font-weight: bold; letter-spacing: 5px; text-align: center;">
+          <p>Your verification code is:</p>
+          <div style="background: #f3f4f6; padding: 20px; font-size: 32px; font-weight: bold; letter-spacing: 5px; text-align: center; border-radius: 10px; margin: 20px 0;">
             ${code}
           </div>
-          <p style="font-size: 14px; color: #64748b; margin-top: 20px;">
-            This code will expire in 15 minutes. If you did not request this, please ignore this email.
-          </p>
+          <p>This code will expire in 10 minutes.</p>
+          <p style="font-size: 12px; color: #666;">If you didn't request this, please ignore this email.</p>
         </div>
       `,
     });
 
-    if (error) {
-      console.error("Resend Error:", error);
-    } else {
-      console.log("Resend Success:", data);
-    }
+    console.log(`Email sent via Gmail: ${info.messageId}`);
+    return { success: true };
   } catch (err) {
-    console.error("Unexpected error sending email via Resend:", err);
+    console.error("Nodemailer Error:", err);
+    return { success: false, error: err };
   }
 }
