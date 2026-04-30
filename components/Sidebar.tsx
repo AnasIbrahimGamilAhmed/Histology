@@ -60,6 +60,17 @@ export function Sidebar() {
         </nav>
 
         <div className="px-3 pt-6 border-t border-slate-800 space-y-2">
+          <Link
+            href="/user-center"
+            className={`flex items-center gap-4 px-4 py-3.5 rounded-2xl transition-all group ${
+              pathname.startsWith("/user-center")
+                ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/20"
+                : "text-slate-400 hover:bg-slate-800/50 hover:text-white"
+            }`}
+          >
+            <User size={20} className={`${pathname.startsWith("/user-center") ? "text-white" : "text-slate-500 group-hover:text-indigo-400"} transition-colors`} />
+            <span className="font-bold text-sm hidden lg:block">User Center</span>
+          </Link>
           <button 
             type="button"
             aria-label="Sign Out"

@@ -90,15 +90,19 @@ export default function MobileNav() {
 
             <div className="mt-12 pt-12 border-t border-white/5">
               {isAuthenticated ? (
-                <div className="flex items-center gap-4 p-6 rounded-3xl bg-indigo-500/5 border border-indigo-500/10">
+                <Link 
+                  href="/user-center"
+                  onClick={() => setIsOpen(false)}
+                  className="flex items-center gap-4 p-6 rounded-3xl bg-indigo-500/5 border border-indigo-500/10 hover:bg-indigo-500/10 transition-all cursor-pointer"
+                >
                   <div className="w-12 h-12 rounded-2xl bg-indigo-600 flex items-center justify-center text-white">
                     <User size={24} />
                   </div>
                   <div>
                     <p className="text-white font-black">{session?.user?.name || "Student"}</p>
-                    <p className="text-indigo-400 text-xs font-bold uppercase tracking-widest">Mastery Portal</p>
+                    <p className="text-indigo-400 text-xs font-bold uppercase tracking-widest">User Center</p>
                   </div>
-                </div>
+                </Link>
               ) : (
                 <div className="grid grid-cols-2 gap-4">
                   <Link 

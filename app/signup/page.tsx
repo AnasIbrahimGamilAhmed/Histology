@@ -167,6 +167,30 @@ export default async function SignupPage({ searchParams }: SignupPageProps) {
             </button>
           </form>
 
+          <div className="mt-8 flex items-center justify-between">
+            <span className="w-1/5 border-b border-slate-200 lg:w-1/4"></span>
+            <span className="text-xs text-center text-slate-500 uppercase font-semibold">Or sign up with</span>
+            <span className="w-1/5 border-b border-slate-200 lg:w-1/4"></span>
+          </div>
+
+          <div className="mt-6 grid grid-cols-2 gap-3">
+            <form action={async () => { "use server"; const { signIn } = await import("@/auth"); await signIn("google", { redirectTo: "/study" }) }}>
+              <button className="w-full flex items-center justify-center gap-2 rounded-xl bg-white border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition">
+                🌐 Google
+              </button>
+            </form>
+            <form action={async () => { "use server"; const { signIn } = await import("@/auth"); await signIn("facebook", { redirectTo: "/study" }) }}>
+              <button className="w-full flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 transition">
+                📘 Facebook
+              </button>
+            </form>
+            <form action={async () => { "use server"; const { signIn } = await import("@/auth"); await signIn("microsoft-entra-id", { redirectTo: "/study" }) }}>
+              <button className="w-full flex items-center justify-center gap-2 rounded-xl bg-[#00a4ef] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#0089c7] transition">
+                🪟 Microsoft
+              </button>
+            </form>
+          </div>
+
           <p className="mt-6 text-center text-sm text-slate-600">
             Already have an account? <a href="/login" className="font-medium text-indigo-700 hover:text-indigo-800">Sign in</a>
           </p>

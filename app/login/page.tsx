@@ -105,6 +105,30 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
             </button>
           </form>
 
+          <div className="mt-8 flex items-center justify-between">
+            <span className="w-1/5 border-b border-slate-200 lg:w-1/4"></span>
+            <span className="text-xs text-center text-slate-500 uppercase font-semibold">Or continue with</span>
+            <span className="w-1/5 border-b border-slate-200 lg:w-1/4"></span>
+          </div>
+
+          <div className="mt-6 grid grid-cols-2 gap-3">
+            <form action={async () => { "use server"; await signIn("google", { redirectTo: callbackUrl ?? "/study" }) }}>
+              <button className="w-full flex items-center justify-center gap-2 rounded-xl bg-white border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition">
+                🌐 Google
+              </button>
+            </form>
+            <form action={async () => { "use server"; await signIn("facebook", { redirectTo: callbackUrl ?? "/study" }) }}>
+              <button className="w-full flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 transition">
+                📘 Facebook
+              </button>
+            </form>
+            <form action={async () => { "use server"; await signIn("microsoft-entra-id", { redirectTo: callbackUrl ?? "/study" }) }}>
+              <button className="w-full flex items-center justify-center gap-2 rounded-xl bg-[#00a4ef] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#0089c7] transition">
+                🪟 Microsoft
+              </button>
+            </form>
+          </div>
+
           {error ? (
             <div className="mt-6 p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-sm text-rose-400 animate-in fade-in slide-in-from-top-2">
               <p className="font-bold mb-1">Login Failed / فشل تسجيل الدخول</p>
