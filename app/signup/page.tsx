@@ -65,7 +65,7 @@ export default async function SignupPage({ searchParams }: SignupPageProps) {
           {error && (
             <div className="mb-4 rounded-2xl bg-rose-50 p-4 text-sm text-rose-700">
               {error === "EmailExists"
-                ? "Email already registered. Please use a different email."
+                ? "Email already registered. Please use a different email or log in. / الإيميل مسجل بالفعل."
                 : error === "UniversityIdExists"
                   ? "University ID already exists. Use a different ID."
                   : error === "PasswordMismatch"
@@ -74,7 +74,9 @@ export default async function SignupPage({ searchParams }: SignupPageProps) {
                       ? "Password is too short. Use at least 6 characters."
                       : error === "MissingFields"
                         ? "Please complete all required fields."
-                        : "Registration failed. Please try again."}
+                        : error === "OAuthFailed"
+                          ? "OAuth signup failed. Please try again. / فشل التسجيل عبر Google/Microsoft."
+                          : "Registration failed. Please try again."}
             </div>
           )}
 
@@ -174,12 +176,12 @@ export default async function SignupPage({ searchParams }: SignupPageProps) {
           </div>
 
           <div className="mt-6 grid grid-cols-2 gap-3">
-            <form action={async () => { "use server"; const { signIn } = await import("@/auth"); await signIn("google", { redirectTo: "/study" }) }}>
+            <form action={async () => { "use server"; const { cookies } = await import("next/headers"); const cookieStore = await cookies(); cookieStore.set("oauth_signup", "true", { path: "/", maxAge: 300, httpOnly: true }); const { signIn } = await import("@/auth"); await signIn("google", { redirectTo: "/study" }) }}>
               <button className="w-full flex items-center justify-center gap-2 rounded-xl bg-white border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition">
                 🌐 Google
               </button>
             </form>
-            <form action={async () => { "use server"; const { signIn } = await import("@/auth"); await signIn("microsoft-entra-id", { redirectTo: "/study" }) }}>
+            <form action={async () => { "use server"; const { cookies } = await import("next/headers"); const cookieStore = await cookies(); cookieStore.set("oauth_signup", "true", { path: "/", maxAge: 300, httpOnly: true }); const { signIn } = await import("@/auth"); await signIn("microsoft-entra-id", { redirectTo: "/study" }) }}>
               <button className="w-full flex items-center justify-center gap-2 rounded-xl bg-[#00a4ef] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#0089c7] transition">
                 🪟 Microsoft
               </button>

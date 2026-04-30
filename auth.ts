@@ -5,7 +5,6 @@ import MicrosoftEntra from "next-auth/providers/microsoft-entra-id";
 import { prisma } from "@/lib/prisma";
 import { authConfig } from "./auth.config";
 import { cookies } from "next/headers";
-import { decode } from "next-auth/jwt";
 
 function generateRandomUniversityId() {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -21,7 +20,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       clientId: process.env.AUTH_GOOGLE_ID,
       clientSecret: process.env.AUTH_GOOGLE_SECRET,
       allowDangerousEmailAccountLinking: false,
-      authorization: { params: { prompt: "select_account" } }
+      authorization: { params: { prompt: "select_account", access_type: "offline" } }
     }),
     MicrosoftEntra({
       clientId: process.env.AUTH_MICROSOFT_ENTRA_ID_ID,
@@ -99,26 +98,27 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           return true;
         }
 
-        // 1.5 Check if user is already logged in (Linking Flow)
-        // We use the cookies to check if there is an active session
+        // 1.5 Check cookies for linking flow or signup flow
         const cookieStore = await cookies();
         const linkingId = cookieStore.get("linking_id")?.value;
+        const isSignupFlow = cookieStore.get("oauth_signup")?.value === "true";
+        
+        // Clean up the signup cookie immediately
+        if (isSignupFlow) {
+          cookieStore.delete("oauth_signup");
+        }
         
         const email = user.email || profile?.email;
         if (!email) return false;
 
         // 2. Linking Logic: ONLY allow linking if the explicit 'linking_id' cookie exists
-        // This prevents auto-relinking when a user has an old session active
-        const targetUniversityId = linkingId;
-
-        if (targetUniversityId) {
+        if (linkingId) {
           try {
             const currentUser = await prisma.studentAccount.findUnique({
-              where: { universityId: targetUniversityId }
+              where: { universityId: linkingId }
             });
 
               if (currentUser) {
-                // Link to the account identified by linkingId or sessionToken
                 await prisma.linkedAccount.upsert({
                   where: {
                     provider_providerAccountId: {
@@ -139,7 +139,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                     access_token: account.access_token as string | null,
                   }
                 });
-                // CRITICAL: Force the session to use the EXISTING universityId
                 user.id = currentUser.universityId;
                 user.name = currentUser.name;
                 return true;
@@ -149,7 +148,45 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             }
         }
 
-        // 3. Deny login if not linked and no linking session
+        // 3. Signup Flow: Create PendingOAuth and redirect to complete-profile
+        if (isSignupFlow) {
+          try {
+            // Check if email already has an account
+            const existingByEmail = await prisma.studentAccount.findUnique({
+              where: { email }
+            });
+            if (existingByEmail) {
+              return `/signup?error=EmailExists`;
+            }
+
+            // Delete any old pending records for this provider+account combo
+            await prisma.pendingOAuth.deleteMany({
+              where: {
+                provider: account.provider,
+                providerAccountId: account.providerAccountId,
+              }
+            });
+
+            // Create a new PendingOAuth record
+            const pending = await prisma.pendingOAuth.create({
+              data: {
+                email,
+                provider: account.provider,
+                providerAccountId: account.providerAccountId,
+                name: user.name || profile?.name || null,
+                image: (user as any).image || (profile as any)?.picture || null,
+              }
+            });
+
+            // Redirect to complete-profile page (return false + redirect URL)
+            return `/signup/complete-profile?pendingId=${pending.id}`;
+          } catch (e) {
+            console.error("OAuth Signup Error:", e);
+            return `/signup?error=OAuthFailed`;
+          }
+        }
+
+        // 4. Normal login flow: Deny if not linked
         return `/login?error=NotLinked&provider=${account.provider}`;
       }
       return true;

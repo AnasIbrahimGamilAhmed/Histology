@@ -126,9 +126,19 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
 
           {error ? (
             <div className="mt-6 p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-sm text-rose-400 animate-in fade-in slide-in-from-top-2">
-              <p className="font-bold mb-1">Login Failed / فشل تسجيل الدخول</p>
-              <p>Invalid ID or password. If you just registered, ensure you are using the correct credentials.</p>
-              <p className="mt-1">الرقم الجامعي أو كلمة المرور غير صحيحة. تأكد من البيانات التي سجلت بها.</p>
+              {error === "NotLinked" ? (
+                <>
+                  <p className="font-bold mb-1">Account Not Linked / الحساب غير مربوط</p>
+                  <p>This Google/Microsoft account is not linked to any HistoPro account. Please <a href="/signup" className="font-bold underline text-indigo-400 hover:text-indigo-300">sign up first</a>, or link it from User Center.</p>
+                  <p className="mt-1">حساب Google/Microsoft غير مربوط بأي حساب. <a href="/signup" className="font-bold underline text-indigo-400 hover:text-indigo-300">سجّل حساب جديد</a> أو اربطه من إعدادات الحساب.</p>
+                </>
+              ) : (
+                <>
+                  <p className="font-bold mb-1">Login Failed / فشل تسجيل الدخول</p>
+                  <p>Invalid ID or password. If you just registered, ensure you are using the correct credentials.</p>
+                  <p className="mt-1">الرقم الجامعي أو كلمة المرور غير صحيحة. تأكد من البيانات التي سجلت بها.</p>
+                </>
+              )}
             </div>
           ) : null}
 
