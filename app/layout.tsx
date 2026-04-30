@@ -12,6 +12,8 @@ export const metadata: Metadata = {
   description: "Advanced histology simulation and diagnostic training for medical students.",
 };
 
+import { Analytics } from "@vercel/analytics/react";
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${inter.variable} ${outfit.variable}`}>
@@ -20,6 +22,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           {children}
           <MobileNav />
         </ClientLayout>
+        <Analytics />
       </body>
     </html>
   );
