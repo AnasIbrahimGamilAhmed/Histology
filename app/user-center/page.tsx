@@ -52,7 +52,7 @@ export default function UserCenter() {
 
   useEffect(() => {
     if (status === "unauthenticated") {
-      router.push("/login");
+      router.push("/login?callbackUrl=/user-center");
     } else if (status === "authenticated" && session?.user) {
       setFormData({
         name: session.user.name || "",
