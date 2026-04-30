@@ -100,6 +100,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         // This part is a bit tricky in v5, so we rely on the email match as a solid fallback
         // but if we have an active student account in the DB with the same email, we link it.
 
+        const email = user.email || profile?.email;
+        if (!email) return false;
+
         // 2. Check if an account with this email already exists manually
         const existingStudent = await prisma.studentAccount.findUnique({
           where: { email }

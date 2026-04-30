@@ -262,7 +262,7 @@ export default function UserCenter() {
                   <button
                     onClick={() => {
                       setIsEditing(false);
-                      setFormData({ name: session.user.name || "", email: session.user.email || "", password: "" });
+                      setFormData({ name: session.user.name || "", email: session.user.email || "", password: "", phone: (session.user as any).phone || "" });
                     }}
                     className="px-10 py-5 bg-slate-100 text-slate-600 rounded-[1.5rem] font-black uppercase tracking-widest hover:bg-slate-200 transition-all"
                   >
