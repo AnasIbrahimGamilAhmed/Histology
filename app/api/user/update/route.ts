@@ -37,7 +37,7 @@ export async function POST(req: Request) {
 
     if (phone) {
       // Check if phone is already used
-      const existingPhone = await prisma.studentAccount.findFirst({
+      const existingPhone = await (prisma.studentAccount as any).findFirst({
         where: {
           phone: phone,
           id: { not: session.user.id }
@@ -69,7 +69,7 @@ export async function POST(req: Request) {
       user: {
         name: updatedUser.name,
         email: updatedUser.email,
-        phone: updatedUser.phone
+        phone: (updatedUser as any).phone
       }
     });
 
