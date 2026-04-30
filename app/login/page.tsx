@@ -147,7 +147,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
 async function loginAction(formData: FormData) {
   "use server";
 
-  const universityId = String(formData.get("universityId") ?? "");
+  const universityId = String(formData.get("universityId") ?? "").replace(/_/g, '-').toUpperCase().trim();
   const password = String(formData.get("password") ?? "");
   const callbackUrl = String(formData.get("callbackUrl") ?? "/study");
 

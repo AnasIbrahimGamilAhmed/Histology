@@ -4,7 +4,11 @@ import { sendVerificationEmail } from "@/lib/mailService";
 
 export async function POST(req: Request) {
   try {
-    const { universityId, email: selectedEmail } = await req.json();
+    let { universityId, email: selectedEmail } = await req.json();
+
+    if (universityId) {
+      universityId = universityId.replace(/_/g, '-').toUpperCase().trim();
+    }
 
     // STEP 1: Lookup ID and return emails
     if (universityId && !selectedEmail) {

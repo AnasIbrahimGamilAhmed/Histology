@@ -36,7 +36,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         password: { label: "Password", type: "password" }
       },
       async authorize(credentials) {
-        const universityId = String(credentials.universityId ?? "").trim();
+        let universityId = String(credentials.universityId ?? "").replace(/_/g, '-').toUpperCase().trim();
         const password = String(credentials.password ?? "");
 
         if (!universityId || !password) {
@@ -170,51 +170,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             }
         }
 
-        // 3. Fallback: Check if an account with this email already exists
-        const existingStudent = await prisma.studentAccount.findUnique({
-          where: { email }
-        });
-
-        if (existingStudent) {
-          // Auto-link social account to this existing HistoPro account
-          await prisma.linkedAccount.upsert({
-            where: {
-              provider_providerAccountId: {
-                provider: account.provider,
-                providerAccountId: account.providerAccountId,
-              }
-            },
-            update: {
-              userId: existingStudent.id,
-              access_token: account.access_token as string | null,
-            },
-            create: {
-              userId: existingStudent.id,
-              type: account.type,
-              provider: account.provider,
-              providerAccountId: account.providerAccountId,
-              email: email,
-              access_token: account.access_token as string | null,
-            }
-          });
-          user.id = existingStudent.universityId;
-          user.name = existingStudent.name;
-          return true;
-        }
-
-        // 4. New User Case: Save data temporarily and redirect to "Complete Profile"
-        const pending = await prisma.pendingOAuth.create({
-          data: {
-            email: email,
-            provider: account.provider,
-            providerAccountId: account.providerAccountId,
-            name: user.name || "",
-            image: user.image || ""
-          }
-        });
-
-        // Redirect to a page to ask for Name and Password
-        return `/signup/complete-profile?pendingId=${pending.id}`;
+        // 3. Deny login if not linked and no linking session
+        return `/login?error=NotLinked&provider=${account.provider}`;
       }
       return true;
     }
