@@ -104,40 +104,25 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         const email = user.email || profile?.email;
         if (!email) return false;
 
-        // 2. Check if there's an active session in the database
-        if (sessionToken) {
-          const session = await prisma.session.findUnique({
-            where: { sessionToken },
-            include: { user: true }
-          });
-
-          if (session?.user) {
-            // Found active session, link to THIS user
-            await prisma.linkedAccount.create({
-              data: {
-                userId: session.userId,
-                type: account.type,
-                provider: account.provider,
-                providerAccountId: account.providerAccountId,
-                email: email,
-                access_token: account.access_token as string | null,
-              }
-            });
-            // CRITICAL: Keep current universityId
-            user.id = (session.user as any).universityId;
-            return true;
-          }
-        }
-
-        // 3. Fallback: Check if an account with this email already exists manually
+        // 2. Check if an account with this email already exists
         const existingStudent = await prisma.studentAccount.findUnique({
           where: { email }
         });
 
         if (existingStudent) {
-          // Auto-link Google to this existing HistoPro account
-          await prisma.linkedAccount.create({
-            data: {
+          // Auto-link social account to this existing HistoPro account
+          await prisma.linkedAccount.upsert({
+            where: {
+              provider_providerAccountId: {
+                provider: account.provider,
+                providerAccountId: account.providerAccountId,
+              }
+            },
+            update: {
+              userId: existingStudent.id,
+              access_token: account.access_token as string | null,
+            },
+            create: {
               userId: existingStudent.id,
               type: account.type,
               provider: account.provider,
