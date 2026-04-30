@@ -3,6 +3,39 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    background-color: #020617;
+  }
+
+  body {
+    @apply bg-[#020617] text-slate-200 antialiased selection:bg-indigo-500/30;
+  }
+
+  /* Custom Scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #020617;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #1e293b;
+    border-radius: 10px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #312e81;
+  }
+
   @keyframes fadeInUp {
     from {
       opacity: 0;
@@ -41,10 +74,6 @@
     50% {
       transform: translateY(-8px);
     }
-  }
-
-  body {
-    @apply bg-slate-50 text-slate-900 antialiased;
   }
 
   h1, h2, h3 {

@@ -112,12 +112,27 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
           </div>
 
           <div className="mt-6 grid grid-cols-2 gap-3">
-            <form action={async () => { "use server"; await signIn("google", { redirectTo: callbackUrl ?? "/study" }) }}>
+            <form action={async () => { 
+              "use server"; 
+              const { cookies } = await import("next/headers");
+              const cookieStore = await cookies();
+              // Set oauth_signup to true so auth.ts knows to allow signup if account isn't found
+              cookieStore.set("oauth_signup", "true", { path: "/", maxAge: 300, httpOnly: true });
+              const { signIn } = await import("@/auth");
+              await signIn("google", { redirectTo: callbackUrl ?? "/study" });
+            }}>
               <button className="w-full flex items-center justify-center gap-2 rounded-xl bg-white border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition">
                 🌐 Google
               </button>
             </form>
-            <form action={async () => { "use server"; await signIn("microsoft-entra-id", { redirectTo: callbackUrl ?? "/study" }) }}>
+            <form action={async () => { 
+              "use server"; 
+              const { cookies } = await import("next/headers");
+              const cookieStore = await cookies();
+              cookieStore.set("oauth_signup", "true", { path: "/", maxAge: 300, httpOnly: true });
+              const { signIn } = await import("@/auth");
+              await signIn("microsoft-entra-id", { redirectTo: callbackUrl ?? "/study" });
+            }}>
               <button className="w-full flex items-center justify-center gap-2 rounded-xl bg-[#00a4ef] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#0089c7] transition">
                 🪟 Microsoft
               </button>

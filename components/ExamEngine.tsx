@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import type { ExamQuestion } from "@/lib/examService";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
+import Image from "next/image";
 import { CheckCircle2, XCircle, Loader2, Microscope, ArrowRight, Lightbulb, AlertCircle, Timer } from "lucide-react";
 
 type ExamEngineProps = {
@@ -255,18 +256,15 @@ export function ExamEngine({ questions, mode }: ExamEngineProps) {
               </motion.button>
             ) : (
               <div className="relative h-[400px] w-full rounded-[2.5rem] overflow-hidden border border-slate-800 shadow-2xl bg-slate-950">
-                <motion.img
-                  initial={{ scale: 1.2, opacity: 0 }}
-                  animate={{ 
-                    scale: zoomFactor * (currentQuestion.microscopy?.cropRect ? 2.5 : 1), 
-                    opacity: 1 
-                  }}
+                <Image
                   src={currentQuestion.image}
                   alt="Histology Specimen"
+                  fill
+                  priority
                   className="absolute inset-0 h-full w-full object-cover"
                   style={{
                     filter: `blur(${currentQuestion.microscopy?.blurPx ?? 0}px) contrast(${currentQuestion.microscopy?.contrast ?? 1})`,
-                    transform: `rotate(${currentQuestion.microscopy?.rotationDeg ?? 0}deg)`,
+                    transform: `rotate(${currentQuestion.microscopy?.rotationDeg ?? 0}deg) scale(${zoomFactor * (currentQuestion.microscopy?.cropRect ? 2.5 : 1)})`,
                     objectPosition: currentQuestion.microscopy?.cropRect
                       ? `${currentQuestion.microscopy.cropRect.x}% ${currentQuestion.microscopy.cropRect.y}%`
                       : "center",
@@ -363,11 +361,12 @@ export function ExamEngine({ questions, mode }: ExamEngineProps) {
                   ) : feedbackByQuestion[currentQuestion.id] ? (
                     <div className="space-y-4">
                       {/* Image Section */}
-                      <div className="relative group rounded-[2.5rem] overflow-hidden border border-white/10 bg-black shadow-2xl">
-                        <img 
+                      <div className="relative group rounded-[2.5rem] overflow-hidden border border-white/10 bg-black shadow-2xl h-[350px] md:h-[500px]">
+                        <Image 
                           src={currentQuestion.image} 
                           alt="Exam Specimen" 
-                          className="w-full h-[350px] md:h-[500px] object-cover transition-transform duration-700 group-hover:scale-105"
+                          fill
+                          className="object-cover transition-transform duration-700 group-hover:scale-110"
                           style={{
                             objectPosition: currentQuestion.microscopy?.cropRect
                               ? `${currentQuestion.microscopy.cropRect.x}% ${currentQuestion.microscopy.cropRect.y}%`

@@ -1,10 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { Microscope, Brain, BookOpen, BarChart3, ChevronRight, PlayCircle, Sparkles } from "lucide-react";
+import { Microscope, Brain, BookOpen, BarChart3, ChevronRight, PlayCircle, Sparkles, LayoutDashboard } from "lucide-react";
 import { motion } from "framer-motion";
+import { useSession } from "next-auth/react";
 
 export default function HomePage() {
+  const { data: session, status } = useSession();
+  const isAuthenticated = status === "authenticated";
+
   return (
     <div className="min-h-screen bg-[#020617] text-slate-200 selection:bg-indigo-500/30 overflow-x-hidden">
       {/* Background decoration */}
@@ -68,19 +72,41 @@ export default function HomePage() {
             transition={{ delay: 0.3 }}
             className="flex flex-col sm:flex-row gap-6"
           >
-            <Link 
-              href="/dashboard" 
-              className="group px-10 py-5 bg-indigo-600 hover:bg-indigo-500 text-white font-black uppercase tracking-widest rounded-2xl transition-all shadow-2xl shadow-indigo-500/20 hover:scale-105 active:scale-95 flex items-center gap-3"
-            >
-              <PlayCircle size={24} />
-              Start Learning
-            </Link>
-            <Link 
-              href="/signup" 
-              className="px-10 py-5 bg-white/5 hover:bg-white/10 text-white font-black uppercase tracking-widest rounded-2xl border border-white/10 transition-all hover:scale-105 active:scale-95 shadow-xl"
-            >
-              Sign Up / تسجيل جديد
-            </Link>
+            {isAuthenticated ? (
+              <Link 
+                href="/dashboard" 
+                className="group px-10 py-5 bg-indigo-600 hover:bg-indigo-500 text-white font-black uppercase tracking-widest rounded-2xl transition-all shadow-2xl shadow-indigo-500/20 hover:scale-105 active:scale-95 flex items-center gap-3"
+              >
+                <LayoutDashboard size={24} />
+                Go to Dashboard
+              </Link>
+            ) : (
+              <Link 
+                href="/signup" 
+                className="group px-10 py-5 bg-indigo-600 hover:bg-indigo-500 text-white font-black uppercase tracking-widest rounded-2xl transition-all shadow-2xl shadow-indigo-500/20 hover:scale-105 active:scale-95 flex items-center gap-3"
+              >
+                <PlayCircle size={24} />
+                Start Learning
+              </Link>
+            )}
+            
+            {!isAuthenticated && (
+              <Link 
+                href="/login" 
+                className="px-10 py-5 bg-white/5 hover:bg-white/10 text-white font-black uppercase tracking-widest rounded-2xl border border-white/10 transition-all hover:scale-105 active:scale-95 shadow-xl"
+              >
+                Login / تسجيل دخول
+              </Link>
+            )}
+            
+            {isAuthenticated && (
+              <Link 
+                href="/study" 
+                className="px-10 py-5 bg-white/5 hover:bg-white/10 text-white font-black uppercase tracking-widest rounded-2xl border border-white/10 transition-all hover:scale-105 active:scale-95 shadow-xl"
+              >
+                Open Study Tree
+              </Link>
+            )}
           </motion.div>
         </div>
 
