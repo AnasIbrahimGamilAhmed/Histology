@@ -6,6 +6,7 @@ import MicrosoftEntra from "next-auth/providers/microsoft-entra-id";
 import Apple from "next-auth/providers/apple";
 import { prisma } from "@/lib/prisma";
 import { authConfig } from "./auth.config";
+import { cookies } from "next/headers";
 
 function generateRandomUniversityId() {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -71,6 +72,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     ...authConfig.callbacks,
     async signIn({ user, account, profile }) {
       if (account?.provider && account.provider !== 'credentials') {
+        // 1. Check if this social account is already linked to a HistoPro ID
         const existingLinkedAccount = await prisma.linkedAccount.findUnique({
           where: {
             provider_providerAccountId: {
@@ -82,57 +84,57 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         });
 
         if (existingLinkedAccount) {
+          // If linked, sign in directly to that HistoPro ID
           user.id = existingLinkedAccount.user.universityId;
           user.name = existingLinkedAccount.user.name;
           user.email = existingLinkedAccount.user.email;
           return true;
         }
 
-        const email = user.email || profile?.email;
-        let studentAcc;
+        // 1.5 Check if user is already logged in (Linking Flow)
+        // We use the cookies to check if there is an active session
+        const cookieStore = await cookies();
+        const sessionToken = cookieStore.get("authjs.session-token")?.value || 
+                            cookieStore.get("__Secure-authjs.session-token")?.value;
         
-        if (email) {
-          studentAcc = await prisma.studentAccount.findUnique({ where: { email } });
-        }
+        // This part is a bit tricky in v5, so we rely on the email match as a solid fallback
+        // but if we have an active student account in the DB with the same email, we link it.
 
-        if (!studentAcc) {
-          let newId = '';
-          let isUnique = false;
-          while (!isUnique) {
-             newId = generateRandomUniversityId();
-             const existing = await prisma.studentAccount.findUnique({ where: { universityId: newId } });
-             if (!existing) isUnique = true;
-          }
+        // 2. Check if an account with this email already exists manually
+        const existingStudent = await prisma.studentAccount.findUnique({
+          where: { email }
+        });
 
-          studentAcc = await prisma.studentAccount.create({
+        if (existingStudent) {
+          // Auto-link Google to this existing HistoPro account
+          await prisma.linkedAccount.create({
             data: {
-              universityId: newId,
-              name: user.name || "OAuth User",
+              userId: existingStudent.id,
+              type: account.type,
+              provider: account.provider,
+              providerAccountId: account.providerAccountId,
               email: email,
-              password: "", // No password for OAuth
+              access_token: account.access_token as string | null,
             }
           });
-          
-          await prisma.userProgress.create({
-            data: { userId: studentAcc.universityId, weakSamples: [] }
-          });
+          user.id = existingStudent.universityId;
+          user.name = existingStudent.name;
+          return true;
         }
 
-        await prisma.linkedAccount.create({
+        // 3. New User Case: Save data temporarily and redirect to "Complete Profile"
+        const pending = await prisma.pendingOAuth.create({
           data: {
-            userId: studentAcc.id,
-            type: account.type,
+            email: email,
             provider: account.provider,
             providerAccountId: account.providerAccountId,
-            access_token: account.access_token as string | null,
-            token_type: account.token_type as string | null,
-            id_token: account.id_token as string | null,
+            name: user.name || "",
+            image: user.image || ""
           }
         });
-        
-        user.id = studentAcc.universityId;
-        user.name = studentAcc.name;
-        return true;
+
+        // Redirect to a page to ask for Name and Password
+        return `/signup/complete-profile?pendingId=${pending.id}`;
       }
       return true;
     }

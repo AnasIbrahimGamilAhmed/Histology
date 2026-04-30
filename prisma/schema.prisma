@@ -182,8 +182,9 @@ model LinkedAccount {
   type              String
   provider          String
   providerAccountId String
-  refresh_token     String?
-  access_token      String?
+  email             String?
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
   expires_at        Int?
   token_type        String?
   scope             String?
@@ -251,3 +252,13 @@ enum ExamMode {
   pressure
 }
 
+
+model PendingOAuth {
+  id                String   @id @default(cuid())
+  email             String
+  provider          String
+  providerAccountId String
+  name              String?
+  image             String?
+  createdAt         DateTime @default(now())
+}

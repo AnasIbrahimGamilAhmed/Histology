@@ -23,6 +23,10 @@ export default function MobileNav() {
   const isLoading = status === "loading";
   const isAuthenticated = status === "authenticated";
 
+  // Hide on auth pages
+  const authPages = ["/", "/login", "/signup", "/forgot-password", "/signup/complete-profile"];
+  if (authPages.includes(pathname)) return null;
+
   return (
     <>
       {/* Bottom Nav Bar for Mobile */}
