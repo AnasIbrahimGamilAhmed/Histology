@@ -27,8 +27,11 @@ const MicrosoftIcon = () => (
   </svg>
 );
 
+import { useRouter } from "next/navigation";
+
 export default function UserCenter() {
-  const { data: session, update } = useSession();
+  const { data: session, status, update } = useSession();
+  const router = useRouter();
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({ name: "", email: "", password: "" });
   const [isSaving, setIsSaving] = useState(false);
@@ -48,7 +51,9 @@ export default function UserCenter() {
   };
 
   useEffect(() => {
-    if (session?.user) {
+    if (status === "unauthenticated") {
+      router.push("/login");
+    } else if (status === "authenticated" && session?.user) {
       setFormData({
         name: session.user.name || "",
         email: session.user.email || "",
@@ -56,7 +61,7 @@ export default function UserCenter() {
       });
       fetchLinkedAccounts();
     }
-  }, [session]);
+  }, [status, session, router]);
 
   const handleSave = async () => {
     setIsSaving(true);
@@ -109,9 +114,9 @@ export default function UserCenter() {
     { id: "microsoft-entra-id", name: "Microsoft", icon: <MicrosoftIcon /> }
   ];
 
-  if (!session) {
+  if (status === "loading" || !session) {
     return (
-      <div className="flex h-screen items-center justify-center bg-slate-50">
+      <div className="flex min-h-screen items-center justify-center bg-slate-50">
         <Loader2 className="w-10 h-10 animate-spin text-indigo-600" />
       </div>
     );
