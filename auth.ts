@@ -97,11 +97,23 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         // 1.5 Check if user is already logged in (Linking Flow)
         // We use the cookies to check if there is an active session
         const cookieStore = await cookies();
-        const sessionToken = 
-          cookieStore.get("authjs.session-token")?.value || 
-          cookieStore.get("__Secure-authjs.session-token")?.value ||
-          cookieStore.get("next-auth.session-token")?.value ||
-          cookieStore.get("__Secure-next-auth.session-token")?.value;
+        let sessionToken = '';
+        let salt = '';
+        const cookieNames = [
+          "authjs.session-token",
+          "__Secure-authjs.session-token",
+          "next-auth.session-token",
+          "__Secure-next-auth.session-token"
+        ];
+        
+        for (const name of cookieNames) {
+          const val = cookieStore.get(name)?.value;
+          if (val) {
+            sessionToken = val;
+            salt = name;
+            break;
+          }
+        }
         
         // This part is a bit tricky in v5, so we rely on the session token in cookies
         // if the user is already logged in, we link this new provider to their current account.
@@ -112,10 +124,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         // 2. JWT Linking Logic: Check if there's an active session in the cookies
         if (sessionToken) {
           try {
-            // Securely decode the session token using the secret
+            // Securely decode the session token using the secret and salt
             const payload = await decode({ 
               token: sessionToken, 
-              secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET || "" 
+              secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET || "",
+              salt: salt
             });
             const currentUniversityId = payload?.sub as string;
 
