@@ -40,7 +40,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           where: {
             OR: [
               { universityId: { equals: universityId, mode: 'insensitive' } },
-              { email: { equals: universityId, mode: 'insensitive' } }
+              { email: { equals: universityId, mode: 'insensitive' } },
+              { phone: { equals: universityId, mode: 'insensitive' } }
             ]
           }
         });
@@ -97,13 +98,38 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         const sessionToken = cookieStore.get("authjs.session-token")?.value || 
                             cookieStore.get("__Secure-authjs.session-token")?.value;
         
-        // This part is a bit tricky in v5, so we rely on the email match as a solid fallback
-        // but if we have an active student account in the DB with the same email, we link it.
+        // This part is a bit tricky in v5, so we rely on the session token in cookies
+        // if the user is already logged in, we link this new provider to their current account.
 
         const email = user.email || profile?.email;
         if (!email) return false;
 
-        // 2. Check if an account with this email already exists manually
+        // 2. Check if there's an active session in the database
+        if (sessionToken) {
+          const session = await prisma.session.findUnique({
+            where: { sessionToken },
+            include: { user: true }
+          });
+
+          if (session?.user) {
+            // Found active session, link to THIS user
+            await prisma.linkedAccount.create({
+              data: {
+                userId: session.userId,
+                type: account.type,
+                provider: account.provider,
+                providerAccountId: account.providerAccountId,
+                email: email,
+                access_token: account.access_token as string | null,
+              }
+            });
+            // CRITICAL: Keep current universityId
+            user.id = (session.user as any).universityId;
+            return true;
+          }
+        }
+
+        // 3. Fallback: Check if an account with this email already exists manually
         const existingStudent = await prisma.studentAccount.findUnique({
           where: { email }
         });
