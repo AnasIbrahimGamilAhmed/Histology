@@ -7,6 +7,7 @@ import Apple from "next-auth/providers/apple";
 import { prisma } from "@/lib/prisma";
 import { authConfig } from "./auth.config";
 import { cookies } from "next/headers";
+import { decodeJwt } from "jose";
 
 function generateRandomUniversityId() {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -101,10 +102,52 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         // This part is a bit tricky in v5, so we rely on the session token in cookies
         // if the user is already logged in, we link this new provider to their current account.
 
-        const email = user.email || profile?.email;
-        if (!email) return false;
+        // 2. JWT Linking Logic: Check if there's an active session in the cookies
+        if (sessionToken) {
+          try {
+            // Decode the JWT to get the current user's universityId
+            const payload = decodeJwt(sessionToken);
+            const currentUniversityId = payload.sub as string;
 
-        // 2. Check if an account with this email already exists
+            if (currentUniversityId) {
+              const currentUser = await prisma.studentAccount.findUnique({
+                where: { universityId: currentUniversityId }
+              });
+
+              if (currentUser) {
+                // Link to the account the student is CURRENTLY logged into
+                await prisma.linkedAccount.upsert({
+                  where: {
+                    provider_providerAccountId: {
+                      provider: account.provider,
+                      providerAccountId: account.providerAccountId,
+                    }
+                  },
+                  update: {
+                    userId: currentUser.id,
+                    access_token: account.access_token as string | null,
+                  },
+                  create: {
+                    userId: currentUser.id,
+                    type: account.type,
+                    provider: account.provider,
+                    providerAccountId: account.providerAccountId,
+                    email: email,
+                    access_token: account.access_token as string | null,
+                  }
+                });
+                // CRITICAL: Preserve the original University ID
+                user.id = currentUser.universityId;
+                user.name = currentUser.name;
+                return true;
+              }
+            }
+          } catch (e) {
+            console.error("JWT Decode Error during linking:", e);
+          }
+        }
+
+        // 3. Fallback: Check if an account with this email already exists
         const existingStudent = await prisma.studentAccount.findUnique({
           where: { email }
         });
@@ -136,7 +179,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           return true;
         }
 
-        // 3. New User Case: Save data temporarily and redirect to "Complete Profile"
+        // 4. New User Case: Save data temporarily and redirect to "Complete Profile"
         const pending = await prisma.pendingOAuth.create({
           data: {
             email: email,
