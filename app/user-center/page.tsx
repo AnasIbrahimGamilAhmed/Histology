@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
-import { User, Mail, Shield, Save, Loader2, Link as LinkIcon, Unlink, CheckCircle2, AlertTriangle, Smartphone } from "lucide-react";
+import { User, Mail, Shield, Save, Loader2, Link as LinkIcon, Unlink, CheckCircle2, AlertTriangle, Smartphone, Lock } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { signIn } from "next-auth/react";
 
