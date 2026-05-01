@@ -79,13 +79,13 @@ function randomElement<T>(items: T[]) {
 
 function sampleCategory(name: string) {
   const lower = name.toLowerCase();
-  if (lower.includes("epitheli") || lower.includes("epithelium")) return "epithelial";
-  if (/(cartilage|bone|connective|adipose|areolar)/.test(lower)) return "connective";
-  if (/(muscle|skeletal|smooth|cardiac)/.test(lower)) return "muscular";
-  if (/(nerve|spinal cord|sciatic|nervous|neuroglia|motor neuron)/.test(lower)) return "nervous";
-  if (/(blood|rabbit|toad)/.test(lower)) return "blood";
-  if (/(liver|kidney|stomach|esophagus|oesophagus|trachea|pancreas|ileum|testis)/.test(lower)) return "organ-samples";
-  if (lower.includes("skin")) return "skin";
+  if (/(epitheli|squamous|cuboidal|columnar|pseudostratified|transitional)/.test(lower)) return "epithelial";
+  if (/(cartilage|bone|connective|adipose|areolar|fibrous|tendon|ligament|elastic)/.test(lower)) return "connective";
+  if (/(muscle|skeletal|smooth|cardiac|myofibril)/.test(lower)) return "muscular";
+  if (/(nerve|spinal cord|sciatic|nervous|neuroglia|motor neuron|axon|dendrite)/.test(lower)) return "nervous";
+  if (/(blood|rabbit|toad|leukocyte|erythrocyte|platelet|monocyte|lymphocyte|neutrophil|eosinophil|basophil)/.test(lower)) return "blood";
+  if (/(liver|kidney|stomach|esophagus|oesophagus|trachea|pancreas|ileum|testis|organ|gland|duct|follicle)/.test(lower)) return "organ-samples";
+  if (lower.includes("skin") || lower.includes("dermis") || lower.includes("epidermis") || lower.includes("hair")) return "skin";
   return "other";
 }
 
@@ -444,7 +444,15 @@ async function createExamInstance(userId: string, options: { mode: ExamMode; lim
     if (!variation) continue;
 
     const typeCandidates = buildQuestionTypeWeightList();
-    const selectedType = weightedChoice(typeCandidates);
+    
+    // Improved Diversity: Prioritize types not yet used in this exam
+    const usedTypes = new Set(questions.map(q => q.type));
+    const unusedTypes = typeCandidates.filter(c => !usedTypes.has(c.type));
+    
+    const selectedType = (unusedTypes.length > 0 && Math.random() < 0.7) 
+      ? weightedChoice(unusedTypes) 
+      : weightedChoice(typeCandidates);
+
     const difficulty: DifficultyLevel = variation.type === "exam_tricky_view" ? "hard" : Math.random() < 0.4 ? "hard" : Math.random() < 0.6 ? "medium" : "easy";
     const template = buildQuestionTemplate(sample, allSamples, selectedType.type, difficulty, variation);
 
@@ -549,7 +557,7 @@ async function createExamInstance(userId: string, options: { mode: ExamMode; lim
         acceptedAnswers: template.acceptedAnswers,
         reasoningPattern: template.reasoningPattern,
         microscopyConfig: buildMicroscopyConfig(variation),
-        fingerprint: `${fingerprint}|pad`
+        fingerprint: `${fingerprint}|pad|${Math.random()}`
       });
     }
   }
