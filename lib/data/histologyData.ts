@@ -93,19 +93,30 @@ export const histologyData: TissueSection[] = [
         imageUrls: ["/images/pseudostratified columnar/pseudostratified columnar.png", "/images/pseudostratified columnar/pseudostratified columnar micro.png"]
       },
       {
-        id: "stratified-squamous",
-        title: "Stratified Squamous",
-        description: "Multiple layers, top layers are flat.",
-        practicalTips: [
-          "Keratinized: Top layers have no nuclei (dead) -> Skin.",
-          "Non-keratinized: Top layers have nuclei -> Esophagus, Vagina."
-        ],
-        confusionWarning: "Do not confuse Keratinized with Non-keratinized. Look closely at the very top flaky layers: if you see little dark dots (nuclei), it is non-keratinized.",
+        id: "non-keratinized-stratified-squamous",
+        title: "Non-Keratinized Stratified Squamous",
+        titleAr: "حرشفية طبقية غير متقرنة",
+        description: "Multiple layers of cells, where the top layers are flat and retain their nuclei.",
+        practicalTips: ["Top layers have visible nuclei (alive cells).", "Lining of wet surfaces like the esophagus and vagina."],
+        practicalTipsAr: ["الطبقات السطحية تحتوي على أنوية واضحة.", "تبطن الأسطح الرطبة مثل المريء والمهبل."],
+        confusionWarning: "Unlike keratinized epithelium, the surface cells here are alive and have nuclei. Look for dark dots at the very top.",
         imageUrl: "/images/non keratinized stratified/non keratinized.png",
         imageUrls: [
           "/images/non keratinized stratified/non keratinized.png", 
-          "/images/non keratinized stratified/non keratinized micro.png",
-          "/images/keratized stratified/keratized .png",
+          "/images/non keratinized stratified/non keratinized micro.png"
+        ]
+      },
+      {
+        id: "keratinized-stratified-squamous",
+        title: "Keratinized Stratified Squamous",
+        titleAr: "حرشفية طبقية متقرنة",
+        description: "Multiple layers where the surface cells are dead, flat, and filled with keratin (no nuclei).",
+        practicalTips: ["Surface layers are dead and have no nuclei.", "Contains a thick layer of keratin on top for protection.", "Forms the epidermis of the skin."],
+        practicalTipsAr: ["الطبقات السطحية ميتة ولا تحتوي على أنوية.", "تحتوي على طبقة سميكة من الكيراتين للحماية.", "تكون طبقة البشرة في الجلد."],
+        confusionWarning: "Look for the flaky, pink/red keratin layer on top with no nuclei. This distinguishes it from the non-keratinized type.",
+        imageUrl: "/images/keratized stratified/keratized .png",
+        imageUrls: [
+          "/images/keratized stratified/keratized .png", 
           "/images/keratized stratified/kertaized micro.png",
           "/images/keratized stratified/layers.png"
         ],
@@ -115,8 +126,8 @@ export const histologyData: TissueSection[] = [
           buttonLabel: "Layers Analysis",
           buttonLabelAr: "تحليل الطبقات",
           imageUrl: "/images/keratized stratified/layers.png",
-          content: "The epidermis of thick skin (keratinized) consists of five distinct layers: 1. Stratum Basale (deepest, mitotic), 2. Stratum Spinosum (prickle cell layer), 3. Stratum Granulosum (keratohyalin granules), 4. Stratum Lucidum (clear layer found only in thick skin), 5. Stratum Corneum (topmost, dead flattened keratinized cells).",
-          contentAr: "تتكون البشرة في الجلد السميك (المقرن) من خمس طبقات متمايزة: 1. الطبقة القاعدة (الأعمق، انقسامية)، 2. الطبقة الشائكة، 3. الطبقة الحبيبية، 4. الطبقة الشفافة (توجد في الجلد السميك فقط)، 5. الطبقة القرنية (الأعلى، خلايا ميتة مسطحة)."
+          content: "The epidermis of thick skin (keratinized) consists of five distinct layers: 1. Stratum Basale, 2. Stratum Spinosum, 3. Stratum Granulosum, 4. Stratum Lucidum, 5. Stratum Corneum.",
+          contentAr: "تتكون البشرة في الجلد السميك من خمس طبقات: 1. الطبقة القاعدة، 2. الطبقة الشائكة، 3. الطبقة الحبيبية، 4. الطبقة الشفافة، 5. الطبقة القرنية."
         }
       },
       {
