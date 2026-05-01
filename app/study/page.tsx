@@ -345,12 +345,20 @@ function StudyContent() {
             >
               {/* Sidebar List */}
               <aside className="space-y-6">
-                <button 
-                  onClick={() => { setActiveParent(null); setSelectedSection(null); }}
-                  className="flex items-center gap-3 text-indigo-400 font-black uppercase tracking-widest text-xs hover:text-indigo-300 transition-all mb-8 bg-indigo-500/5 px-6 py-3 rounded-xl border border-indigo-500/10"
-                >
-                  <ArrowLeft size={16} /> Categories
-                </button>
+                <div className="flex gap-2 mb-8">
+                  <button 
+                    onClick={() => { setActiveParent(null); setSelectedSection(null); }}
+                    className="flex-1 flex items-center justify-center gap-2 text-indigo-400 font-black uppercase tracking-widest text-[10px] hover:text-indigo-300 transition-all bg-indigo-500/5 px-4 py-3 rounded-xl border border-indigo-500/10"
+                  >
+                    <ArrowLeft size={14} /> Categories
+                  </button>
+                  <Link
+                    href={`/exam?mode=standard&category=${activeParent.id}&limit=5&drill=1`}
+                    className="flex-1 flex items-center justify-center gap-2 bg-indigo-600 text-white font-black uppercase tracking-widest text-[10px] hover:bg-indigo-500 transition-all px-4 py-3 rounded-xl shadow-lg shadow-indigo-500/20"
+                  >
+                    <Brain size={14} /> Section Quiz
+                  </Link>
+                </div>
                 
                 <div className="p-3 rounded-[2.5rem] bg-slate-900/40 border border-slate-800/60 backdrop-blur-md shadow-2xl overflow-hidden">
                   <h2 className="px-6 py-5 text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] border-b border-slate-800/50 mb-4 flex justify-between items-center">

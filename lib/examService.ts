@@ -80,10 +80,10 @@ function sampleCategory(name: string) {
   const lower = name.toLowerCase();
   if (lower.includes("epitheli") || lower.includes("epithelium")) return "epithelial";
   if (/(cartilage|bone|connective|adipose|areolar)/.test(lower)) return "connective";
-  if (/(muscle|skeletal|smooth|cardiac)/.test(lower)) return "muscle";
+  if (/(muscle|skeletal|smooth|cardiac)/.test(lower)) return "muscular";
   if (/(nerve|spinal cord|sciatic|nervous|neuroglia|motor neuron)/.test(lower)) return "nervous";
   if (/(blood|rabbit|toad)/.test(lower)) return "blood";
-  if (/(liver|kidney|stomach|esophagus|trachea|pancreas|ileum)/.test(lower)) return "organ";
+  if (/(liver|kidney|stomach|esophagus|trachea|pancreas|ileum|testis)/.test(lower)) return "organ-samples";
   if (lower.includes("skin")) return "skin";
   return "other";
 }
@@ -325,8 +325,14 @@ async function getPreviousExamSamplePatterns(userId: string) {
   return map;
 }
 
-async function getUniqueSamplePool(userId: string, limit: number, mode: ExamMode, forceConfusionDrill?: boolean) {
-  const allAvailable = await prisma.sample.findMany({ include: { variations: true } });
+async function getUniqueSamplePool(userId: string, limit: number, mode: ExamMode, forceConfusionDrill?: boolean, category?: string) {
+  const allAvailableRaw = await prisma.sample.findMany({ include: { variations: true } });
+  
+  // Filter by category if requested
+  const allAvailable = category 
+    ? allAvailableRaw.filter(s => sampleCategory(s.name) === category)
+    : allAvailableRaw;
+
   if (allAvailable.length === 0) return [];
 
   // ONLY include samples that have at least one micro image
@@ -366,7 +372,7 @@ async function getUniqueSamplePool(userId: string, limit: number, mode: ExamMode
         combined.push(...fill.slice(0, limit - combined.length));
       }
 
-      return shuffle(combined);
+      return shuffle(combined).slice(0, limit);
     }
   }
 
@@ -385,18 +391,22 @@ async function getUniqueSamplePool(userId: string, limit: number, mode: ExamMode
   const filteredPool = poolWithMicro.filter((s) => !recentSampleIds.has(s.id));
   const poolToUse = filteredPool.length >= limit ? filteredPool : poolWithMicro;
 
-  return shuffle(poolToUse);
+  return shuffle(poolToUse).slice(0, limit);
 }
 
-async function createExamInstance(userId: string, options: { mode: ExamMode; limit: number; forceConfusionDrill?: boolean }) {
-  const availableSamples = await prisma.sample.findMany({ include: { variations: true } });
-  const allSamples = availableSamples.map((sample) => ({ id: sample.id, name: sample.name, category: sampleCategory(sample.name) }));
+async function createExamInstance(userId: string, options: { mode: ExamMode; limit: number; forceConfusionDrill?: boolean; category?: string }) {
+  const allAvailableRaw = await prisma.sample.findMany({ include: { variations: true } });
+  const allAvailable = options.category 
+    ? allAvailableRaw.filter(s => sampleCategory(s.name) === options.category)
+    : allAvailableRaw;
+
+  const allSamples = allAvailable.map((sample) => ({ id: sample.id, name: sample.name, category: sampleCategory(sample.name) }));
   const previousPatterns = await getPreviousExamSamplePatterns(userId);
   const existingFingerprints = new Set(
     (await prisma.examQuestionInstance.findMany({ select: { fingerprint: true } })).map((item) => item.fingerprint)
   );
 
-  const samplePool = await getUniqueSamplePool(userId, options.limit, options.mode, options.forceConfusionDrill);
+  const samplePool = await getUniqueSamplePool(userId, options.limit, options.mode, options.forceConfusionDrill, options.category);
   const questions = [] as Array<{
     sampleId: string;
     variationId?: string;
@@ -589,10 +599,10 @@ async function findActiveExam(userId: string, mode: ExamMode, limit: number) {
 
 export async function getExamQuestionsForMode(
   userId: string,
-  options: { mode: ExamMode; limit?: number; forceConfusionDrill?: boolean; forceRegenerate?: boolean }
+  options: { mode: ExamMode; limit?: number; forceConfusionDrill?: boolean; forceRegenerate?: boolean; category?: string }
 ): Promise<ExamResponse> {
   const limit = options.limit ?? 8;
-  const existing = await findActiveExam(userId, options.mode, limit);
+  const existing = options.category ? null : await findActiveExam(userId, options.mode, limit);
   if (existing && existing.questions.length > 0 && !options.forceRegenerate) {
     return {
       examId: existing.id,
@@ -626,7 +636,7 @@ export async function getExamQuestionsForMode(
     };
   }
 
-  const exam = await createExamInstance(userId, { mode: options.mode, limit, forceConfusionDrill: options.forceConfusionDrill });
+  const exam = await createExamInstance(userId, { mode: options.mode, limit, forceConfusionDrill: options.forceConfusionDrill, category: options.category });
   return {
     examId: exam.id,
     questions: exam.questions.map((question: any) => ({
@@ -659,11 +669,12 @@ export async function getExamQuestionsForMode(
   };
 }
 
-export async function getConfusionDrillQuestions(userId: string, limit = 6): Promise<ExamResponse> {
+export async function getConfusionDrillQuestions(userId: string, limit = 6, category?: string): Promise<ExamResponse> {
   return getExamQuestionsForMode(userId, {
     mode: "standard",
     limit,
     forceConfusionDrill: true,
-    forceRegenerate: true
+    forceRegenerate: true,
+    category
   });
 }
