@@ -459,8 +459,8 @@ export const histologyData: TissueSection[] = [
         ],
         confusionWarning: "Ileum has distinct outward-projecting villi and many goblet cells.",
         confusionWarningAr: "يتميز اللفائفي بالخملات البارزة للخارج وكثرة الخلايا الكأسية.",
-        imageUrl: "/images/illeum/ileum.png",
-        imageUrls: ["/images/illeum/ileum.png", "/images/illeum/ileum micro.png"]
+        imageUrl: "/images/illeum/illeum.png",
+        imageUrls: ["/images/illeum/illeum.png", "/images/illeum/illeum micro.png"]
       },
       {
         id: "kidney",
