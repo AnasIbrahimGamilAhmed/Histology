@@ -424,17 +424,20 @@ export function ExamEngine({ questions, mode }: ExamEngineProps) {
                     <div className="space-y-4">
                       {/* Image Section */}
                       <div className="relative group rounded-[2.5rem] overflow-hidden border border-white/10 bg-black shadow-2xl h-[350px] md:h-[500px]">
-                        <Image 
-                          src={currentQuestion.image} 
-                          alt="Exam Specimen" 
-                          fill
-                          className="object-cover transition-transform duration-700 group-hover:scale-110"
+                        <img
+                          src={currentQuestion.image}
+                          alt="Exam Specimen"
                           style={{
+                            width: "100%",
+                            height: "100%",
+                            objectFit: "cover",
                             objectPosition: currentQuestion.microscopy?.cropRect
                               ? `${currentQuestion.microscopy.cropRect.x}% ${currentQuestion.microscopy.cropRect.y}%`
                               : "center",
-                            transform: currentQuestion.microscopy?.cropRect ? "scale(2.5)" : "none"
+                            transform: currentQuestion.microscopy?.cropRect ? "scale(2)" : "none",
+                            transition: "transform 700ms"
                           }}
+                          className="group-hover:scale-110"
                         />
                         
                         {/* Dynamic Pointer for "Identify Part" questions */}
