@@ -378,22 +378,8 @@ async function getUniqueSamplePool(userId: string, limit: number, mode: ExamMode
     }
   }
 
-  // Exclude samples from the last few exams to ensure high variety (Standard Mode)
-  const recentSampleIds = new Set(
-    (await prisma.examQuestionInstance.findMany({
-      where: {
-        examInstance: { userId }
-      },
-      orderBy: { id: 'desc' },
-      take: limit * 2.5,
-      select: { sampleId: true }
-    })).map((item) => item.sampleId)
-  );
-
-  const filteredPool = poolWithMicro.filter((s) => !recentSampleIds.has(s.id));
-  const poolToUse = filteredPool.length >= limit ? filteredPool : poolWithMicro;
-
-  return shuffle(poolToUse).slice(0, limit);
+  // Simply shuffle the entire available pool from the bank without aggressive filtering
+  return shuffle(poolWithMicro).slice(0, limit);
 }
 
 async function createExamInstance(userId: string, options: { mode: ExamMode; limit: number; forceConfusionDrill?: boolean; category?: string; allowSeen?: boolean }) {
@@ -491,9 +477,6 @@ async function createExamInstance(userId: string, options: { mode: ExamMode; lim
         rotationDeg: Math.random() * 360, // Total disorientation
       };
       finalPrompt = `[ELITE CHALLENGE] ${finalPrompt} (Artifacts & poor focus simulated)`;
-    } else if (isAlreadySeen && !options.allowSeen) {
-      // Still skip for normal students to maintain uniqueness UNLESS we are in fallback mode
-      continue;
     }
 
     questions.push({
@@ -554,9 +537,6 @@ async function createExamInstance(userId: string, options: { mode: ExamMode; lim
   }
 
   if (questions.length === 0) {
-    if (!options.allowSeen) {
-      return createExamInstance(userId, { ...options, allowSeen: true });
-    }
     if (options.category) {
       return createExamInstance(userId, { ...options, category: undefined });
     }
