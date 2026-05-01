@@ -554,7 +554,7 @@ async function createExamInstance(userId: string, options: { mode: ExamMode; lim
       createdAt: new Date(),
       updatedAt: new Date(),
       questions: questions.map((q, i) => {
-        const fullSample = availableSamples.find((s) => s.id === q.sampleId);
+        const fullSample = allAvailableRaw.find((s) => s.id === q.sampleId);
         return {
           id: "stateless-q-" + i,
           examInstanceId: mockExamId,
