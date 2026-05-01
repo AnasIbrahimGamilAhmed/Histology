@@ -511,21 +511,59 @@ async function createExamInstance(userId: string, options: { mode: ExamMode; lim
     });
   }
 
+  // Fallback: If we didn't reach the limit (e.g., small category), generate more questions from the same samples
+  if (questions.length < options.limit && samplePool.length > 0) {
+    let attempts = 0;
+    while (questions.length < options.limit && attempts < 50) {
+      attempts++;
+      const sample = samplePool[Math.floor(Math.random() * samplePool.length)];
+      const microVariations = sample.variations.filter(v => v.image.toLowerCase().includes("micro"));
+      if (microVariations.length === 0) continue;
+
+      const variation = microVariations[Math.floor(Math.random() * microVariations.length)];
+      const selectedType = weightedChoice(buildQuestionTypeWeightList());
+      const difficulty: DifficultyLevel = variation.type === "exam_tricky_view" ? "hard" : Math.random() < 0.4 ? "hard" : Math.random() < 0.6 ? "medium" : "easy";
+      const template = buildQuestionTemplate(sample, allSamples, selectedType.type, difficulty, variation);
+
+      const fingerprint = fingerprintForQuestion({
+        prompt: template.prompt,
+        sampleId: sample.id,
+        variationType: variation.type,
+        type: selectedType.type,
+        choices: template.choices,
+        difficulty,
+        reasoningPattern: template.reasoningPattern
+      });
+
+      questions.push({
+        sampleId: sample.id,
+        variationId: variation.id,
+        type: selectedType.type,
+        difficulty: difficulty,
+        prompt: template.prompt,
+        image: variation.image,
+        variationType: variation.type,
+        choices: template.choices,
+        acceptedAnswers: template.acceptedAnswers,
+        reasoningPattern: template.reasoningPattern,
+        microscopyConfig: buildMicroscopyConfig(variation),
+        fingerprint: `${fingerprint}|pad|${Math.random()}`
+      });
+    }
+  }
+
   if (questions.length === 0) {
     if (!options.allowSeen) {
-      // Try again but allow duplicates
       return createExamInstance(userId, { ...options, allowSeen: true });
     }
     if (options.category) {
-      // Try again without category if still nothing
       return createExamInstance(userId, { ...options, category: undefined });
     }
-    
-    // Total failure - should not happen with allowSeen: true
     throw new Error("Critical: No questions could be generated even with duplicates allowed.");
   }
 
-  const uniqueSignature = crypto.createHash("sha256").update(questions.map((question) => question.fingerprint).join("|")).digest("hex");
+  // Ensure unique signature never conflicts even if exact same questions are generated
+  const uniqueSignature = crypto.createHash("sha256").update(questions.map((question) => question.fingerprint).join("|") + Date.now().toString()).digest("hex");
 
   try {
     const created = await prisma.examInstance.create({
