@@ -60,7 +60,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         const progress = await prisma.userProgress.findUnique({
           where: { userId: account.universityId }
         });
-        
+
         if (!progress) {
           await prisma.userProgress.create({
             data: { userId: account.universityId, weakSamples: [] }
@@ -102,12 +102,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         const cookieStore = await cookies();
         const linkingId = cookieStore.get("linking_id")?.value;
         const isSignupFlow = cookieStore.get("oauth_signup")?.value === "true";
-        
+
         // Clean up the signup cookie immediately
         if (isSignupFlow) {
           cookieStore.delete("oauth_signup");
         }
-        
+
         const email = user.email || profile?.email;
         if (!email) return false;
 
@@ -118,34 +118,34 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
               where: { universityId: linkingId }
             });
 
-              if (currentUser) {
-                await prisma.linkedAccount.upsert({
-                  where: {
-                    provider_providerAccountId: {
-                      provider: account.provider,
-                      providerAccountId: account.providerAccountId,
-                    }
-                  },
-                  update: {
-                    userId: currentUser.id,
-                    access_token: account.access_token as string | null,
-                  },
-                  create: {
-                    userId: currentUser.id,
-                    type: account.type,
+            if (currentUser) {
+              await prisma.linkedAccount.upsert({
+                where: {
+                  provider_providerAccountId: {
                     provider: account.provider,
                     providerAccountId: account.providerAccountId,
-                    email: email,
-                    access_token: account.access_token as string | null,
                   }
-                });
-                user.id = currentUser.universityId;
-                user.name = currentUser.name;
-                return true;
-              }
-            } catch (e) {
-              console.error("JWT Linking Error:", e);
+                },
+                update: {
+                  userId: currentUser.id,
+                  access_token: account.access_token as string | null,
+                },
+                create: {
+                  userId: currentUser.id,
+                  type: account.type,
+                  provider: account.provider,
+                  providerAccountId: account.providerAccountId,
+                  email: email,
+                  access_token: account.access_token as string | null,
+                }
+              });
+              user.id = currentUser.universityId;
+              user.name = currentUser.name;
+              return true;
             }
+          } catch (e) {
+            console.error("JWT Linking Error:", e);
+          }
         }
 
         // 3. Signup Flow: Create PendingOAuth and redirect to complete-profile
@@ -190,6 +190,46 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         return `/login?error=NotLinked&provider=${account.provider}`;
       }
       return true;
-    }
+    },
+    async session({ session, token }) {
+      if (session.user && token.sub) {
+        const universityId = token.sub as string;
+
+        // 1. Check if the StudentAccount exists
+        let account = await prisma.studentAccount.findUnique({
+          where: { universityId }
+        });
+
+        // 2. If the account is missing (due to reset), RE-CREATE it silently
+        if (!account) {
+          try {
+            account = await prisma.studentAccount.create({
+              data: {
+                universityId,
+                name: session.user.name || "Student",
+                email: session.user.email || null,
+                password: "123456", // Default password for recovered accounts
+              }
+            });
+          } catch (e) {
+            console.error("Silent account recovery failed:", e);
+          }
+        }
+
+        session.user.id = universityId;
+
+        // 3. Ensure UserProgress exists for this user (for both existing and recovered accounts)
+        const progress = await prisma.userProgress.findUnique({
+          where: { userId: universityId }
+        });
+        
+        if (!progress) {
+          await prisma.userProgress.create({
+            data: { userId: universityId, weakSamples: [] }
+          });
+        }
+      }
+      return session;
+    },
   }
 });
