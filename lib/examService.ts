@@ -92,10 +92,10 @@ function categoryLabel(name: string) {
   const category = sampleCategory(name);
   if (category === "epithelial") return "Epithelial tissue";
   if (category === "connective") return "Connective tissue";
-  if (category === "muscle") return "Muscle tissue";
+  if (category === "muscular") return "Muscle tissue";
   if (category === "nervous") return "Nervous tissue";
   if (category === "blood") return "Blood film";
-  if (category === "organ") return "Organ section";
+  if (category === "organ-samples") return "Organ section";
   if (category === "skin") return "Skin histology";
   return "Mixed histology";
 }
