@@ -228,16 +228,24 @@ export default function DashboardPage() {
                 {data.confusionTop5.length === 0 ? (
                   <p className="text-sm text-slate-500 italic text-center py-8">No diagnostic patterns yet.</p>
                 ) : (
-                  data.confusionTop5.map((pair: any) => (
-                    <motion.div 
-                      key={pair.label}
-                      whileHover={{ x: 5 }}
-                      className="flex items-center justify-between p-5 rounded-[1.5rem] bg-rose-500/5 border border-rose-500/10 group hover:bg-rose-500/10 transition-all"
+                  <>
+                    {data.confusionTop5.map((pair: any) => (
+                      <motion.div 
+                        key={pair.label}
+                        whileHover={{ x: 5 }}
+                        className="flex items-center justify-between p-5 rounded-[1.5rem] bg-rose-500/5 border border-rose-500/10 group hover:bg-rose-500/10 transition-all"
+                      >
+                        <p className="text-sm text-rose-200 font-bold group-hover:text-white transition-colors">{pair.label}</p>
+                        <span className="text-[10px] font-black text-rose-400 bg-rose-500/10 px-3 py-1.5 rounded-xl border border-rose-500/20">{pair.count}x</span>
+                      </motion.div>
+                    ))}
+                    <Link 
+                      href="/exam" 
+                      className="mt-6 flex items-center justify-center gap-2 w-full py-4 rounded-2xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 text-xs font-black uppercase tracking-widest border border-amber-500/20 transition-all group"
                     >
-                      <p className="text-sm text-rose-200 font-bold group-hover:text-white transition-colors">{pair.label}</p>
-                      <span className="text-[10px] font-black text-rose-400 bg-rose-500/10 px-3 py-1.5 rounded-xl border border-rose-500/20">{pair.count}x</span>
-                    </motion.div>
-                  ))
+                      Start Targeted Drill <Brain size={16} className="group-hover:rotate-12 transition-transform" />
+                    </Link>
+                  </>
                 )}
               </div>
             </motion.section>

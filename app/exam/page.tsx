@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useState } from "react";
 import { ExamEngine } from "@/components/ExamEngine";
@@ -6,7 +6,7 @@ import type { ExamQuestion } from "@/lib/examService";
 import { Brain, Play, ShieldAlert, RotateCcw, ArrowLeft, Microscope, Timer, Settings2 } from "lucide-react";
 import Link from "next/link";
 
-const examModes = ["standard", "pressure"] as const;
+const examModes = ["standard", "pressure", "drill"] as const;
 
 type LiveExamMode = (typeof examModes)[number] | null;
 type LoadState = "idle" | "loading" | "ready" | "error";
@@ -26,7 +26,9 @@ export default function ExamPage() {
 
     async function fetchExam() {
       try {
-        const response = await fetch(`/api/exam/questions?mode=${mode}&limit=${limit}${forceRegen ? "&regen=1" : ""}`, {
+        const isDrill = mode === "drill";
+        const fetchMode = isDrill ? "standard" : mode;
+        const response = await fetch(`/api/exam/questions?mode=${fetchMode}&limit=${limit}${forceRegen ? "&regen=1" : ""}${isDrill ? "&drill=1" : ""}`, {
           signal: controller.signal
         });
         if (!response.ok) {
@@ -95,49 +97,73 @@ export default function ExamPage() {
               </p>
             </div>
             {mode && (
-              <div className="flex items-center gap-3 px-6 py-3 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-300">
-                <Timer size={24} />
-                <span className="font-bold capitalize">{mode} Mode Active</span>
+              <div className={`flex items-center gap-3 px-6 py-3 rounded-2xl border backdrop-blur-sm ${
+                mode === "drill" ? "bg-amber-500/10 border-amber-500/20 text-amber-300" :
+                mode === "pressure" ? "bg-rose-500/10 border-rose-500/20 text-rose-300" :
+                "bg-indigo-500/10 border-indigo-500/20 text-indigo-300"
+              }`}>
+                {mode === "drill" ? <Brain size={24} /> : mode === "pressure" ? <ShieldAlert size={24} /> : <Timer size={24} />}
+                <span className="font-bold capitalize">{mode === "drill" ? "Adaptive Drill" : `${mode} Mode`} Active</span>
               </div>
             )}
           </div>
         </header>
 
         {!mode ? (
-          /* MODE SELECTION */
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <button
               onClick={() => startExam("standard")}
-              className="group p-10 rounded-[3rem] bg-slate-900/50 border border-slate-800 hover:border-indigo-500/30 text-left transition-all hover:shadow-2xl hover:shadow-indigo-500/5 backdrop-blur-sm"
+              className="group p-8 rounded-[3rem] bg-slate-900/50 border border-slate-800 hover:border-indigo-500/30 text-left transition-all hover:shadow-2xl hover:shadow-indigo-500/5 backdrop-blur-sm relative overflow-hidden"
             >
-              <div className="w-16 h-16 rounded-2xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center mb-8 group-hover:scale-110 transition-transform">
-                <Play size={32} />
+              <div className="absolute -right-8 -top-8 w-24 h-24 bg-indigo-500/5 blur-2xl group-hover:bg-indigo-500/10 transition-all" />
+              <div className="w-14 h-14 rounded-2xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                <Play size={28} />
               </div>
-              <h3 className="text-3xl font-bold text-white mb-4 group-hover:text-indigo-400 transition-colors">
+              <h3 className="text-2xl font-bold text-white mb-3 group-hover:text-indigo-400 transition-colors">
                 Standard Mode
               </h3>
-              <p className="text-slate-400 leading-relaxed mb-8">
-                Balanced practice with realistic microscope conditions. No time limits, perfect for learning and mastering identification.
+              <p className="text-slate-400 text-sm leading-relaxed mb-6">
+                Balanced practice with the full curriculum. No time limits, perfect for foundational mastery.
               </p>
-              <div className="flex items-center gap-2 text-sm font-bold text-indigo-400 uppercase tracking-widest">
+              <div className="flex items-center gap-2 text-xs font-bold text-indigo-400 uppercase tracking-widest mt-auto">
                 Start Session <ChevronRight size={14} />
               </div>
             </button>
 
             <button
-              onClick={() => startExam("pressure")}
-              className="group p-10 rounded-[3rem] bg-slate-900/50 border border-slate-800 hover:border-rose-500/30 text-left transition-all hover:shadow-2xl hover:shadow-rose-500/5 backdrop-blur-sm"
+              onClick={() => startExam("drill")}
+              className="group p-8 rounded-[3rem] bg-indigo-500/10 border border-indigo-500/20 hover:border-amber-500/40 text-left transition-all hover:shadow-2xl hover:shadow-amber-500/5 backdrop-blur-sm relative overflow-hidden"
             >
-              <div className="w-16 h-16 rounded-2xl bg-rose-500/10 text-rose-400 flex items-center justify-center mb-8 group-hover:scale-110 transition-transform">
-                <ShieldAlert size={32} />
+              <div className="absolute -right-8 -top-8 w-24 h-24 bg-amber-500/5 blur-2xl group-hover:bg-amber-500/10 transition-all" />
+              <div className="w-14 h-14 rounded-2xl bg-amber-500/10 text-amber-400 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                <Brain size={28} />
               </div>
-              <h3 className="text-3xl font-bold text-white mb-4 group-hover:text-rose-400 transition-colors">
+              <h3 className="text-2xl font-bold text-white mb-3 group-hover:text-amber-400 transition-colors">
+                Confusion Drill
+              </h3>
+              <p className="text-slate-400 text-sm leading-relaxed mb-6">
+                Adaptive practice focusing on your weak areas and confused pairs. 70% priority on mistakes.
+              </p>
+              <div className="flex items-center gap-2 text-xs font-bold text-amber-400 uppercase tracking-widest mt-auto">
+                Target Weakness <ChevronRight size={14} />
+              </div>
+            </button>
+
+            <button
+              onClick={() => startExam("pressure")}
+              className="group p-8 rounded-[3rem] bg-slate-900/50 border border-slate-800 hover:border-rose-500/30 text-left transition-all hover:shadow-2xl hover:shadow-rose-500/5 backdrop-blur-sm relative overflow-hidden"
+            >
+              <div className="absolute -right-8 -top-8 w-24 h-24 bg-rose-500/5 blur-2xl group-hover:bg-rose-500/10 transition-all" />
+              <div className="w-14 h-14 rounded-2xl bg-rose-500/10 text-rose-400 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                <ShieldAlert size={28} />
+              </div>
+              <h3 className="text-2xl font-bold text-white mb-3 group-hover:text-rose-400 transition-colors">
                 Pressure Mode
               </h3>
-              <p className="text-slate-400 leading-relaxed mb-8">
-                Timed exam mode with university-style pressure. One-time image viewing and no going back. Pure diagnostic skill test.
+              <p className="text-slate-400 text-sm leading-relaxed mb-6">
+                Timed simulation with strict university rules. One-time viewing and no back-tracking.
               </p>
-              <div className="flex items-center gap-2 text-sm font-bold text-rose-400 uppercase tracking-widest">
+              <div className="flex items-center gap-2 text-xs font-bold text-rose-400 uppercase tracking-widest mt-auto">
                 Enter Simulation <ChevronRight size={14} />
               </div>
             </button>
