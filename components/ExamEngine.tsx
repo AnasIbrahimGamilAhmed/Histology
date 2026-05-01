@@ -9,7 +9,7 @@ import { CheckCircle2, XCircle, Loader2, Microscope, ArrowRight, Lightbulb, Aler
 
 type ExamEngineProps = {
   questions: ExamQuestion[];
-  mode: "standard" | "pressure";
+  mode: "standard" | "pressure" | "drill";
 };
 
 type FeedbackPayload = {
