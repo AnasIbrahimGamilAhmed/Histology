@@ -218,11 +218,11 @@ function fingerprintForQuestion(userId: string, question: {
 
 function buildQuestionTemplate(
   sample: { id: string; name: string; description: string; keyFeatures: unknown; confusionTags: unknown; variations: { id: string; image: string; type: VariationType }[] },
-  allSamples: { id: string; name: string; category: string }[],
+  allSamples: { id: string; name: string; category: string; variations: { id: string; image: string; type: VariationType }[] }[],
   type: ExamQuestionType,
   difficulty: DifficultyLevel,
   variation: { id: string; image: string; type: VariationType }
-): { prompt: string; choices: string[]; acceptedAnswers: string[]; reasoningPattern: QuestionPattern } {
+): { prompt: string; choices: string[]; acceptedAnswers: string[]; reasoningPattern: QuestionPattern; overrideImage?: string } {
   const sampleLabel = sample.name;
   const category = categoryLabel(sampleLabel);
   const parsedFeatures = Array.isArray(sample.keyFeatures) ? sample.keyFeatures : typeof sample.keyFeatures === "string" ? [sample.keyFeatures] : [];
@@ -311,13 +311,54 @@ function buildQuestionTemplate(
         acceptedAnswers: [category],
         reasoningPattern: "identify_tissue_type" as const
       };
-    case "compare_samples":
+    case "compare_samples": {
+      // Find a confusing sample
+      const confusedSampleName = parsedConfusionTags.length > 0 
+        ? sampleChoices.find(c => parsedConfusionTags.some(tag => c.toLowerCase().includes(String(tag).toLowerCase())))
+        : sampleChoices[0];
+        
+      const confusedSample = allSamples.find(s => s.name === (confusedSampleName || sampleChoices[0]));
+      
+      let overrideImage = undefined;
+      let prompt = `Focusing on the key diagnostic features, which specimen is most likely represented here?`;
+      let acceptedAnswers = [sampleLabel];
+      let choices = compareChoices;
+      
+      if (confusedSample && confusedSample.variations.length > 0) {
+        const confusedVar = confusedSample.variations.find(v => v.image.toLowerCase().includes("micro")) || confusedSample.variations[0];
+        const isCorrectFirst = Math.random() > 0.5;
+        overrideImage = isCorrectFirst ? `${variation.image},${confusedVar.image}` : `${confusedVar.image},${variation.image}`;
+        
+        // Randomize what we ask!
+        const questionSubtype = Math.random();
+        if (questionSubtype < 0.33) {
+          // Which is X?
+          prompt = `Identify which specimen is the ${sampleLabel}.`;
+          choices = ["Specimen A", "Specimen B"];
+          acceptedAnswers = [isCorrectFirst ? "Specimen A" : "Specimen B"];
+        } else if (questionSubtype < 0.66) {
+          // Which one has feature X?
+          const feature = clean(featureChoices[0] || "specific characteristic");
+          prompt = `Which specimen exhibits: "${feature}"?`;
+          choices = ["Specimen A", "Specimen B"];
+          acceptedAnswers = [isCorrectFirst ? "Specimen A" : "Specimen B"];
+        } else {
+          // Which one is found in location X?
+          const loc = LOCATION_MAP[sampleLabel] || "its typical anatomical location";
+          prompt = `Which specimen is normally found in: ${loc}?`;
+          choices = ["Specimen A", "Specimen B"];
+          acceptedAnswers = [isCorrectFirst ? "Specimen A" : "Specimen B"];
+        }
+      }
+      
       return {
-        prompt: `Focusing on the key diagnostic features, which specimen is most likely represented here?`,
-        choices: compareChoices,
-        acceptedAnswers: [sampleLabel],
-        reasoningPattern: "compare_views" as const
+        prompt,
+        choices,
+        acceptedAnswers,
+        reasoningPattern: "compare_views" as const,
+        overrideImage
       };
+    }
     case "interpret_partial_slide":
       return {
         prompt: `Clinical micro-view: Even in this specific or tricky field, which specimen can be confirmed?`,
@@ -487,7 +528,7 @@ async function createExamInstance(userId: string, options: { mode: ExamMode; lim
   const allAvailableRaw = await prisma.sample.findMany({ include: { variations: true } });
 
   // allSamples always uses FULL bank so distractors are always diverse and challenging
-  const allSamples = allAvailableRaw.map((sample) => ({ id: sample.id, name: sample.name, category: sampleCategory(sample.name) }));
+  const allSamples = allAvailableRaw.map((sample) => ({ id: sample.id, name: sample.name, category: sampleCategory(sample.name), variations: sample.variations }));
   
   let previousPatterns = new Map<string, Set<QuestionPattern>>();
   let existingFingerprints = new Set<string>();
@@ -594,7 +635,7 @@ async function createExamInstance(userId: string, options: { mode: ExamMode; lim
       type: selectedType.type,
       difficulty: isAlreadySeen ? "hard" : difficulty,
       prompt: finalPrompt,
-      image: variation.image,
+      image: template.overrideImage || variation.image,
       variationType: variation.type,
       choices: template.choices,
       acceptedAnswers: template.acceptedAnswers,
@@ -660,7 +701,7 @@ async function createExamInstance(userId: string, options: { mode: ExamMode; lim
         type,
         difficulty,
         prompt: template.prompt,
-        image: variation.image,
+        image: template.overrideImage || variation.image,
         variationType: variation.type,
         choices: template.choices,
         acceptedAnswers: template.acceptedAnswers,
