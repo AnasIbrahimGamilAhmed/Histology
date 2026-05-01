@@ -4,7 +4,6 @@ import { useEffect, useMemo, useState } from "react";
 import type { ExamQuestion } from "@/lib/examService";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import Image from "next/image";
 import { CheckCircle2, XCircle, Loader2, Microscope, ArrowRight, Lightbulb, AlertCircle, Timer } from "lucide-react";
 
 type ExamEngineProps = {
@@ -257,21 +256,15 @@ export function ExamEngine({ questions, mode }: ExamEngineProps) {
             ) : currentQuestion.type === "compare_samples" && currentQuestion.image?.includes(",") ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {currentQuestion.image.split(",").map((img, idx) => {
-                  // Add random "Microscope Challenge" effects for comparison
                   const challengeBlur = Math.random() > 0.5 ? Math.floor(Math.random() * 3) : 0;
-                  const challengeContrast = 0.8 + Math.random() * 0.4; // 0.8 to 1.2
-                  
+                  const challengeContrast = 0.8 + Math.random() * 0.4;
                   return (
                     <div key={idx} className="relative h-[300px] md:h-[400px] rounded-[2.5rem] overflow-hidden border border-slate-800 shadow-2xl bg-slate-950 group/img">
-                      <Image
+                      <img
                         src={img.trim()}
                         alt={`Specimen ${idx + 1}`}
-                        fill
-                        priority
-                        className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover/img:scale-110"
-                        style={{
-                          filter: `blur(${challengeBlur}px) contrast(${challengeContrast})`
-                        }}
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover/img:scale-110"
+                        style={{ filter: `blur(${challengeBlur}px) contrast(${challengeContrast})` }}
                       />
                       <div className="absolute top-6 left-6 px-4 py-2 rounded-xl bg-indigo-600/90 backdrop-blur-md text-[12px] font-black text-white uppercase tracking-widest">
                         Specimen {idx === 0 ? "A" : "B"}
@@ -286,46 +279,49 @@ export function ExamEngine({ questions, mode }: ExamEngineProps) {
                 })}
               </div>
             ) : (
-              <div className="relative h-[400px] w-full rounded-[2.5rem] overflow-hidden border border-slate-800 shadow-2xl bg-slate-950 cursor-grab active:cursor-grabbing">
+              <div
+                className="relative h-[400px] w-full rounded-[2.5rem] overflow-hidden border border-slate-800 shadow-2xl bg-slate-950 cursor-grab active:cursor-grabbing"
+              >
                 <motion.div
                   drag
-                  dragConstraints={{ top: -150, left: -150, right: 150, bottom: 150 }}
-                  className="absolute inset-0 w-full h-full"
-                  initial={{ scale: 1 }}
-                  whileHover={{ scale: 1.2 }}
-                  transition={{ duration: 0.3 }}
+                  dragConstraints={{ top: -120, left: -120, right: 120, bottom: 120 }}
+                  dragElastic={0.1}
+                  style={{ width: "100%", height: "100%", position: "absolute", inset: 0 }}
+                  whileHover={{ scale: 1.15 }}
+                  transition={{ duration: 0.25 }}
                 >
-                  <Image
+                  <img
                     src={currentQuestion.image || ""}
                     alt="Histology Specimen"
-                    fill
-                    priority
-                    className="absolute inset-0 h-full w-full object-cover pointer-events-none"
+                    draggable={false}
                     style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                      pointerEvents: "none",
+                      userSelect: "none",
                       filter: `blur(${currentQuestion.microscopy?.blurPx ?? 0}px) contrast(${currentQuestion.microscopy?.contrast ?? 1})`,
-                      transform: `rotate(${currentQuestion.microscopy?.rotationDeg ?? 0}deg) scale(${zoomFactor * (currentQuestion.microscopy?.cropRect ? 2.5 : 1)})`,
+                      transform: `rotate(${currentQuestion.microscopy?.rotationDeg ?? 0}deg) scale(${zoomFactor * (currentQuestion.microscopy?.cropRect ? 2 : 1)})`,
                       objectPosition: currentQuestion.microscopy?.cropRect
                         ? `${currentQuestion.microscopy.cropRect.x}% ${currentQuestion.microscopy.cropRect.y}%`
                         : "center",
                     }}
                   />
-                  
-                  {/* Dynamic Pointer for "Identify Structure" questions during the exam */}
                   {currentQuestion.type === "identify_structure" && (
-                    <motion.div 
+                    <motion.div
                       initial={{ scale: 0, opacity: 0 }}
                       animate={{ scale: 1, opacity: 1 }}
-                      className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 pointer-events-none"
+                      style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%,-50%)", zIndex: 20, pointerEvents: "none" }}
                     >
                       <div className="relative">
-                        <motion.div 
+                        <motion.div
                           animate={{ scale: [1, 1.5, 1], opacity: [0.5, 0.2, 0.5] }}
                           transition={{ duration: 2, repeat: Infinity }}
                           className="w-16 h-16 bg-rose-500 rounded-full blur-xl"
                         />
                         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
                           <div className="w-4 h-4 bg-white rounded-full shadow-[0_0_20px_rgba(255,255,255,0.8)] border-2 border-rose-500" />
-                          <motion.div 
+                          <motion.div
                             animate={{ rotate: 360 }}
                             transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
                             className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 border border-white/40 rounded-full border-dashed"

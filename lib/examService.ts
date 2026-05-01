@@ -493,35 +493,55 @@ async function createExamInstance(userId: string, options: { mode: ExamMode; lim
     });
   }
 
-  // Fallback: If we didn't reach the limit (e.g., small category), generate more questions from the same samples
+  // Padding: generate more questions by cycling through samples × question types
+  // to avoid same image repeating back-to-back
   if (questions.length < options.limit && samplePool.length > 0) {
-    let attempts = 0;
-    while (questions.length < options.limit && attempts < 50) {
-      attempts++;
-      const sample = samplePool[Math.floor(Math.random() * samplePool.length)];
+    const allTypes: ExamQuestionType[] = [
+      "identify_sample",
+      "identify_tissue_type",
+      "identify_structure",
+      "list_features",
+      "compare_samples",
+      "interpret_partial_slide",
+      "describe_features"
+    ];
+
+    // Build all possible (sample × variation × type) combos not already in questions
+    const usedKeys = new Set(questions.map(q => `${q.sampleId}|${q.variationId}|${q.type}`));
+    const combos: Array<{ sample: typeof samplePool[0]; variation: typeof samplePool[0]["variations"][0]; type: ExamQuestionType }> = [];
+
+    for (const sample of samplePool) {
       const microVariations = sample.variations.filter(v => v.image.toLowerCase().includes("micro"));
-      if (microVariations.length === 0) continue;
+      for (const variation of microVariations) {
+        for (const type of allTypes) {
+          const key = `${sample.id}|${variation.id}|${type}`;
+          if (!usedKeys.has(key)) {
+            combos.push({ sample, variation, type });
+          }
+        }
+      }
+    }
 
-      const variation = microVariations[Math.floor(Math.random() * microVariations.length)];
-      const selectedType = weightedChoice(buildQuestionTypeWeightList());
+    const shuffledCombos = shuffle(combos);
+    for (const combo of shuffledCombos) {
+      if (questions.length >= options.limit) break;
+      const { sample, variation, type } = combo;
       const difficulty: DifficultyLevel = variation.type === "exam_tricky_view" ? "hard" : Math.random() < 0.4 ? "hard" : Math.random() < 0.6 ? "medium" : "easy";
-      const template = buildQuestionTemplate(sample, allSamples, selectedType.type, difficulty, variation);
-
+      const template = buildQuestionTemplate(sample, allSamples, type, difficulty, variation);
       const fingerprint = fingerprintForQuestion(userId, {
         prompt: template.prompt,
         sampleId: sample.id,
         variationType: variation.type,
-        type: selectedType.type,
+        type,
         choices: template.choices,
         difficulty,
         reasoningPattern: template.reasoningPattern
       });
-
       questions.push({
         sampleId: sample.id,
         variationId: variation.id,
-        type: selectedType.type,
-        difficulty: difficulty,
+        type,
+        difficulty,
         prompt: template.prompt,
         image: variation.image,
         variationType: variation.type,
@@ -529,7 +549,7 @@ async function createExamInstance(userId: string, options: { mode: ExamMode; lim
         acceptedAnswers: template.acceptedAnswers,
         reasoningPattern: template.reasoningPattern,
         microscopyConfig: buildMicroscopyConfig(variation),
-        fingerprint: `${fingerprint}|pad|${Math.random()}`
+        fingerprint: `${fingerprint}|pad`
       });
     }
   }
