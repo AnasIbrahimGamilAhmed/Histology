@@ -1,11 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { ExamEngine } from "@/components/ExamEngine";
 import type { ExamQuestion } from "@/lib/examService";
 import { Brain, Play, ShieldAlert, RotateCcw, ArrowLeft, Microscope, Timer, Settings2 } from "lucide-react";
 import Link from "next/link";
-
 import { useSearchParams } from "next/navigation";
 
 const examModes = ["standard", "pressure", "drill"] as const;
@@ -13,7 +12,7 @@ const examModes = ["standard", "pressure", "drill"] as const;
 type LiveExamMode = (typeof examModes)[number] | null;
 type LoadState = "idle" | "loading" | "ready" | "error";
 
-export default function ExamPage() {
+function ExamContent() {
   const searchParams = useSearchParams();
   const [mode, setMode] = useState<LiveExamMode>(null);
   const [questions, setQuestions] = useState<ExamQuestion[]>([]);
@@ -26,7 +25,6 @@ export default function ExamPage() {
   // Initialize from URL params
   useEffect(() => {
     const urlMode = searchParams.get("mode") as LiveExamMode;
-    const urlCategory = searchParams.get("category");
     const urlLimit = searchParams.get("limit");
 
     if (urlMode && examModes.includes(urlMode)) {
@@ -34,7 +32,7 @@ export default function ExamPage() {
       if (urlLimit) setLimit(Number(urlLimit));
       setLoadState("loading");
     }
-  }, []);
+  }, [searchParams]);
 
   useEffect(() => {
     if (!mode || loadState !== "loading") return undefined;
@@ -71,7 +69,7 @@ export default function ExamPage() {
 
     void fetchExam();
     return () => controller.abort();
-  }, [mode, limit, loadState, searchParams]);
+  }, [mode, limit, loadState, searchParams, forceRegen]);
 
   const startExam = (selectedMode: LiveExamMode) => {
     setMode(selectedMode);
@@ -99,7 +97,6 @@ export default function ExamPage() {
 
   return (
     <div className="min-h-screen bg-[#020617] text-slate-200 selection:bg-indigo-500/30 pb-20">
-      {/* Background decoration */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-0 right-0 w-[50%] h-[50%] rounded-full bg-indigo-500/5 blur-[120px]" />
         <div className="absolute bottom-0 left-0 w-[40%] h-[40%] rounded-full bg-blue-500/5 blur-[100px]" />
@@ -149,7 +146,7 @@ export default function ExamPage() {
                 Balanced practice with the full curriculum. No time limits, perfect for foundational mastery.
               </p>
               <div className="flex items-center gap-2 text-xs font-bold text-indigo-400 uppercase tracking-widest mt-auto">
-                Start Session <ChevronRight size={14} />
+                Start Session →
               </div>
             </button>
 
@@ -168,7 +165,7 @@ export default function ExamPage() {
                 Adaptive practice focusing on your weak areas and confused pairs. 70% priority on mistakes.
               </p>
               <div className="flex items-center gap-2 text-xs font-bold text-amber-400 uppercase tracking-widest mt-auto">
-                Target Weakness <ChevronRight size={14} />
+                Target Weakness →
               </div>
             </button>
 
@@ -187,20 +184,17 @@ export default function ExamPage() {
                 Timed simulation with strict university rules. One-time viewing and no back-tracking.
               </p>
               <div className="flex items-center gap-2 text-xs font-bold text-rose-400 uppercase tracking-widest mt-auto">
-                Enter Simulation <ChevronRight size={14} />
+                Enter Simulation →
               </div>
             </button>
           </div>
         ) : (
-          /* EXAM INTERFACE */
           <div className="flex flex-col lg:grid lg:grid-cols-[300px_1fr] gap-10 animate-in fade-in slide-in-from-left-4 duration-500">
-            {/* Sidebar Controls */}
             <aside className="space-y-6">
               <div className="p-6 rounded-[2rem] bg-slate-900/50 border border-slate-800 backdrop-blur-sm">
                 <h4 className="flex items-center gap-2 text-xs font-black text-slate-500 uppercase tracking-widest mb-6">
                   <Settings2 size={14} /> Session Settings
                 </h4>
-                
                 <div className="space-y-6">
                   <div>
                     <label className="block text-xs font-bold text-slate-400 mb-3 ml-1 uppercase">Questions Count</label>
@@ -219,7 +213,6 @@ export default function ExamPage() {
                       <span>20</span>
                     </div>
                   </div>
-
                   <button
                     onClick={regenerateExam}
                     disabled={loadState === "loading"}
@@ -228,7 +221,6 @@ export default function ExamPage() {
                     <RotateCcw size={18} className={loadState === "loading" ? "animate-spin" : ""} />
                     New Random Exam
                   </button>
-
                   <button
                     onClick={resetExam}
                     className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl border border-slate-800 hover:bg-rose-500/10 hover:text-rose-400 text-slate-500 font-bold transition-all"
@@ -237,36 +229,20 @@ export default function ExamPage() {
                   </button>
                 </div>
               </div>
-
-              <div className="p-6 rounded-[2rem] bg-indigo-500/5 border border-indigo-500/10">
-                <h4 className="flex items-center gap-2 text-xs font-black text-indigo-400 uppercase tracking-widest mb-4">
-                  <Microscope size={14} /> Exam Info
-                </h4>
-                <p className="text-sm text-indigo-100/60 leading-relaxed">
-                  Images are selected exclusively from high-resolution clinical micro-views.
-                </p>
-              </div>
             </aside>
 
-            {/* Exam Engine Area */}
             <div className="min-h-[600px] rounded-[3rem] bg-slate-900/30 border border-slate-800/50 p-8 relative overflow-hidden shadow-2xl">
               {loadState === "loading" && (
                 <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-12 bg-[#020617]/50 backdrop-blur-sm z-50">
                   <div className="w-20 h-20 border-4 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin mb-8" />
                   <h3 className="text-2xl font-bold text-white mb-2 italic">Synthesizing Unique Exam...</h3>
-                  <p className="text-slate-400 max-w-xs">Selecting specimens and configuring microscope field of view for this student instance.</p>
                 </div>
               )}
-
               {loadState === "ready" && questions.length > 0 && (
                 <ExamEngine questions={questions} mode={mode ?? "standard"} />
               )}
-
               {loadState === "error" && error && (
                 <div className="h-full flex flex-col items-center justify-center text-center p-12">
-                  <div className="w-16 h-16 bg-rose-500/10 text-rose-400 rounded-2xl flex items-center justify-center mb-6">
-                    <ShieldAlert size={32} />
-                  </div>
                   <h3 className="text-xl font-bold text-white mb-2">Generation Failed</h3>
                   <p className="text-slate-400 mb-6">{error}</p>
                   <button onClick={regenerateExam} className="px-6 py-3 bg-slate-800 rounded-xl font-bold hover:bg-slate-700 transition-all">Try Again</button>
@@ -280,21 +256,14 @@ export default function ExamPage() {
   );
 }
 
-function ChevronRight({ size, className }: { size: number; className?: string }) {
+export default function ExamPage() {
   return (
-    <svg 
-      xmlns="http://www.w3.org/2000/svg" 
-      width={size} 
-      height={size} 
-      viewBox="0 0 24 24" 
-      fill="none" 
-      stroke="currentColor" 
-      strokeWidth="2" 
-      strokeLinecap="round" 
-      strokeLinejoin="round" 
-      className={className}
-    >
-      <path d="m9 18 6-6-6-6"/>
-    </svg>
+    <Suspense fallback={
+      <div className="min-h-screen bg-[#020617] flex items-center justify-center">
+        <div className="w-20 h-20 border-4 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin" />
+      </div>
+    }>
+      <ExamContent />
+    </Suspense>
   );
 }
