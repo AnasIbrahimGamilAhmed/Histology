@@ -195,39 +195,18 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (session.user && token.sub) {
         const universityId = token.sub as string;
 
-        // 1. Check if the StudentAccount exists
-        let account = await prisma.studentAccount.findUnique({
-          where: { universityId }
+        // Lightweight check to ensure the user wasn't deleted in a DB reset
+        const userExists = await prisma.studentAccount.findUnique({
+          where: { universityId },
+          select: { id: true }
         });
 
-        // 2. If the account is missing (due to reset), RE-CREATE it silently
-        if (!account) {
-          try {
-            account = await prisma.studentAccount.create({
-              data: {
-                universityId,
-                name: session.user.name || "Student",
-                email: session.user.email || null,
-                password: "123456", // Default password for recovered accounts
-              }
-            });
-          } catch (e) {
-            console.error("Silent account recovery failed:", e);
-          }
+        if (!userExists) {
+          // Force logout for deleted accounts (forces them to Sign Up properly)
+          return null as any;
         }
 
         session.user.id = universityId;
-
-        // 3. Ensure UserProgress exists for this user (for both existing and recovered accounts)
-        const progress = await prisma.userProgress.findUnique({
-          where: { userId: universityId }
-        });
-        
-        if (!progress) {
-          await prisma.userProgress.create({
-            data: { userId: universityId, weakSamples: [] }
-          });
-        }
       }
       return session;
     },
