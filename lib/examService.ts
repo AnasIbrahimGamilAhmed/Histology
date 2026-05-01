@@ -14,7 +14,8 @@ export type ExamQuestionType =
   | "describe_features"
   | "identify_location"
   | "high_power_id"
-  | "clinical_correlation";
+  | "clinical_correlation"
+  | "negative_feature";
 
 export type QuestionPattern =
   | "identify_specimen"
@@ -218,7 +219,7 @@ function fingerprintForQuestion(userId: string, question: {
 
 function buildQuestionTemplate(
   sample: { id: string; name: string; description: string; keyFeatures: unknown; confusionTags: unknown; variations: { id: string; image: string; type: VariationType }[] },
-  allSamples: { id: string; name: string; category: string; variations: { id: string; image: string; type: VariationType }[] }[],
+  allSamples: { id: string; name: string; category: string; keyFeatures: unknown; variations: { id: string; image: string; type: VariationType }[] }[],
   type: ExamQuestionType,
   difficulty: DifficultyLevel,
   variation: { id: string; image: string; type: VariationType }
@@ -407,6 +408,39 @@ function buildQuestionTemplate(
         reasoningPattern: "identify_specimen" as const
       };
     }
+    case "negative_feature": {
+      const confusedSampleName = parsedConfusionTags.length > 0 
+        ? sampleChoices.find(c => parsedConfusionTags.some(tag => c.toLowerCase().includes(String(tag).toLowerCase())))
+        : sampleChoices[0];
+        
+      const confusedSample = allSamples.find(s => s.name === (confusedSampleName || sampleChoices[0]));
+      
+      let falseFeature = "Exhibits a generic mammalian tissue structure";
+      if (confusedSample) {
+        const falseFeatures = Array.isArray(confusedSample.keyFeatures) ? confusedSample.keyFeatures : typeof confusedSample.keyFeatures === "string" ? [confusedSample.keyFeatures] : [];
+        if (falseFeatures.length > 0) {
+          falseFeature = clean(falseFeatures[0]);
+        } else if (LOCATION_MAP[confusedSample.name]) {
+          falseFeature = `Found in: ${LOCATION_MAP[confusedSample.name]}`;
+        }
+      }
+      
+      const trueFacts = [...featureChoices.map(clean)];
+      if (LOCATION_MAP[sampleLabel]) {
+         trueFacts.push(`Found in: ${LOCATION_MAP[sampleLabel]}`);
+      }
+      trueFacts.push(`Belongs to the ${category} category`);
+      
+      const trueChoices = shuffle(trueFacts).slice(0, 3);
+      const allChoices = shuffle([...trueChoices, falseFeature]);
+      
+      return {
+        prompt: `All of the following characteristics are true regarding the specimen shown EXCEPT:`,
+        choices: allChoices,
+        acceptedAnswers: [falseFeature],
+        reasoningPattern: "describe_features" as const
+      };
+    }
     default:
       return {
         prompt: `Identify this specimen from the provided microscope field.`,
@@ -429,6 +463,7 @@ function buildQuestionTypeWeightList() {
     { type: "identify_location" as const, weight: 12 },
     { type: "high_power_id" as const, weight: 10 },
     { type: "clinical_correlation" as const, weight: 12 },
+    { type: "negative_feature" as const, weight: 10 },
   ];
 }
 
@@ -528,7 +563,7 @@ async function createExamInstance(userId: string, options: { mode: ExamMode; lim
   const allAvailableRaw = await prisma.sample.findMany({ include: { variations: true } });
 
   // allSamples always uses FULL bank so distractors are always diverse and challenging
-  const allSamples = allAvailableRaw.map((sample) => ({ id: sample.id, name: sample.name, category: sampleCategory(sample.name), variations: sample.variations }));
+  const allSamples = allAvailableRaw.map((sample) => ({ id: sample.id, name: sample.name, category: sampleCategory(sample.name), keyFeatures: sample.keyFeatures, variations: sample.variations }));
   
   let previousPatterns = new Map<string, Set<QuestionPattern>>();
   let existingFingerprints = new Set<string>();

@@ -216,6 +216,7 @@ enum QuestionType {
   identify_location
   high_power_id
   clinical_correlation
+  negative_feature
 }
 
 enum QuestionPattern {
