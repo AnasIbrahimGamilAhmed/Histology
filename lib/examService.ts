@@ -1,3 +1,4 @@
+/** Version: 2.1.0 - Optimized Query Performance **/
 import crypto from "crypto";
 import { prisma } from "@/lib/prisma";
 import type { DifficultyLevel, VariationType } from "@prisma/client";
