@@ -102,18 +102,18 @@ function categoryLabel(name: string) {
 
 function buildMicroscopyConfig(variation: { image: string, type: VariationType }) {
   const imgLower = variation.image.toLowerCase();
-  const isDual = imgLower.includes("vs") || 
-                 imgLower.includes("compare") ||
-                 imgLower.includes("&") ||
-                 imgLower.includes("spinal") || 
-                 imgLower.includes("esophagus") || 
-                 imgLower.includes("stomach") || 
-                 imgLower.includes("ileum");
-  
+  const isDual = imgLower.includes("vs") ||
+    imgLower.includes("compare") ||
+    imgLower.includes("&") ||
+    imgLower.includes("spinal") ||
+    imgLower.includes("esophagus") ||
+    imgLower.includes("stomach") ||
+    imgLower.includes("ileum");
+
   // For dual circular images, focus exactly on the left (25%) or right (75%) circle center
   const useRightSide = variation.image.length % 2 === 0;
   const cropRect = isDual ? { x: useRightSide ? 75 : 25, y: 50, width: 50, height: 100 } : undefined;
-  
+
   const partialView = Math.random() < 0.2;
   const zoomLevel = (Math.random() < 0.1 ? 3 : Math.random() < 0.3 ? 2 : 1) as 1 | 2 | 3;
   const blurPx = Math.random() * 0.2; // Keep it clear
@@ -157,7 +157,7 @@ function buildQuestionTemplate(
   const featureChoices = parsedFeatures.length > 0 ? parsedFeatures : [sample.description];
 
   const parsedConfusionTags = Array.isArray(sample.confusionTags) ? sample.confusionTags.filter(item => typeof item === "string") : [];
-  
+
   // Prioritize confusing samples for highly realistic distractors
   let sampleChoices = shuffle(
     allSamples
@@ -184,7 +184,7 @@ function buildQuestionTemplate(
     );
     sampleChoices.push(...others);
   }
-  
+
   sampleChoices = sampleChoices.slice(0, 3);
 
   const tissueOptions = [
@@ -325,7 +325,7 @@ async function getPreviousExamSamplePatterns(userId: string) {
   return map;
 }
 
-async function getUniqueSamplePool(userId: string, limit: number, mode: ExamMode) {
+async function getUniqueSamplePool(userId: string, limit: number, mode: ExamMode, forceConfusionDrill?: boolean) {
   const allAvailable = await prisma.sample.findMany({ include: { variations: true } });
   if (allAvailable.length === 0) return [];
 
@@ -336,7 +336,41 @@ async function getUniqueSamplePool(userId: string, limit: number, mode: ExamMode
 
   if (poolWithMicro.length === 0) return [];
 
-  // Exclude samples from the last few exams to ensure high variety
+  // HYBRID ADAPTIVE LOGIC: 70% Weak/Confused, 30% General Review
+  if (forceConfusionDrill) {
+    const progress = await prisma.userProgress.findUnique({
+      where: { userId },
+      select: { weakSamples: true, confusionPairs: true }
+    });
+
+    if (progress) {
+      const weakIds = new Set(Array.isArray(progress.weakSamples) ? (progress.weakSamples as string[]) : []);
+      const confusedIds = new Set(progress.confusionPairs.flatMap(p => [p.sampleAId, p.sampleBId]));
+      const priorityIds = new Set([...weakIds, ...confusedIds]);
+
+      const priorityPool = poolWithMicro.filter(s => priorityIds.has(s.id));
+      const othersPool = poolWithMicro.filter(s => !priorityIds.has(s.id));
+
+      const weakTarget = Math.ceil(limit * 0.7);
+      const generalTarget = limit - weakTarget;
+
+      const selectedWeak = shuffle(priorityPool).slice(0, weakTarget);
+      const selectedGeneral = shuffle(othersPool).slice(0, generalTarget);
+      
+      const combined = [...selectedWeak, ...selectedGeneral];
+      
+      // Fallback: If we don't have enough in combined, fill from anything available
+      if (combined.length < limit) {
+        const currentIds = new Set(combined.map(s => s.id));
+        const fill = shuffle(poolWithMicro.filter(s => !currentIds.has(s.id)));
+        combined.push(...fill.slice(0, limit - combined.length));
+      }
+
+      return shuffle(combined);
+    }
+  }
+
+  // Exclude samples from the last few exams to ensure high variety (Standard Mode)
   const recentSampleIds = new Set(
     (await prisma.examQuestionInstance.findMany({
       where: {
@@ -362,7 +396,7 @@ async function createExamInstance(userId: string, options: { mode: ExamMode; lim
     (await prisma.examQuestionInstance.findMany({ select: { fingerprint: true } })).map((item) => item.fingerprint)
   );
 
-  const samplePool = await getUniqueSamplePool(userId, options.limit, options.mode);
+  const samplePool = await getUniqueSamplePool(userId, options.limit, options.mode, options.forceConfusionDrill);
   const questions = [] as Array<{
     sampleId: string;
     variationId?: string;
@@ -385,19 +419,19 @@ async function createExamInstance(userId: string, options: { mode: ExamMode; lim
   });
 
   const totalAnswers = (userProgress?.correctAnswers || 0) + (userProgress?.wrongAnswers || 0);
-  const accuracyPercentage = totalAnswers > 0 
-    ? ((userProgress?.correctAnswers || 0) / totalAnswers) * 100 
+  const accuracyPercentage = totalAnswers > 0
+    ? ((userProgress?.correctAnswers || 0) / totalAnswers) * 100
     : 0;
   const strongSamplesCount = userProgress?.performances.filter(p => p.masteryScore >= 80).length || 0;
 
   const isEliteUser = accuracyPercentage > 85 && strongSamplesCount > 10;
-  
+
   for (const sample of samplePool) {
     if (questions.length >= options.limit) break;
 
     const microVariations = sample.variations.filter(v => v.image.toLowerCase().includes("micro"));
     if (microVariations.length === 0) continue;
-    
+
     const variation = microVariations[Math.floor(Math.random() * microVariations.length)];
     if (!variation) continue;
 
@@ -405,7 +439,7 @@ async function createExamInstance(userId: string, options: { mode: ExamMode; lim
     const selectedType = weightedChoice(typeCandidates);
     const difficulty: DifficultyLevel = variation.type === "exam_tricky_view" ? "hard" : Math.random() < 0.4 ? "hard" : Math.random() < 0.6 ? "medium" : "easy";
     const template = buildQuestionTemplate(sample, allSamples, selectedType.type, difficulty, variation);
-    
+
     const fingerprint = fingerprintForQuestion({
       prompt: template.prompt,
       sampleId: sample.id,
@@ -457,7 +491,7 @@ async function createExamInstance(userId: string, options: { mode: ExamMode; lim
   if (questions.length === 0) {
     // Last resort fallback: force allow duplicates with challenge mode
     // (This ensures students NEVER hit a 'No questions left' wall)
-    return createExamInstance(userId, { ...options, forceConfusionDrill: true }); 
+    return createExamInstance(userId, { ...options, forceConfusionDrill: true });
   }
 
   const uniqueSignature = crypto.createHash("sha256").update(questions.map((question) => question.fingerprint).join("|")).digest("hex");
@@ -576,11 +610,11 @@ export async function getExamQuestionsForMode(
         pressureConfig:
           options.mode === "pressure"
             ? {
-                timerSeconds: question.difficulty === "hard" ? 25 : question.difficulty === "medium" ? 35 : 45,
-                oneTimeImageView: true,
-                noHints: true,
-                noGoingBack: true
-              }
+              timerSeconds: question.difficulty === "hard" ? 25 : question.difficulty === "medium" ? 35 : 45,
+              oneTimeImageView: true,
+              noHints: true,
+              noGoingBack: true
+            }
             : undefined,
         microscopy: question.microscopyConfig as MicroscopyConfig,
         sample: {
@@ -609,11 +643,11 @@ export async function getExamQuestionsForMode(
       pressureConfig:
         options.mode === "pressure"
           ? {
-              timerSeconds: question.difficulty === "hard" ? 25 : question.difficulty === "medium" ? 35 : 45,
-              oneTimeImageView: true,
-              noHints: true,
-              noGoingBack: true
-            }
+            timerSeconds: question.difficulty === "hard" ? 25 : question.difficulty === "medium" ? 35 : 45,
+            oneTimeImageView: true,
+            noHints: true,
+            noGoingBack: true
+          }
           : undefined,
       microscopy: question.microscopyConfig as MicroscopyConfig,
       sample: {
