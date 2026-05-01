@@ -6,12 +6,15 @@ import type { ExamQuestion } from "@/lib/examService";
 import { Brain, Play, ShieldAlert, RotateCcw, ArrowLeft, Microscope, Timer, Settings2 } from "lucide-react";
 import Link from "next/link";
 
+import { useSearchParams } from "next/navigation";
+
 const examModes = ["standard", "pressure", "drill"] as const;
 
 type LiveExamMode = (typeof examModes)[number] | null;
 type LoadState = "idle" | "loading" | "ready" | "error";
 
 export default function ExamPage() {
+  const searchParams = useSearchParams();
   const [mode, setMode] = useState<LiveExamMode>(null);
   const [questions, setQuestions] = useState<ExamQuestion[]>([]);
   const [examId, setExamId] = useState<string | null>(null);
@@ -20,15 +23,35 @@ export default function ExamPage() {
   const [limit, setLimit] = useState(8);
   const [forceRegen, setForceRegen] = useState(false);
 
+  // Initialize from URL params
+  useEffect(() => {
+    const urlMode = searchParams.get("mode") as LiveExamMode;
+    const urlCategory = searchParams.get("category");
+    const urlLimit = searchParams.get("limit");
+
+    if (urlMode && examModes.includes(urlMode)) {
+      setMode(urlMode);
+      if (urlLimit) setLimit(Number(urlLimit));
+      setLoadState("loading");
+    }
+  }, []);
+
   useEffect(() => {
     if (!mode || loadState !== "loading") return undefined;
     const controller = new AbortController();
 
     async function fetchExam() {
       try {
-        const isDrill = mode === "drill";
+        const isDrill = mode === "drill" || searchParams.get("drill") === "1";
         const fetchMode = isDrill ? "standard" : mode;
-        const response = await fetch(`/api/exam/questions?mode=${fetchMode}&limit=${limit}${forceRegen ? "&regen=1" : ""}${isDrill ? "&drill=1" : ""}`, {
+        const category = searchParams.get("category");
+        
+        let url = `/api/exam/questions?mode=${fetchMode}&limit=${limit}`;
+        if (forceRegen) url += "&regen=1";
+        if (isDrill) url += "&drill=1";
+        if (category) url += `&category=${category}`;
+
+        const response = await fetch(url, {
           signal: controller.signal
         });
         if (!response.ok) {
@@ -48,7 +71,7 @@ export default function ExamPage() {
 
     void fetchExam();
     return () => controller.abort();
-  }, [mode, limit, loadState]);
+  }, [mode, limit, loadState, searchParams]);
 
   const startExam = (selectedMode: LiveExamMode) => {
     setMode(selectedMode);
