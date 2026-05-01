@@ -11,7 +11,10 @@ export type ExamQuestionType =
   | "compare_samples"
   | "interpret_partial_slide"
   | "identify_structure"
-  | "describe_features";
+  | "describe_features"
+  | "identify_location"
+  | "high_power_id"
+  | "clinical_correlation";
 
 export type QuestionPattern =
   | "identify_specimen"
@@ -281,13 +284,16 @@ function buildQuestionTemplate(
 
 function buildQuestionTypeWeightList() {
   return [
-    { type: "identify_sample" as const, weight: 15 },
-    { type: "identify_tissue_type" as const, weight: 15 },
-    { type: "compare_samples" as const, weight: 15 },
-    { type: "interpret_partial_slide" as const, weight: 15 },
-    { type: "identify_structure" as const, weight: 15 },
-    { type: "list_features" as const, weight: 15 },
-    { type: "describe_features" as const, weight: 10 }
+    { type: "identify_sample" as const, weight: 12 },
+    { type: "identify_tissue_type" as const, weight: 12 },
+    { type: "compare_samples" as const, weight: 12 },
+    { type: "interpret_partial_slide" as const, weight: 10 },
+    { type: "identify_structure" as const, weight: 10 },
+    { type: "list_features" as const, weight: 10 },
+    { type: "describe_features" as const, weight: 8 },
+    { type: "identify_location" as const, weight: 12 },
+    { type: "high_power_id" as const, weight: 10 },
+    { type: "clinical_correlation" as const, weight: 12 },
   ];
 }
 
@@ -671,7 +677,7 @@ export async function getExamQuestionsForMode(
     };
   }
 
-  const exam = await createExamInstance(userId, { mode: options.mode, limit, forceConfusionDrill: options.forceConfusionDrill, category: options.category });
+  const exam: any = await createExamInstance(userId, { mode: options.mode, limit, forceConfusionDrill: options.forceConfusionDrill, category: options.category });
   return {
     examId: exam.id,
     questions: exam.questions.map((question: any) => ({

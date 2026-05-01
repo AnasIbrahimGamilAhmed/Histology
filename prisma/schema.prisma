@@ -213,6 +213,9 @@ enum QuestionType {
   interpret_partial_slide
   identify_structure
   describe_features
+  identify_location
+  high_power_id
+  clinical_correlation
 }
 
 enum QuestionPattern {

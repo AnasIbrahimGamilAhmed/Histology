@@ -216,6 +216,9 @@ export function ExamEngine({ questions, mode }: ExamEngineProps) {
              currentQuestion.type === "compare_samples" ? "Comparative Histology" :
              currentQuestion.type === "interpret_partial_slide" ? "Microscopic Interpretation" :
              currentQuestion.type === "list_features" ? "Diagnostic Features" :
+             currentQuestion.type === "identify_location" ? "Anatomical Location" :
+             currentQuestion.type === "high_power_id" ? "High-Power Field (400×)" :
+             currentQuestion.type === "clinical_correlation" ? "Clinical Correlation" :
              "Practical Assessment"}
           </h2>
         </div>
@@ -349,6 +352,16 @@ export function ExamEngine({ questions, mode }: ExamEngineProps) {
                     <Microscope size={12} />
                     Virtual Microscope (Drag to Pan)
                   </div>
+                  {currentQuestion.type === "high_power_id" && (
+                    <div className="px-4 py-2 rounded-xl bg-amber-500/80 backdrop-blur-md border border-amber-400 text-[10px] font-black text-black uppercase tracking-widest flex items-center gap-1 shadow-lg shadow-amber-500/30">
+                      🔬 400× HIGH POWER
+                    </div>
+                  )}
+                  {currentQuestion.type === "identify_location" && (
+                    <div className="px-4 py-2 rounded-xl bg-emerald-500/80 backdrop-blur-md border border-emerald-400 text-[10px] font-black text-black uppercase tracking-widest flex items-center gap-1 shadow-lg shadow-emerald-500/30">
+                      📍 WHERE IS THIS?
+                    </div>
+                  )}
                 </div>
               </div>
             )}
@@ -356,6 +369,33 @@ export function ExamEngine({ questions, mode }: ExamEngineProps) {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div className="space-y-6">
+              {/* Clinical Correlation: prominent scenario banner */}
+              {currentQuestion.type === "clinical_correlation" && (
+                <div className="p-6 rounded-3xl bg-rose-500/10 border border-rose-500/20">
+                  <div className="flex items-center gap-3 mb-3 text-rose-400">
+                    <span className="text-xs font-black uppercase tracking-widest">🩺 Clinical Scenario</span>
+                  </div>
+                  <p className="text-rose-100/80 text-sm leading-relaxed font-semibold">
+                    {currentQuestion.prompt}
+                  </p>
+                  <p className="text-rose-400/60 text-xs mt-3 font-bold uppercase tracking-widest">→ Identify the tissue/organ shown in the image above</p>
+                </div>
+              )}
+
+              {/* Location Question: map pin hint */}
+              {currentQuestion.type === "identify_location" && (
+                <div className="p-6 rounded-3xl bg-amber-500/10 border border-amber-500/20">
+                  <div className="flex items-center gap-3 mb-3 text-amber-400">
+                    <span className="text-xs font-black uppercase tracking-widest">📍 Location Question</span>
+                  </div>
+                  <p className="text-amber-100/80 text-sm leading-relaxed font-semibold">
+                    {currentQuestion.prompt}
+                  </p>
+                </div>
+              )}
+
+              {/* Standard hint for all other types */}
+              {currentQuestion.type !== "clinical_correlation" && currentQuestion.type !== "identify_location" && (
               <div className="p-6 rounded-3xl bg-indigo-500/5 border border-indigo-500/10">
                 <div className="flex items-center gap-3 mb-4 text-indigo-400">
                   <Lightbulb size={20} />
@@ -365,6 +405,7 @@ export function ExamEngine({ questions, mode }: ExamEngineProps) {
                   {currentQuestion.prompt}
                 </p>
               </div>
+              )}
 
               {(currentQuestion.choices && currentQuestion.choices.length > 0) ? (
                 <div className="grid grid-cols-1 gap-3">
