@@ -254,10 +254,41 @@ export function ExamEngine({ questions, mode }: ExamEngineProps) {
                 <p className="text-lg font-bold">Reveal Microscope View</p>
                 <p className="text-xs uppercase tracking-widest font-black opacity-50">One-time view only in pressure mode</p>
               </motion.button>
+            ) : currentQuestion.type === "compare_samples" && currentQuestion.image?.includes(",") ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {currentQuestion.image.split(",").map((img, idx) => {
+                  // Add random "Microscope Challenge" effects for comparison
+                  const challengeBlur = Math.random() > 0.5 ? Math.floor(Math.random() * 3) : 0;
+                  const challengeContrast = 0.8 + Math.random() * 0.4; // 0.8 to 1.2
+                  
+                  return (
+                    <div key={idx} className="relative h-[300px] md:h-[400px] rounded-[2.5rem] overflow-hidden border border-slate-800 shadow-2xl bg-slate-950 group/img">
+                      <Image
+                        src={img.trim()}
+                        alt={`Specimen ${idx + 1}`}
+                        fill
+                        priority
+                        className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover/img:scale-110"
+                        style={{
+                          filter: `blur(${challengeBlur}px) contrast(${challengeContrast})`
+                        }}
+                      />
+                      <div className="absolute top-6 left-6 px-4 py-2 rounded-xl bg-indigo-600/90 backdrop-blur-md text-[12px] font-black text-white uppercase tracking-widest">
+                        Specimen {idx === 0 ? "A" : "B"}
+                      </div>
+                      {challengeBlur > 0 && (
+                        <div className="absolute bottom-6 left-6 px-3 py-1 rounded-lg bg-rose-500/80 backdrop-blur-sm text-[8px] font-black text-white uppercase tracking-widest">
+                          Poor Focus
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
             ) : (
               <div className="relative h-[400px] w-full rounded-[2.5rem] overflow-hidden border border-slate-800 shadow-2xl bg-slate-950">
                 <Image
-                  src={currentQuestion.image}
+                  src={currentQuestion.image || ""}
                   alt="Histology Specimen"
                   fill
                   priority

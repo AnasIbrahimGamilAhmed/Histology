@@ -205,8 +205,8 @@ export const histologyData: TissueSection[] = [
         description: "Mainly collagen fibers running in parallel.",
         practicalTips: ["Collagen fibers are parallel (Tendons/Ligaments).", "Fibroblast nuclei are squashed between fibers."],
         confusionWarning: "Often confused with Smooth Muscle! Dense Regular CT has wavy, glassy collagen fibers and the nuclei are very thin/dark and outside the fibers. Smooth muscle cells are the fibers themselves, and nuclei are inside.",
-        imageUrl: "/images/demse ct/dense ct.png",
-        imageUrls: ["/images/demse ct/dense ct.png", "/images/demse ct/dense ct micro.png"],
+        imageUrl: "/images/dense ct/dense ct.png",
+        imageUrls: ["/images/dense ct/dense ct.png", "/images/dense ct/dense ct micro.png"],
       },
       {
         id: "elastic-ct",
@@ -429,47 +429,72 @@ export const histologyData: TissueSection[] = [
       {
         id: "pancreas",
         title: "Pancreas",
+        titleAr: "البنكرياس",
         description: "Mixed exocrine and endocrine gland.",
+        descriptionAr: "غدة مختلطة (قنوية ولا قنوية).",
         practicalTips: [
           "Look for pale-staining patches called Islets of Langerhans."
         ],
+        practicalTipsAr: [
+          "ابحث عن بقع فاتحة اللون تسمى جزر لانجر هانز (Islets of Langerhans)."
+        ],
         confusionWarning: "Presence of pale Islets of Langerhans specifically confirms it is the pancreas.",
-        imageUrl: "/images/pancereaas/pancereas.png",
-        imageUrls: ["/images/pancereaas/pancereas.png", "/images/pancereaas/pancereas micro.png"]
+        confusionWarningAr: "وجود جزر لانجر هانز الفاتحة يؤكد تماماً أنه البنكرياس.",
+        imageUrl: "/images/pancreas/pancreas.png",
+        imageUrls: ["/images/pancreas/pancreas.png", "/images/pancreas/pancreas micro.png"]
       },
       {
         id: "ileum",
         title: "Ileum (Small Intestine)",
+        titleAr: "اللفائفي (الأمعاء الدقيقة)",
         description: "Part of the small intestine specialized for absorption.",
+        descriptionAr: "جزء من الأمعاء الدقيقة مخصص لامتصاص الغذاء.",
         practicalTips: [
           "Prominent finger-like projections called Villi.",
           "Many Goblet cells."
         ],
+        practicalTipsAr: [
+          "بروزات تشبه الأصابع تسمى خملات (Villi).",
+          "كثرة الخلايا الكأسية (Goblet cells)."
+        ],
         confusionWarning: "Ileum has distinct outward-projecting villi and many goblet cells.",
-        imageUrl: "/images/illeum/illeum.png",
-        imageUrls: ["/images/illeum/illeum.png", "/images/illeum/illeum micro.png"]
+        confusionWarningAr: "يتميز اللفائفي بالخملات البارزة للخارج وكثرة الخلايا الكأسية.",
+        imageUrl: "/images/ileum/ileum.png",
+        imageUrls: ["/images/ileum/ileum.png", "/images/ileum/ileum micro.png"]
       },
       {
         id: "kidney",
         title: "Kidney",
+        titleAr: "الكلية",
         description: "Organ for filtration.",
+        descriptionAr: "عضو مخصص لترشيح الدم وتكوين البول.",
         practicalTips: [
           "Cortex contains round structures called Glomeruli."
         ],
+        practicalTipsAr: [
+          "القشرة تحتوي على تراكيب مستديرة تسمى كبيبات (Glomeruli)."
+        ],
         confusionWarning: "Look specifically for the Glomeruli (a ball of capillaries inside a capsule).",
+        confusionWarningAr: "ابحث خصيصاً عن الكبيبات (كرة من الشعيرات الدموية داخل محفظة).",
         imageUrl: "/images/kidney/kidney.png",
         imageUrls: ["/images/kidney/kidney.png", "/images/kidney/kidney micro.png"],
       },
       {
-        id: "oesophagus",
-        title: "Oesophagus",
+        id: "esophagus",
+        title: "Esophagus",
+        titleAr: "المريء",
         description: "Muscular tube.",
+        descriptionAr: "أنبوب عضلي لنقل الطعام.",
         practicalTips: [
           "Lined by a very thick Non-keratinized Stratified Squamous Epithelium."
         ],
+        practicalTipsAr: [
+          "مبطن بنسيج طلائي حرشفي طبقي غير متقرن سميك جداً."
+        ],
         confusionWarning: "Distinct thick muscularis layer and folded mucosa.",
-        imageUrl: "/images/osephoges/osephoges .png",
-        imageUrls: ["/images/osephoges/osephoges .png", "/images/osephoges/oesophagus micro.png"]
+        confusionWarningAr: "يتميز بطبقة عضلية سميكة وغشاء مخاطي مطوي.",
+        imageUrl: "/images/esophagus/esophagus.png",
+        imageUrls: ["/images/esophagus/esophagus.png", "/images/esophagus/esophagus micro.png"]
       },
       {
         id: "skin",
@@ -491,18 +516,25 @@ export const histologyData: TissueSection[] = [
           "Composed of many circular Seminiferous Tubules."
         ],
         confusionWarning: "Testis tubules contain multiple layers of maturing sperm cells.",
-        imageUrl: "/images/testes/tesesss.png",
-        imageUrls: ["/images/testes/tesesss.png", "/images/testes/testes micro.png"]
+        imageUrl: "/images/testis/testis.png",
+        imageUrls: ["/images/testis/testis.png", "/images/testis/testis micro.png"]
       },
       {
         id: "liver",
         title: "Liver",
+        titleAr: "الكبد",
         description: "Large metabolic organ.",
+        descriptionAr: "عضو تمثيل غذائي كبير.",
         practicalTips: [
           "Arranged in distinct hexagonal Hepatic Lobules.",
           "Central Vein in the middle."
         ],
+        practicalTipsAr: [
+          "مرتب في فصيصات كبدية سداسية الشكل.",
+          "وجود وريد مركزي (Central Vein) في المنتصف."
+        ],
         confusionWarning: "Highly distinctive repeating hexagonal lobules.",
+        confusionWarningAr: "يتميز بالفصيصات السداسية المتكررة.",
         imageUrl: "/images/liver/liver.png",
         imageUrls: ["/images/liver/liver.png", "/images/liver/liver micro.png"],
       },
@@ -543,24 +575,36 @@ export const histologyData: TissueSection[] = [
       {
         id: "rabbit-blood",
         title: "Rabbit Blood",
+        titleAr: "دم الأرنب",
         description: "Mammalian blood film.",
+        descriptionAr: "فيلم دم ثدييات.",
         practicalTips: [
           "RBCs are non-nucleated biconcave discs."
         ],
+        practicalTipsAr: [
+          "خلايا الدم الحمراء غير منواة (لا تحتوي على أنوية) ومقعرة الوجهين."
+        ],
         confusionWarning: "Rabbit (mammal) RBCs lack nuclei.",
+        confusionWarningAr: "خلايا دم الأرنب (الثدييات) تفتقر للأنوية.",
         imageUrl: "/images/blood film of rabbit/blood film of rabbit.png",
         imageUrls: ["/images/blood film of rabbit/blood film of rabbit.png", "/images/blood film of rabbit/blood film of rabbit micro.png"]
       },
       {
         id: "toad-blood",
         title: "Toad Blood",
+        titleAr: "دم الضفدع",
         description: "Amphibian blood film.",
+        descriptionAr: "فيلم دم برمائيات.",
         practicalTips: [
           "RBCs are large, oval, and nucleated."
         ],
+        practicalTipsAr: [
+          "خلايا الدم الحمراء كبيرة، بيضاوية، وتحتوي على أنوية."
+        ],
         confusionWarning: "Large nuclei in every RBC.",
-        imageUrl: "/images/blood film of toad/blood film offf toad.png",
-        imageUrls: ["/images/blood film of toad/blood film offf toad.png", "/images/blood film of toad/blood film of toad micro.png"]
+        confusionWarningAr: "وجود أنوية كبيرة في كل خلية دم حمراء.",
+        imageUrl: "/images/blood film of toad/blood film toad.png",
+        imageUrls: ["/images/blood film of toad/blood film toad.png", "/images/blood film of toad/blood film of toad micro.png"]
       }
     ]
   }
