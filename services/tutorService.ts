@@ -46,10 +46,25 @@ function classifyMistake(input: TutorFeedbackInput): MistakeClass {
 
 function fallbackExplanation(input: TutorFeedbackInput, classification: MistakeClass | null): string {
   if (input.isCorrect) {
+    if (input.questionType === "identify_structure") {
+      return `Excellent! You correctly identified the structure in ${input.sample.name}.`;
+    }
+    if (input.questionType === "list_features" || input.questionType === "describe_features") {
+      return `Correct! You identified the key diagnostic feature for ${input.sample.name}.`;
+    }
     return `Excellent! You correctly identified ${input.sample.name}. Diagnostic features to remember: ${input.sample.keyFeatures.slice(0, 2).join(", ")}.`;
   }
 
   const chosen = input.chosenSample ? ` (You noted: ${input.chosenSample}).` : "";
+  
+  if (input.questionType === "identify_structure") {
+    return `Not quite.${chosen} The correct structure was ${input.correctAnswer}. It's a key part of ${input.sample.name}.`;
+  }
+  
+  if (input.questionType === "list_features" || input.questionType === "describe_features") {
+    return `Not quite.${chosen} The expected diagnostic feature for ${input.sample.name} was: ${input.correctAnswer}. Keep practicing your observations!`;
+  }
+
   return `Not quite.${chosen} The correct identification is ${input.sample.name}. Look for these key markers: ${input.sample.keyFeatures.slice(0, 2).join(", ")}. Don't worry, histology takes practice!`;
 }
 
@@ -71,8 +86,11 @@ export async function generateTutorFeedback(input: TutorFeedbackInput): Promise<
   const userPrompt = `
     TASK: Provide feedback for a histology exam question.
     
+    QUESTION TYPE: "${input.questionType}" (This could be identifying the specimen, a specific structure, or a diagnostic feature)
+    PROMPT GIVEN: "${input.prompt}"
     STUDENT ANSWER: "${input.userAnswer}"
-    CORRECT DIAGNOSIS: "${input.sample.name}"
+    CORRECT ANSWER: "${input.correctAnswer}"
+    CORRECT SPECIMEN: "${input.sample.name}"
     RESULT: ${status}
     ERROR TYPE: ${classification ?? "None"}
     
@@ -82,11 +100,12 @@ export async function generateTutorFeedback(input: TutorFeedbackInput): Promise<
     - Variation in this question: ${input.variationType ?? "Standard view"}
     
     INSTRUCTIONS:
-    1. If correct, explain WHY (mentioning pathognomonic features).
-    2. If incorrect, gently explain the confusion and highlight what feature they missed.
-    3. Specifically address the variation (${input.variationType}) if present, explaining how it might change the look (e.g., stain, cut angle).
-    4. Keep it under 100 words.
-    5. Be professional and educational.
+    1. Focus your feedback on the QUESTION TYPE. If it was a structure/feature question, don't just talk about the specimen name.
+    2. If correct, explain WHY (mentioning pathognomonic features).
+    3. If incorrect, gently explain why the student's answer might be wrong and highlight the correct answer.
+    4. Specifically address the variation (${input.variationType}) if present.
+    5. Keep it under 80 words.
+    6. Be professional and educational.
   `;
 
   try {
