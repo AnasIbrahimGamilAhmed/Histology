@@ -83,7 +83,7 @@ function sampleCategory(name: string) {
   if (/(muscle|skeletal|smooth|cardiac)/.test(lower)) return "muscular";
   if (/(nerve|spinal cord|sciatic|nervous|neuroglia|motor neuron)/.test(lower)) return "nervous";
   if (/(blood|rabbit|toad)/.test(lower)) return "blood";
-  if (/(liver|kidney|stomach|esophagus|trachea|pancreas|ileum|testis)/.test(lower)) return "organ-samples";
+  if (/(liver|kidney|stomach|esophagus|oesophagus|trachea|pancreas|ileum|testis)/.test(lower)) return "organ-samples";
   if (lower.includes("skin")) return "skin";
   return "other";
 }
@@ -394,17 +394,29 @@ async function getUniqueSamplePool(userId: string, limit: number, mode: ExamMode
   return shuffle(poolToUse).slice(0, limit);
 }
 
-async function createExamInstance(userId: string, options: { mode: ExamMode; limit: number; forceConfusionDrill?: boolean; category?: string }) {
+async function createExamInstance(userId: string, options: { mode: ExamMode; limit: number; forceConfusionDrill?: boolean; category?: string; allowSeen?: boolean }) {
   const allAvailableRaw = await prisma.sample.findMany({ include: { variations: true } });
+
   const allAvailable = options.category 
     ? allAvailableRaw.filter(s => sampleCategory(s.name) === options.category)
     : allAvailableRaw;
 
   const allSamples = allAvailable.map((sample) => ({ id: sample.id, name: sample.name, category: sampleCategory(sample.name) }));
-  const previousPatterns = await getPreviousExamSamplePatterns(userId);
-  const existingFingerprints = new Set(
-    (await prisma.examQuestionInstance.findMany({ select: { fingerprint: true } })).map((item) => item.fingerprint)
-  );
+  
+  let previousPatterns = new Map<string, Set<QuestionPattern>>();
+  let existingFingerprints = new Set<string>();
+
+  try {
+    previousPatterns = await getPreviousExamSamplePatterns(userId);
+    existingFingerprints = new Set(
+      (await prisma.examQuestionInstance.findMany({ 
+        where: { examInstance: { userId } },
+        select: { fingerprint: true } 
+      })).map((item) => item.fingerprint)
+    );
+  } catch (e) {
+    console.warn("Could not load previous patterns/fingerprints from DB, using empty sets.");
+  }
 
   const samplePool = await getUniqueSamplePool(userId, options.limit, options.mode, options.forceConfusionDrill, options.category);
   const questions = [] as Array<{
@@ -477,8 +489,8 @@ async function createExamInstance(userId: string, options: { mode: ExamMode; lim
         rotationDeg: Math.random() * 360, // Total disorientation
       };
       finalPrompt = `[ELITE CHALLENGE] ${finalPrompt} (Artifacts & poor focus simulated)`;
-    } else if (isAlreadySeen) {
-      // Still skip for normal students to maintain uniqueness
+    } else if (isAlreadySeen && !options.allowSeen) {
+      // Still skip for normal students to maintain uniqueness UNLESS we are in fallback mode
       continue;
     }
 
@@ -499,9 +511,17 @@ async function createExamInstance(userId: string, options: { mode: ExamMode; lim
   }
 
   if (questions.length === 0) {
-    // Last resort fallback: force allow duplicates with challenge mode
-    // (This ensures students NEVER hit a 'No questions left' wall)
-    return createExamInstance(userId, { ...options, forceConfusionDrill: true });
+    if (!options.allowSeen) {
+      // Try again but allow duplicates
+      return createExamInstance(userId, { ...options, allowSeen: true });
+    }
+    if (options.category) {
+      // Try again without category if still nothing
+      return createExamInstance(userId, { ...options, category: undefined });
+    }
+    
+    // Total failure - should not happen with allowSeen: true
+    throw new Error("Critical: No questions could be generated even with duplicates allowed.");
   }
 
   const uniqueSignature = crypto.createHash("sha256").update(questions.map((question) => question.fingerprint).join("|")).digest("hex");
@@ -542,39 +562,7 @@ async function createExamInstance(userId: string, options: { mode: ExamMode; lim
 
     return created;
   } catch (error) {
-    console.warn("Falling back to stateless exam due to database write error (e.g. Vercel SQLite read-only).", error);
-    const mockExamId = "stateless-exam-" + Date.now();
-    return {
-      id: mockExamId,
-      userId,
-      mode: options.mode,
-      status: "active",
-      questionCount: questions.length,
-      uniqueSignature,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      questions: questions.map((q, i) => {
-        const fullSample = allAvailableRaw.find((s) => s.id === q.sampleId);
-        return {
-          id: "stateless-q-" + i,
-          examInstanceId: mockExamId,
-          questionTemplateId: null,
-          sampleId: q.sampleId,
-          variationId: q.variationId || null,
-          type: q.type,
-          reasoningPattern: q.reasoningPattern,
-          difficulty: q.difficulty,
-          prompt: q.prompt,
-          image: q.image,
-          choices: q.choices,
-          acceptedAnswers: q.acceptedAnswers,
-          microscopyConfig: q.microscopyConfig,
-          variationType: q.variationType || null,
-          fingerprint: q.fingerprint,
-          sample: fullSample || { name: "", description: "", keyFeatures: [] }
-        };
-      })
-    } as any;
+    throw error;
   }
 }
 
@@ -603,6 +591,7 @@ export async function getExamQuestionsForMode(
 ): Promise<ExamResponse> {
   const limit = options.limit ?? 8;
   const existing = options.category ? null : await findActiveExam(userId, options.mode, limit);
+  
   if (existing && existing.questions.length > 0 && !options.forceRegenerate) {
     return {
       examId: existing.id,
