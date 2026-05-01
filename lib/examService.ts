@@ -124,7 +124,7 @@ function buildMicroscopyConfig(variation: { image: string, type: VariationType }
   return { zoomLevel, partialView, blurPx, contrast, rotationDeg, cropRect };
 }
 
-function fingerprintForQuestion(question: {
+function fingerprintForQuestion(userId: string, question: {
   prompt: string;
   sampleId: string;
   variationType: VariationType | null;
@@ -134,6 +134,7 @@ function fingerprintForQuestion(question: {
   reasoningPattern: QuestionPattern;
 }) {
   const normalized = [
+    userId,
     normalize(question.prompt),
     question.sampleId,
     question.variationType ?? "none",
@@ -463,7 +464,7 @@ async function createExamInstance(userId: string, options: { mode: ExamMode; lim
     const difficulty: DifficultyLevel = variation.type === "exam_tricky_view" ? "hard" : Math.random() < 0.4 ? "hard" : Math.random() < 0.6 ? "medium" : "easy";
     const template = buildQuestionTemplate(sample, allSamples, selectedType.type, difficulty, variation);
 
-    const fingerprint = fingerprintForQuestion({
+    const fingerprint = fingerprintForQuestion(userId, {
       prompt: template.prompt,
       sampleId: sample.id,
       variationType: variation.type,
@@ -525,7 +526,7 @@ async function createExamInstance(userId: string, options: { mode: ExamMode; lim
       const difficulty: DifficultyLevel = variation.type === "exam_tricky_view" ? "hard" : Math.random() < 0.4 ? "hard" : Math.random() < 0.6 ? "medium" : "easy";
       const template = buildQuestionTemplate(sample, allSamples, selectedType.type, difficulty, variation);
 
-      const fingerprint = fingerprintForQuestion({
+      const fingerprint = fingerprintForQuestion(userId, {
         prompt: template.prompt,
         sampleId: sample.id,
         variationType: variation.type,
