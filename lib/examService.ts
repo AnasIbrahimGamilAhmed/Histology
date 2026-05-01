@@ -435,7 +435,7 @@ function buildQuestionTemplate(
       const allChoices = shuffle([...trueChoices, falseFeature]);
       
       return {
-        prompt: `All of the following characteristics are true regarding the specimen shown EXCEPT:`,
+        prompt: `Identify this specimen, then determine which of the following statements about it is FALSE (EXCEPT):`,
         choices: allChoices,
         acceptedAnswers: [falseFeature],
         reasoningPattern: "describe_features" as const
@@ -771,18 +771,18 @@ async function createExamInstance(userId: string, options: { mode: ExamMode; lim
         uniqueSignature,
         questions: {
           create: questions.map((question) => ({
-            sampleId: question.sampleId,
-            variationId: question.variationId,
-            type: question.type,
-            difficulty: question.difficulty,
+            type: question.type as any,
+            difficulty: question.difficulty as any,
             prompt: question.prompt,
             image: question.image,
-            variationType: question.variationType,
-            choices: question.choices,
-            acceptedAnswers: question.acceptedAnswers,
-            microscopyConfig: question.microscopyConfig,
-            reasoningPattern: question.reasoningPattern,
-            fingerprint: question.fingerprint
+            variationType: question.variationType as any,
+            choices: question.choices ?? [],
+            acceptedAnswers: question.acceptedAnswers ?? [],
+            microscopyConfig: question.microscopyConfig as any,
+            reasoningPattern: question.reasoningPattern as any,
+            fingerprint: question.fingerprint,
+            sample: { connect: { id: question.sampleId } },
+            ...(question.variationId ? { variation: { connect: { id: question.variationId } } } : {})
           }))
         }
       },
