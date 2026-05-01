@@ -220,8 +220,9 @@ function buildQuestionTemplate(
 
   const clean = (s: string) => s.trim().replace(/\.+$/, "");
   const structureAnswer = clean(featureChoices[0]);
-  const cleanedChoices = featureChoices.slice(0, 3).map(clean);
-  const structureChoices = shuffle([...cleanedChoices, ...structurePool.map(clean).slice(0, 6)]).slice(0, 4);
+  
+  // Use ONLY structurePool for the distractors to avoid putting other true features (like locations) as wrong answers
+  const structureChoices = shuffle([...structurePool.map(clean).slice(0, 6)]).slice(0, 4);
 
   // Ensure answer is always in choices
   if (!structureChoices.includes(structureAnswer)) {
