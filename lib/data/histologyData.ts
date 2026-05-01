@@ -200,11 +200,21 @@ export const histologyData: TissueSection[] = [
       {
         id: "elastic-ct",
         title: "Elastic Connective Tissue",
-        description: "High concentration of elastic fibers allowing stretch.",
-        practicalTips: ["Dark, wavy, parallel elastic fibers.", "Found in walls of large arteries (Aorta)."],
-        practicalTipsAr: ["ألياف مرنة داكنة، مموجة، ومتوازية.", "توجد في جدران الشرايين الكبيرة (الأورطى)."],
-        confusionWarning: "Often confused with Dense Regular CT, but elastic fibers are much darker (often stained black/dark purple) and more wavy/coiled.",
-        confusionWarningAr: "تتشابه مع النسيج الضام الكثيف المنتظم، لكن الألياف المرنة أغمق بكثير ومموجة أكثر.",
+        titleAr: "نسيج ضام مرن",
+        description: "High concentration of elastic (yellow) fibers allowing significant stretch and recoil.",
+        descriptionAr: "يحتوي على تركيز عالٍ من الألياف المرنة (الصفراء) التي تسمح بالتمدد والارتداد.",
+        practicalTips: [
+          "Yellow Fibers (Elastic): Look for thin, delicate, branching fibers that form a network. They are often stained dark (black/purple).",
+          "White Fibers (Collagen): These are thick, wavy bundles. They are stronger but less flexible than yellow fibers.",
+          "In the Aorta: Look for thick, wavy, parallel 'lamellae' of elastic tissue."
+        ],
+        practicalTipsAr: [
+          "الألياف الصفراء (Elastic): ألياف رفيعة، رقيقة، ومتفرعة مكونة شبكة. غالباً تظهر بلون داكن.",
+          "الألياف البيضاء (Collagen): حزم سميكة ومموجة. أقوى ولكن أقل مرونة من الصفراء.",
+          "في الأورطى: ابحث عن 'رقائق' سميكة ومموجة ومتوازية من النسيج المرن."
+        ],
+        confusionWarning: "Differentiate White vs Yellow: White fibers (Collagen) are thick bundles and don't branch. Yellow fibers (Elastic) are much thinner, branch frequently, and have a 'snappy' wavy appearance. Also, don't confuse Elastic CT with Dense Regular CT; Elastic CT is much darker and more 'crinkly'.",
+        confusionWarningAr: "الفرق بين البيضاء والصفراء: الألياف البيضاء (كولاجين) تكون في حزم سميكة ولا تتفرع. الألياف الصفراء (مرنة) أرفع بكثير وتتفرع بكثرة ولها مظهر 'زجزاجي' حاد.",
         imageUrl: "/images/elastic connective tissue/elastic connective.png",
         imageUrls: ["/images/elastic connective tissue/elastic connective.png", "/images/elastic connective tissue/elastic connective micro.png"]
       },
