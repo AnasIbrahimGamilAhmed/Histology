@@ -281,13 +281,13 @@ function buildQuestionTemplate(
 
 function buildQuestionTypeWeightList() {
   return [
-    { type: "identify_sample" as const, weight: 18 },
-    { type: "identify_tissue_type" as const, weight: 14 },
-    { type: "compare_samples" as const, weight: 14 },
-    { type: "interpret_partial_slide" as const, weight: 12 },
-    { type: "identify_structure" as const, weight: 10 },
-    { type: "list_features" as const, weight: 10 },
-    { type: "describe_features" as const, weight: 8 }
+    { type: "identify_sample" as const, weight: 15 },
+    { type: "identify_tissue_type" as const, weight: 15 },
+    { type: "compare_samples" as const, weight: 15 },
+    { type: "interpret_partial_slide" as const, weight: 15 },
+    { type: "identify_structure" as const, weight: 15 },
+    { type: "list_features" as const, weight: 15 },
+    { type: "describe_features" as const, weight: 10 }
   ];
 }
 

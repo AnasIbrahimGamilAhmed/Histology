@@ -209,7 +209,15 @@ export function ExamEngine({ questions, mode }: ExamEngineProps) {
       <div className="flex items-center justify-between">
         <div className="space-y-1">
           <p className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.3em]">Module {currentIndex + 1}</p>
-          <h2 className="text-2xl font-black text-white tracking-tight">Practical Identification</h2>
+          <h2 className="text-2xl font-black text-white tracking-tight">
+            {currentQuestion.type === "identify_sample" ? "Specimen Identification" :
+             currentQuestion.type === "identify_tissue_type" ? "Tissue Classification" :
+             currentQuestion.type === "identify_structure" ? "Structural Analysis" :
+             currentQuestion.type === "compare_samples" ? "Comparative Histology" :
+             currentQuestion.type === "interpret_partial_slide" ? "Microscopic Interpretation" :
+             currentQuestion.type === "list_features" ? "Diagnostic Features" :
+             "Practical Assessment"}
+          </h2>
         </div>
         <div className="flex items-center gap-4">
           <div className="px-4 py-2 rounded-xl bg-slate-800/50 border border-slate-700 text-xs font-bold text-slate-300">
@@ -291,20 +299,24 @@ export function ExamEngine({ questions, mode }: ExamEngineProps) {
                   transition={{ duration: 0.25 }}
                 >
                   <img
-                    src={currentQuestion.image || ""}
+                    key={currentQuestion.image + currentIndex}
+                    src={currentQuestion.image ? encodeURI(currentQuestion.image) : ""}
                     alt="Histology Specimen"
                     draggable={false}
+                    className="w-full h-full object-cover"
                     style={{
-                      width: "100%",
-                      height: "100%",
-                      objectFit: "cover",
                       pointerEvents: "none",
                       userSelect: "none",
                       filter: `blur(${currentQuestion.microscopy?.blurPx ?? 0}px) contrast(${currentQuestion.microscopy?.contrast ?? 1})`,
-                      transform: `rotate(${currentQuestion.microscopy?.rotationDeg ?? 0}deg) scale(${zoomFactor * (currentQuestion.microscopy?.cropRect ? 2 : 1)})`,
+                      transform: `rotate(${currentQuestion.microscopy?.rotationDeg ?? 0}deg) scale(${zoomFactor * (currentQuestion.microscopy?.cropRect ? 2 : 1.2)})`,
                       objectPosition: currentQuestion.microscopy?.cropRect
                         ? `${currentQuestion.microscopy.cropRect.x}% ${currentQuestion.microscopy.cropRect.y}%`
                         : "center",
+                    }}
+                    onLoad={(e) => (e.currentTarget.style.opacity = "1")}
+                    onError={(e) => {
+                      console.error("Image failed to load:", currentQuestion.image);
+                      e.currentTarget.src = "https://placehold.co/800x400/0f172a/6366f1?text=Image+Loading+Error";
                     }}
                   />
                   {currentQuestion.type === "identify_structure" && (
@@ -354,23 +366,24 @@ export function ExamEngine({ questions, mode }: ExamEngineProps) {
                 </p>
               </div>
 
-              {currentQuestion.choices.length > 0 ? (
+              {(currentQuestion.choices && currentQuestion.choices.length > 0) ? (
                 <div className="grid grid-cols-1 gap-3">
                   {currentQuestion.choices.map((choice, i) => (
                     <motion.button
                       key={i}
-                      whileHover={{ x: 10 }}
+                      whileHover={{ x: 10, backgroundColor: "rgba(99, 102, 241, 0.1)" }}
+                      whileTap={{ scale: 0.98 }}
                       disabled={revealed[currentQuestion.id]}
                       onClick={() => setAnswers((prev) => ({ ...prev, [currentQuestion.id]: choice }))}
-                      className={`p-5 rounded-2xl border text-left transition-all flex items-center justify-between ${
+                      className={`p-5 rounded-2xl border-2 text-left transition-all flex items-center justify-between ${
                         answers[currentQuestion.id] === choice 
-                        ? "bg-indigo-600 border-indigo-500 text-white shadow-lg shadow-indigo-500/20" 
-                        : "bg-slate-900/50 border-slate-800 text-slate-400 hover:border-slate-700"
+                        ? "bg-indigo-600 border-indigo-400 text-white shadow-xl shadow-indigo-500/40" 
+                        : "bg-slate-900 border-slate-800 text-slate-200 hover:border-indigo-500/30"
                       } disabled:opacity-50`}
                     >
-                      <span className="font-bold">{choice}</span>
+                      <span className="font-bold text-lg">{choice}</span>
                       <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${answers[currentQuestion.id] === choice ? "border-white bg-white/20" : "border-slate-700"}`}>
-                        {answers[currentQuestion.id] === choice && <div className="w-2 h-2 rounded-full bg-white" />}
+                        {answers[currentQuestion.id] === choice && <div className="w-2 h-2 rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.8)]" />}
                       </div>
                     </motion.button>
                   ))}
@@ -380,8 +393,8 @@ export function ExamEngine({ questions, mode }: ExamEngineProps) {
                   disabled={revealed[currentQuestion.id]}
                   value={answers[currentQuestion.id] ?? ""}
                   onChange={(e) => setAnswers(prev => ({ ...prev, [currentQuestion.id]: e.target.value }))}
-                  placeholder="Identify specimen or features..."
-                  className="w-full h-32 p-6 rounded-3xl bg-slate-900/50 border border-slate-800 text-white placeholder:text-slate-600 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500/50 outline-none transition-all resize-none font-medium"
+                  placeholder="Type your identification here..."
+                  className="w-full h-40 p-6 rounded-3xl bg-slate-900 border-2 border-slate-800 text-white placeholder:text-slate-600 focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500/50 outline-none transition-all resize-none font-bold text-lg"
                 />
               )}
             </div>

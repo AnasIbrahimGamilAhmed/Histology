@@ -21,12 +21,12 @@ function ComparisonCard({ sample, isComparison = false, opposingSample }: { samp
       
       <div className="grid grid-cols-2 bg-black h-56 border-b border-white/5 relative">
         <div className="relative overflow-hidden group">
-          <img src={sample.imageUrl || sample.imageUrls?.[0]} alt={sample.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+          <img src={sample.imageUrl ? encodeURI(sample.imageUrl) : (sample.imageUrls?.[0] ? encodeURI(sample.imageUrls[0]) : "")} alt={sample.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
           <div className="absolute inset-0 bg-black/20" />
           <span className="absolute bottom-3 left-3 text-[8px] font-black uppercase text-white/60 bg-black/40 px-2 py-1 rounded-md">General View</span>
         </div>
         <div className="relative overflow-hidden border-l border-white/10 group cursor-crosshair">
-          <img src={microImage} alt={`${sample.title} Micro`} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+          <img src={microImage ? encodeURI(microImage) : ""} alt={`${sample.title} Micro`} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
           <div className="absolute inset-0 bg-indigo-500/10" />
           
           {/* REFINED VIRTUAL TARGETING SYSTEM */}
@@ -589,7 +589,7 @@ function StudyContent() {
             >
               <div className="relative group overflow-hidden bg-black flex items-center justify-center p-6 lg:p-12 aspect-square lg:aspect-auto">
                 <img 
-                  src={selectedSection.extraStudy.imageUrl} 
+                  src={selectedSection.extraStudy.imageUrl ? encodeURI(selectedSection.extraStudy.imageUrl) : ""} 
                   alt={selectedSection.extraStudy.title}
                   className="max-w-full max-h-full lg:max-h-[70vh] object-contain transition-transform duration-1000 group-hover:scale-110"
                 />

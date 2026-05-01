@@ -81,7 +81,7 @@ export default function AtlasClient({ samples }: { samples: SampleWithVariations
               >
                 <div className="relative aspect-[4/3] overflow-hidden bg-black">
                   <img 
-                    src={variation.image} 
+                    src={variation.image ? encodeURI(variation.image) : ""} 
                     alt={sample.name}
                     className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
                     loading="lazy"
@@ -266,7 +266,7 @@ function PreciseMagnifier({ src }: { src: string }) {
     >
       <img 
         ref={imgRef}
-        src={src} 
+        src={src ? encodeURI(src) : ""} 
         className="max-w-full max-h-full object-contain pointer-events-none shadow-2xl transition-all"
         alt="Clinical specimen"
       />
@@ -277,7 +277,7 @@ function PreciseMagnifier({ src }: { src: string }) {
           style={{
             left: lens.x - 160,
             top: lens.y - 160,
-            backgroundImage: `url(${src})`,
+            backgroundImage: `url('${src ? encodeURI(src) : ""}')`,
             backgroundPosition: getBackgroundPos(),
             backgroundSize: `${imgRef.current.width * 3}px ${imgRef.current.height * 3}px`,
             backgroundRepeat: "no-repeat"

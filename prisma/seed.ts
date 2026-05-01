@@ -213,16 +213,16 @@ async function main() {
     }
   }
 
-  // Helper for categories
+  // Helper for categories (Robust Version)
   function categoryLabel(name: string) {
     const lower = name.toLowerCase();
-    if (lower.includes("epitheli") || lower.includes("epithelium")) return "Epithelial tissue";
-    if (/(cartilage|bone|connective|adipose|areolar)/.test(lower)) return "Connective tissue";
-    if (/(muscle|skeletal|smooth|cardiac)/.test(lower)) return "Muscle tissue";
-    if (/(nerve|spinal cord|sciatic|nervous|neuroglia|motor neuron)/.test(lower)) return "Nervous tissue";
-    if (/(blood|rabbit|toad)/.test(lower)) return "Blood film";
-    if (/(liver|kidney|stomach|esophagus|trachea|pancreas|ileum|testis)/.test(lower)) return "Organ section";
-    if (lower.includes("skin")) return "Skin histology";
+    if (/(epitheli|squamous|cuboidal|columnar|pseudostratified|transitional)/.test(lower)) return "Epithelial tissue";
+    if (/(cartilage|bone|connective|adipose|areolar|fibrous|tendon|ligament|elastic)/.test(lower)) return "Connective tissue";
+    if (/(muscle|skeletal|smooth|cardiac|myofibril)/.test(lower)) return "Muscle tissue";
+    if (/(nerve|spinal cord|sciatic|nervous|neuroglia|motor neuron|axon|dendrite)/.test(lower)) return "Nervous tissue";
+    if (/(blood|rabbit|toad|leukocyte|erythrocyte|platelet|monocyte|lymphocyte|neutrophil|eosinophil|basophil)/.test(lower)) return "Blood film";
+    if (/(liver|kidney|stomach|esophagus|oesophagus|trachea|pancreas|ileum|testis|organ|gland|duct|follicle)/.test(lower)) return "Organ section";
+    if (lower.includes("skin") || lower.includes("dermis") || lower.includes("epidermis") || lower.includes("hair")) return "Skin histology";
     return "Mixed histology";
   }
 

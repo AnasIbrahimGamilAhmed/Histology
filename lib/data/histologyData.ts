@@ -205,8 +205,8 @@ export const histologyData: TissueSection[] = [
         description: "Mainly collagen fibers running in parallel.",
         practicalTips: ["Collagen fibers are parallel (Tendons/Ligaments).", "Fibroblast nuclei are squashed between fibers."],
         confusionWarning: "Often confused with Smooth Muscle! Dense Regular CT has wavy, glassy collagen fibers and the nuclei are very thin/dark and outside the fibers. Smooth muscle cells are the fibers themselves, and nuclei are inside.",
-        imageUrl: "/images/dense ct/dense ct.png",
-        imageUrls: ["/images/dense ct/dense ct.png", "/images/dense ct/dense ct micro.png"],
+        imageUrl: "/images/demse ct/dense ct.png",
+        imageUrls: ["/images/demse ct/dense ct.png", "/images/demse ct/dense ct micro.png"],
       },
       {
         id: "elastic-ct",
@@ -440,8 +440,8 @@ export const histologyData: TissueSection[] = [
         ],
         confusionWarning: "Presence of pale Islets of Langerhans specifically confirms it is the pancreas.",
         confusionWarningAr: "وجود جزر لانجر هانز الفاتحة يؤكد تماماً أنه البنكرياس.",
-        imageUrl: "/images/pancreas/pancreas.png",
-        imageUrls: ["/images/pancreas/pancreas.png", "/images/pancreas/pancreas micro.png"]
+        imageUrl: "/images/pancereaas/pancereas.png",
+        imageUrls: ["/images/pancereaas/pancereas.png", "/images/pancereaas/pancereas micro.png"]
       },
       {
         id: "ileum",
@@ -459,8 +459,8 @@ export const histologyData: TissueSection[] = [
         ],
         confusionWarning: "Ileum has distinct outward-projecting villi and many goblet cells.",
         confusionWarningAr: "يتميز اللفائفي بالخملات البارزة للخارج وكثرة الخلايا الكأسية.",
-        imageUrl: "/images/ileum/ileum.png",
-        imageUrls: ["/images/ileum/ileum.png", "/images/ileum/ileum micro.png"]
+        imageUrl: "/images/illeum/ileum.png",
+        imageUrls: ["/images/illeum/ileum.png", "/images/illeum/ileum micro.png"]
       },
       {
         id: "kidney",
@@ -493,8 +493,8 @@ export const histologyData: TissueSection[] = [
         ],
         confusionWarning: "Distinct thick muscularis layer and folded mucosa.",
         confusionWarningAr: "يتميز بطبقة عضلية سميكة وغشاء مخاطي مطوي.",
-        imageUrl: "/images/esophagus/esophagus.png",
-        imageUrls: ["/images/esophagus/esophagus.png", "/images/esophagus/esophagus micro.png"]
+        imageUrl: "/images/osephoges/osephoges .png",
+        imageUrls: ["/images/osephoges/osephoges .png", "/images/osephoges/oesophagus micro.png"]
       },
       {
         id: "skin",
@@ -516,8 +516,8 @@ export const histologyData: TissueSection[] = [
           "Composed of many circular Seminiferous Tubules."
         ],
         confusionWarning: "Testis tubules contain multiple layers of maturing sperm cells.",
-        imageUrl: "/images/testis/testis.png",
-        imageUrls: ["/images/testis/testis.png", "/images/testis/testis micro.png"]
+        imageUrl: "/images/testes/tesesss.png",
+        imageUrls: ["/images/testes/tesesss.png", "/images/testes/testes micro.png"]
       },
       {
         id: "liver",
