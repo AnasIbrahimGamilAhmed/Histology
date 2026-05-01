@@ -474,19 +474,22 @@ async function createExamInstance(userId: string, options: { mode: ExamMode; lim
 
     const isAlreadySeen = existingFingerprints.has(fingerprint);
 
-    // INNOVATIVE FALLBACK: If elite student has seen this, don't skip! 
-    // Instead, "Challenge" them by applying extreme filters.
+    // STRICT NON-REPETITION: Skip if already seen to ensure fresh questions
+    if (isAlreadySeen && !options.allowSeen) {
+      continue;
+    }
+
     let microscopyConfig = buildMicroscopyConfig(variation);
     let finalPrompt = template.prompt;
 
-    if (isAlreadySeen && isEliteUser) {
-      // Apply "Microscope Challenge" filters
+    // Optional: Keep Elite Challenge if forced to allow seen
+    if (isAlreadySeen && isEliteUser && options.allowSeen) {
       microscopyConfig = {
         ...microscopyConfig,
-        zoomLevel: 3, // Force high power
-        contrast: 1.8, // Harsh lighting
-        blurPx: 2.5, // Out of focus simulation
-        rotationDeg: Math.random() * 360, // Total disorientation
+        zoomLevel: 3,
+        contrast: 1.8,
+        blurPx: 2.5,
+        rotationDeg: Math.random() * 360,
       };
       finalPrompt = `[ELITE CHALLENGE] ${finalPrompt} (Artifacts & poor focus simulated)`;
     }
@@ -551,6 +554,12 @@ async function createExamInstance(userId: string, options: { mode: ExamMode; lim
         difficulty,
         reasoningPattern: template.reasoningPattern
       });
+
+      // STRICT NON-REPETITION padding check
+      if (existingFingerprints.has(fingerprint) && !options.allowSeen) {
+        continue;
+      }
+
       questions.push({
         sampleId: sample.id,
         variationId: variation.id,
@@ -563,12 +572,16 @@ async function createExamInstance(userId: string, options: { mode: ExamMode; lim
         acceptedAnswers: template.acceptedAnswers,
         reasoningPattern: template.reasoningPattern,
         microscopyConfig: buildMicroscopyConfig(variation),
-        fingerprint: `${fingerprint}|pad|${Math.random()}`
+        fingerprint: existingFingerprints.has(fingerprint) ? `${fingerprint}|pad|${Math.random()}` : fingerprint
       });
     }
   }
 
   if (questions.length === 0) {
+    if (!options.allowSeen) {
+      // Fallback: if all questions have been seen, allow them instead of failing
+      return createExamInstance(userId, { ...options, allowSeen: true });
+    }
     if (options.category) {
       return createExamInstance(userId, { ...options, category: undefined });
     }
