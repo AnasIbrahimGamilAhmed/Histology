@@ -374,22 +374,20 @@ async function getUniqueSamplePool(userId: string, limit: number, mode: ExamMode
         combined.push(...fill.slice(0, limit - combined.length));
       }
 
-      return shuffle(combined).slice(0, limit);
+      return shuffle(combined);
     }
   }
 
-  // Simply shuffle the entire available pool from the bank without aggressive filtering
-  return shuffle(poolWithMicro).slice(0, limit);
+  // Return ALL available samples shuffled — the main loop will cap at limit,
+  // and the padding loop will reuse them to fill any remaining slots with varied questions.
+  return shuffle(poolWithMicro);
 }
 
 async function createExamInstance(userId: string, options: { mode: ExamMode; limit: number; forceConfusionDrill?: boolean; category?: string; allowSeen?: boolean }) {
   const allAvailableRaw = await prisma.sample.findMany({ include: { variations: true } });
 
-  const allAvailable = options.category 
-    ? allAvailableRaw.filter(s => sampleCategory(s.name) === options.category)
-    : allAvailableRaw;
-
-  const allSamples = allAvailable.map((sample) => ({ id: sample.id, name: sample.name, category: sampleCategory(sample.name) }));
+  // allSamples always uses FULL bank so distractors are always diverse and challenging
+  const allSamples = allAvailableRaw.map((sample) => ({ id: sample.id, name: sample.name, category: sampleCategory(sample.name) }));
   
   let previousPatterns = new Map<string, Set<QuestionPattern>>();
   let existingFingerprints = new Set<string>();
