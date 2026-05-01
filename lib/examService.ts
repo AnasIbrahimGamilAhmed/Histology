@@ -63,6 +63,73 @@ export type ExamResponse = {
   questions: ExamQuestion[];
 };
 
+const LOCATION_MAP: Record<string, string> = {
+  "Simple Squamous": "Blood vessel walls & lung alveoli",
+  "Simple Cuboidal": "Kidney tubules & thyroid follicles",
+  "Simple Columnar": "Stomach & intestinal lining",
+  "Pseudostratified Columnar": "Trachea & upper airways",
+  "Non-Keratinized Stratified Squamous": "Esophagus & oral cavity",
+  "Keratinized Stratified Squamous": "Skin epidermis",
+  "Transitional Epithelium": "Urinary bladder & ureter",
+  "Mucous Connective Tissue": "Umbilical cord (Wharton's Jelly)",
+  "Loose (Areolar) CT": "Beneath epithelial layers throughout the body",
+  "Adipose Tissue (Fat)": "Subcutaneous tissue & omentum",
+  "Reticular Tissue": "Spleen, lymph nodes & bone marrow",
+  "Dense Regular CT": "Tendons & ligaments",
+  "Elastic Connective Tissue": "Aorta & elastic arteries",
+  "Hyaline Cartilage": "Trachea rings & articular joint surfaces",
+  "Elastic Cartilage": "Ear pinna & epiglottis",
+  "Fibrocartilage": "Intervertebral discs & pubic symphysis",
+  "Compact Bone": "Outer cortex of long bones",
+  "Spongy (Cancellous) Bone": "Interior of flat bones & epiphyses",
+  "Motor Neuron": "Spinal cord anterior horn",
+  "Spinal Cord (T.S.)": "Vertebral canal",
+  "Sciatic Nerve (Peripheral Nerve T.S.)": "Posterior thigh",
+  "Skeletal Muscle": "Attached to skeleton",
+  "Cardiac Muscle": "Heart wall (myocardium)",
+  "Smooth Muscle": "Walls of hollow visceral organs",
+  "Pancreas": "Retroperitoneal, behind stomach",
+  "Ileum (Small Intestine)": "Abdomen (terminal small intestine)",
+  "Kidney": "Retroperitoneal, posterior abdominal wall",
+  "Esophagus": "Mediastinum, connecting pharynx to stomach",
+  "Skin (V.S.)": "External surface of entire body",
+  "Testis": "Scrotal sac",
+  "Liver": "Right upper quadrant of abdomen",
+  "Trachea": "Anterior neck & superior mediastinum",
+  "Stomach": "Left upper quadrant of abdomen",
+  "Rabbit Blood": "Systemic circulation",
+  "Toad Blood": "Systemic circulation (amphibian)",
+};
+const ALL_LOCATIONS = Object.values(LOCATION_MAP);
+
+const CLINICAL_MAP: Record<string, string> = {
+  "Simple Squamous": "A student examines a lung slide. They see an extremely thin, flat single-layer lining in the alveolar walls. What tissue type is this?",
+  "Simple Cuboidal": "A kidney biopsy shows tubular structures lined by a single layer of cube-shaped cells with round central nuclei. What epithelium is this?",
+  "Simple Columnar": "A patient undergoes a gastric biopsy. The lining shows tall, single-layered cells with basal oval nuclei and goblet cells. What tissue is seen?",
+  "Pseudostratified Columnar": "A respiratory tract biopsy shows cells at different heights, all touching the basement membrane, with cilia on the surface. What epithelium is this?",
+  "Non-Keratinized Stratified Squamous": "An esophageal biopsy shows multiple cell layers. The surface cells are flat but have visible nuclei. What tissue is this?",
+  "Keratinized Stratified Squamous": "A skin biopsy shows multiple cell layers. The outermost consists of anucleated dead cells packed with keratin. What tissue is this?",
+  "Transitional Epithelium": "A bladder biopsy shows a special epithelium that stretches. The surface has large dome-shaped 'umbrella cells'. What tissue is this?",
+  "Hyaline Cartilage": "A joint biopsy shows a glassy, homogeneous matrix with chondrocytes in lacunae. What cartilage is this?",
+  "Elastic Cartilage": "The ear pinna biopsy shows dark branching elastic fibers in the cartilage matrix. What cartilage is this?",
+  "Fibrocartilage": "An intervertebral disc biopsy shows chondrocytes arranged in rows between thick collagen bundles. What tissue is this?",
+  "Compact Bone": "A long bone cross-section shows concentric rings around a central canal forming cylindrical osteons. What tissue is this?",
+  "Skeletal Muscle": "A muscle biopsy shows long, multinucleated fibers with peripheral nuclei and visible striations. What muscle type is this?",
+  "Cardiac Muscle": "A heart biopsy shows branching fibers with central nuclei and dark intercalated discs. What tissue is this?",
+  "Smooth Muscle": "A stomach biopsy shows spindle-shaped cells with central oval nuclei and no striations. What muscle type is this?",
+  "Motor Neuron": "A spinal cord sample shows degeneration of large star-shaped cells with prominent nucleoli in the anterior horn. What cells are affected?",
+  "Pancreas": "A biopsy from a diabetic patient shows pale cell clusters (islets) surrounded by darker acinar cells. What organ is this?",
+  "Ileum (Small Intestine)": "A bowel biopsy shows finger-like villi projecting into the lumen, lined by columnar cells with many goblet cells. What part of the GI tract is this?",
+  "Kidney": "A renal biopsy shows cortical tissue with spherical glomeruli enclosed in Bowman's capsule. What organ is this?",
+  "Liver": "A biopsy shows hepatocytes arranged in cords radiating from a central vein forming hexagonal lobules. What organ is this?",
+  "Trachea": "A windpipe biopsy shows pseudostratified ciliated columnar epithelium overlying C-shaped rings of hyaline cartilage. What structure is this?",
+  "Stomach": "A biopsy shows deep gastric pits with NO goblet cells. The lamina propria contains gastric glands. What organ is this?",
+  "Skin (V.S.)": "A palm biopsy shows a very thick keratinized epithelium with hair follicles and sebaceous glands below. What is this specimen?",
+  "Esophagus": "A dysphagia patient biopsy shows very thick non-keratinized stratified squamous epithelium with a prominent folded mucosa. What organ is this?",
+  "Rabbit Blood": "A blood smear shows numerous anucleated biconcave disc-shaped RBCs with various leukocytes. What specimen is this?",
+  "Toad Blood": "A blood smear shows large oval RBCs with prominent nuclei, characteristic of an amphibian. What specimen is this?",
+};
+
 function normalize(text: string) {
   return text.trim().toLowerCase().replace(/\s+/g, " ");
 }
@@ -273,6 +340,32 @@ function buildQuestionTemplate(
         acceptedAnswers: featureChoices.length > 0 ? featureChoices.map(clean) : [clean(sample.description)],
         reasoningPattern: "describe_features" as const
       };
+    case "identify_location": {
+      const correctLoc = LOCATION_MAP[sampleLabel] || "General body tissue";
+      const wrongLocs = shuffle(ALL_LOCATIONS.filter(l => l !== correctLoc)).slice(0, 3);
+      return {
+        prompt: `Where in the human body is this tissue/organ normally found?`,
+        choices: shuffle([correctLoc, ...wrongLocs]),
+        acceptedAnswers: [correctLoc],
+        reasoningPattern: "identify_specimen" as const // using specimen pattern for tracking
+      };
+    }
+    case "high_power_id":
+      return {
+        prompt: `This is a HIGH-POWER microscope field (400×). Examine the cellular detail carefully and identify the tissue.`,
+        choices: shuffle([...compareChoices]),
+        acceptedAnswers: [sampleLabel],
+        reasoningPattern: "identify_specimen" as const
+      };
+    case "clinical_correlation": {
+      const scenario = CLINICAL_MAP[sampleLabel];
+      return {
+        prompt: scenario || `Clinical case: A patient biopsy reveals this microscopic view. Identify the tissue to aid diagnosis.`,
+        choices: shuffle([...compareChoices]),
+        acceptedAnswers: [sampleLabel],
+        reasoningPattern: "identify_specimen" as const
+      };
+    }
     default:
       return {
         prompt: `Identify this specimen from the provided microscope field.`,
