@@ -286,25 +286,60 @@ export function ExamEngine({ questions, mode }: ExamEngineProps) {
                 })}
               </div>
             ) : (
-              <div className="relative h-[400px] w-full rounded-[2.5rem] overflow-hidden border border-slate-800 shadow-2xl bg-slate-950">
-                <Image
-                  src={currentQuestion.image || ""}
-                  alt="Histology Specimen"
-                  fill
-                  priority
-                  className="absolute inset-0 h-full w-full object-cover"
-                  style={{
-                    filter: `blur(${currentQuestion.microscopy?.blurPx ?? 0}px) contrast(${currentQuestion.microscopy?.contrast ?? 1})`,
-                    transform: `rotate(${currentQuestion.microscopy?.rotationDeg ?? 0}deg) scale(${zoomFactor * (currentQuestion.microscopy?.cropRect ? 2.5 : 1)})`,
-                    objectPosition: currentQuestion.microscopy?.cropRect
-                      ? `${currentQuestion.microscopy.cropRect.x}% ${currentQuestion.microscopy.cropRect.y}%`
-                      : "center",
-                  }}
-                />
+              <div className="relative h-[400px] w-full rounded-[2.5rem] overflow-hidden border border-slate-800 shadow-2xl bg-slate-950 cursor-grab active:cursor-grabbing">
+                <motion.div
+                  drag
+                  dragConstraints={{ top: -150, left: -150, right: 150, bottom: 150 }}
+                  className="absolute inset-0 w-full h-full"
+                  initial={{ scale: 1 }}
+                  whileHover={{ scale: 1.2 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <Image
+                    src={currentQuestion.image || ""}
+                    alt="Histology Specimen"
+                    fill
+                    priority
+                    className="absolute inset-0 h-full w-full object-cover pointer-events-none"
+                    style={{
+                      filter: `blur(${currentQuestion.microscopy?.blurPx ?? 0}px) contrast(${currentQuestion.microscopy?.contrast ?? 1})`,
+                      transform: `rotate(${currentQuestion.microscopy?.rotationDeg ?? 0}deg) scale(${zoomFactor * (currentQuestion.microscopy?.cropRect ? 2.5 : 1)})`,
+                      objectPosition: currentQuestion.microscopy?.cropRect
+                        ? `${currentQuestion.microscopy.cropRect.x}% ${currentQuestion.microscopy.cropRect.y}%`
+                        : "center",
+                    }}
+                  />
+                  
+                  {/* Dynamic Pointer for "Identify Structure" questions during the exam */}
+                  {currentQuestion.type === "identify_structure" && (
+                    <motion.div 
+                      initial={{ scale: 0, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 pointer-events-none"
+                    >
+                      <div className="relative">
+                        <motion.div 
+                          animate={{ scale: [1, 1.5, 1], opacity: [0.5, 0.2, 0.5] }}
+                          transition={{ duration: 2, repeat: Infinity }}
+                          className="w-16 h-16 bg-rose-500 rounded-full blur-xl"
+                        />
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+                          <div className="w-4 h-4 bg-white rounded-full shadow-[0_0_20px_rgba(255,255,255,0.8)] border-2 border-rose-500" />
+                          <motion.div 
+                            animate={{ rotate: 360 }}
+                            transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+                            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 border border-white/40 rounded-full border-dashed"
+                          />
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </motion.div>
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-950/50 to-transparent pointer-events-none" />
-                <div className="absolute bottom-6 left-6 right-6 flex justify-between items-end">
-                  <div className="px-4 py-2 rounded-xl bg-black/60 backdrop-blur-md border border-white/10 text-[10px] font-black text-white/80 uppercase tracking-widest">
-                    Live Micro-View
+                <div className="absolute bottom-6 left-6 right-6 flex justify-between items-end pointer-events-none">
+                  <div className="px-4 py-2 rounded-xl bg-black/60 backdrop-blur-md border border-white/10 text-[10px] font-black text-white/80 uppercase tracking-widest flex items-center gap-2">
+                    <Microscope size={12} />
+                    Virtual Microscope (Drag to Pan)
                   </div>
                 </div>
               </div>
