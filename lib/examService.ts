@@ -234,7 +234,7 @@ function buildQuestionTemplate(
   // Prioritize confusing samples for highly realistic distractors
   let sampleChoices = shuffle(
     allSamples
-      .filter((candidate) => candidate.id !== sample.id && parsedConfusionTags.some(tag => candidate.name.toLowerCase().includes(String(tag).toLowerCase())))
+      .filter((candidate) => candidate.id !== sample.id && parsedConfusionTags.some(tag => String(tag).toLowerCase().includes(candidate.name.toLowerCase())))
       .map((candidate) => candidate.name)
   );
 
@@ -315,7 +315,7 @@ function buildQuestionTemplate(
     case "compare_samples": {
       // Find a confusing sample
       const confusedSampleName = parsedConfusionTags.length > 0 
-        ? sampleChoices.find(c => parsedConfusionTags.some(tag => c.toLowerCase().includes(String(tag).toLowerCase())))
+        ? sampleChoices.find(c => parsedConfusionTags.some(tag => String(tag).toLowerCase().includes(c.toLowerCase())))
         : sampleChoices[0];
         
       const confusedSample = allSamples.find(s => s.name === (confusedSampleName || sampleChoices[0]));
@@ -410,7 +410,7 @@ function buildQuestionTemplate(
     }
     case "negative_feature": {
       const confusedSampleName = parsedConfusionTags.length > 0 
-        ? sampleChoices.find(c => parsedConfusionTags.some(tag => c.toLowerCase().includes(String(tag).toLowerCase())))
+        ? sampleChoices.find(c => parsedConfusionTags.some(tag => String(tag).toLowerCase().includes(c.toLowerCase())))
         : sampleChoices[0];
         
       const confusedSample = allSamples.find(s => s.name === (confusedSampleName || sampleChoices[0]));
