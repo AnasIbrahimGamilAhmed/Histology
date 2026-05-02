@@ -20,6 +20,10 @@ export default function DashboardPage() {
     async function loadData() {
       try {
         const res = await fetch("/api/dashboard/stats");
+        if (res.status === 401) {
+          window.location.href = "/login";
+          return;
+        }
         if (res.ok) {
           const json = await res.json();
           setData(json);

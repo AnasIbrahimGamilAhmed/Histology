@@ -55,6 +55,10 @@ function ExamContent() {
         const response = await fetch(url, {
           signal: controller.signal
         });
+        if (response.status === 401) {
+          window.location.href = "/login";
+          return;
+        }
         if (!response.ok) {
           throw new Error("Failed to load exam.");
         }
