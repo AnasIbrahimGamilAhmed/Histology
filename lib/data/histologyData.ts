@@ -457,8 +457,8 @@ export const histologyData: TissueSection[] = [
           "بروزات تشبه الأصابع تسمى خملات (Villi).",
           "كثرة الخلايا الكأسية (Goblet cells)."
         ],
-        confusionWarning: "Ileum has distinct outward-projecting villi and many goblet cells.",
-        confusionWarningAr: "يتميز اللفائفي بالخملات البارزة للخارج وكثرة الخلايا الكأسية.",
+        confusionWarning: "Do not confuse with Stomach. Ileum has distinct outward-projecting villi and many goblet cells, while Stomach has inward gastric pits and no goblet cells.",
+        confusionWarningAr: "لا تخلط بينه وبين المعدة. يتميز اللفائفي بالخملات البارزة للخارج وكثرة الخلايا الكأسية، بينما المعدة لها وهدات (pits) للداخل ولا تحتوي على خلايا كأسية.",
         imageUrl: "/images/illeum/illeum.png",
         imageUrls: ["/images/illeum/illeum.png", "/images/illeum/illeum micro.png"]
       },
@@ -558,7 +558,8 @@ export const histologyData: TissueSection[] = [
           "Surface has deep Gastric pits.",
           "NO goblet cells."
         ],
-        confusionWarning: "Inward pits (gastric glands) and no goblet cells.",
+        confusionWarning: "Do not confuse with Ileum. Stomach has inward gastric pits and NO goblet cells, while Ileum has outward villi and many goblet cells.",
+        confusionWarningAr: "لا تخلط بينه وبين اللفائفي. المعدة لها وهدات (pits) للداخل ولا تحتوي على خلايا كأسية، بينما اللفائفي له خملات بارزة للخارج وكثير من الخلايا الكأسية.",
         imageUrl: "/images/stomach/stomach.png",
         imageUrls: ["/images/stomach/stomach.png", "/images/stomach/stomach micro.png"],
       }

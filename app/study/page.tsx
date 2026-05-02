@@ -536,13 +536,14 @@ function StudyContent() {
                               <button 
                                 onClick={() => {
                                   // 1. Try to find specimen in confusion warning text
-                                  const match = selectedSection.confusionWarning?.match(/with\s+([A-Za-z\s-]+)/i);
+                                  const match = selectedSection.confusionWarning?.match(/with\\s+([A-Za-z\\s-]+)/i);
                                   let found = match ? findSampleByName(match[1].trim()) : null;
+                                  if (found?.id === selectedSection.id) found = null;
                                   
                                   // 2. Fallback: Search all words in warning
                                   if (!found) {
                                     const words = selectedSection.confusionWarning?.split(" ") || [];
-                                    found = words.map(w => findSampleByName(w)).find(f => f !== null) || null;
+                                    found = words.map(w => findSampleByName(w)).find(f => f !== null && f.id !== selectedSection.id) || null;
                                   }
 
                                   // 3. Category Fallback: Find any sibling in the same category

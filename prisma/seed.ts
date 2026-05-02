@@ -221,7 +221,7 @@ async function main() {
         });
 
         const confusedSample = createdSamples.find((s) =>
-          s.name.toLowerCase().includes(confusionTags[0].toLowerCase())
+          s.id !== sample.id && confusionTags[0].toLowerCase().includes(s.name.toLowerCase())
         );
         if (confusedSample && confusedSample.variations.length > 0) {
           const confusedVar = confusedSample.variations[0];
