@@ -26,6 +26,46 @@ function categoryLabel(name: string) {
   return "Mixed histology";
 }
 
+function getShortStructureName(sampleName: string, originalTip: string): string {
+  const name = sampleName.toLowerCase();
+  const tip = originalTip.toLowerCase();
+
+  // Hardcoded mapping for high-quality short answers
+  if (name.includes("squamous")) return "Flat nuclei";
+  if (name.includes("cuboidal")) return "Round central nuclei";
+  if (name.includes("columnar") && !name.includes("pseudo")) return "Basal oval nuclei";
+  if (name.includes("pseudo")) return "Nuclei at different levels";
+  if (name.includes("keratinized") && !name.includes("non")) return "Keratin layer";
+  if (name.includes("non-keratinized")) return "Nuclei in surface cells";
+  if (name.includes("transitional")) return "Dome-shaped umbrella cells";
+  if (name.includes("hyaline")) return "Glassy homogeneous matrix";
+  if (name.includes("elastic cartilage")) return "Dark branching elastic fibers";
+  if (name.includes("fibrocartilage")) return "Chondrocytes in rows";
+  if (name.includes("compact bone")) return "Concentric lamellae (Osteon)";
+  if (name.includes("spongy bone")) return "Bony trabeculae";
+  if (name.includes("motor neuron")) return "Multipolar neuron soma";
+  if (name.includes("spinal cord")) return "Butterfly-shaped grey matter";
+  if (name.includes("sciatic nerve")) return "Myelinated nerve fibers";
+  if (name.includes("skeletal muscle")) return "Peripheral multinuclei";
+  if (name.includes("cardiac muscle")) return "Intercalated discs";
+  if (name.includes("smooth muscle")) return "Cigar-shaped central nuclei";
+  if (name.includes("pancreas")) return "Islets of Langerhans";
+  if (name.includes("ileum")) return "Finger-like Villi";
+  if (name.includes("kidney")) return "Renal Glomeruli";
+  if (name.includes("esophagus")) return "Folded mucosa";
+  if (name.includes("skin")) return "Hair follicles & sebaceous glands";
+  if (name.includes("testis")) return "Seminiferous tubules";
+  if (name.includes("liver")) return "Hexagonal hepatic lobules";
+  if (name.includes("trachea")) return "C-shaped hyaline cartilage";
+  if (name.includes("stomach")) return "Deep gastric pits";
+  if (name.includes("blood")) return "Non-nucleated RBCs";
+
+  const match = originalTip.match(/called\s+([A-Za-z\s]+)/i) || 
+                originalTip.match(/known\s+as\s+([A-Za-z\s]+)/i);
+  if (match) return match[1].trim().split(/[.,]/)[0];
+  return originalTip.split(/[.,]/)[0].split(" ").slice(0, 4).join(" ");
+}
+
 // ─── LOCATION MAP ────────────────────────────────────────────────────────────
 
 const LOCATION_MAP: Record<string, string> = {
@@ -185,12 +225,15 @@ async function main() {
       });
 
       // 3. Identify Structure (MCQ)
-      const primaryFeature = (sample.keyFeatures as string[])[0] || "General structure";
+      const primaryTip = (sample.keyFeatures as string[])[0] || "General structure";
+      const structureAnswer = getShortStructureName(sample.name, primaryTip);
       const structureChoices = shuffle([
-        ...(sample.keyFeatures as string[]).slice(0, 3),
+        structureAnswer,
         "Basal lamina",
         "Fibroblast",
         "Capillary",
+        "Intercellular matrix",
+        "Cell membrane"
       ]).slice(0, 4);
       await prisma.question.create({
         data: {
@@ -201,7 +244,7 @@ async function main() {
           prompt: "Which specific histological structure is most prominent in this field?",
           image: variation.image,
           choices: structureChoices,
-          acceptedAnswers: JSON.parse(JSON.stringify([primaryFeature])),
+          acceptedAnswers: JSON.parse(JSON.stringify([structureAnswer])),
         },
       });
 

@@ -131,6 +131,48 @@ const CLINICAL_MAP: Record<string, string> = {
   "Toad Blood": "A blood smear shows large oval RBCs with prominent nuclei, characteristic of an amphibian. What specimen is this?",
 };
 
+function getShortStructureName(sampleName: string, originalTip: string): string {
+  const name = sampleName.toLowerCase();
+  const tip = originalTip.toLowerCase();
+
+  // Hardcoded mapping for high-quality short answers
+  if (name.includes("squamous")) return "Flat nuclei";
+  if (name.includes("cuboidal")) return "Round central nuclei";
+  if (name.includes("columnar") && !name.includes("pseudo")) return "Basal oval nuclei";
+  if (name.includes("pseudo")) return "Nuclei at different levels";
+  if (name.includes("keratinized") && !name.includes("non")) return "Keratin layer";
+  if (name.includes("non-keratinized")) return "Nuclei in surface cells";
+  if (name.includes("transitional")) return "Dome-shaped umbrella cells";
+  if (name.includes("hyaline")) return "Glassy homogeneous matrix";
+  if (name.includes("elastic cartilage")) return "Dark branching elastic fibers";
+  if (name.includes("fibrocartilage")) return "Chondrocytes in rows";
+  if (name.includes("compact bone")) return "Concentric lamellae (Osteon)";
+  if (name.includes("spongy bone")) return "Bony trabeculae";
+  if (name.includes("motor neuron")) return "Multipolar neuron soma";
+  if (name.includes("spinal cord")) return "Butterfly-shaped grey matter";
+  if (name.includes("sciatic nerve")) return "Myelinated nerve fibers";
+  if (name.includes("skeletal muscle")) return "Peripheral multinuclei";
+  if (name.includes("cardiac muscle")) return "Intercalated discs";
+  if (name.includes("smooth muscle")) return "Cigar-shaped central nuclei";
+  if (name.includes("pancreas")) return "Islets of Langerhans";
+  if (name.includes("ileum")) return "Finger-like Villi";
+  if (name.includes("kidney")) return "Renal Glomeruli";
+  if (name.includes("esophagus")) return "Folded mucosa";
+  if (name.includes("skin")) return "Hair follicles & sebaceous glands";
+  if (name.includes("testis")) return "Seminiferous tubules";
+  if (name.includes("liver")) return "Hexagonal hepatic lobules";
+  if (name.includes("trachea")) return "C-shaped hyaline cartilage";
+  if (name.includes("stomach")) return "Deep gastric pits";
+  if (name.includes("blood")) return "Non-nucleated RBCs";
+
+  // Fallback: cleaning the tip if no hardcoded match
+  const match = originalTip.match(/called\s+([A-Za-z\s]+)/i) || 
+                originalTip.match(/known\s+as\s+([A-Za-z\s]+)/i);
+  if (match) return match[1].trim().split(/[.,]/)[0];
+
+  return originalTip.split(/[.,]/)[0].split(" ").slice(0, 4).join(" ");
+}
+
 function normalize(text: string) {
   return text.trim().toLowerCase().replace(/\s+/g, " ");
 }
@@ -287,7 +329,7 @@ function buildQuestionTemplate(
   );
 
   const clean = (s: string) => s.trim().replace(/\.+$/, "");
-  const structureAnswer = clean(featureChoices[0]);
+  const structureAnswer = getShortStructureName(sampleLabel, featureChoices[0]);
   
   // Use ONLY structurePool for the distractors to avoid putting other true features (like locations) as wrong answers
   const structureChoices = shuffle([...structurePool.map(clean).slice(0, 6)]).slice(0, 4);
