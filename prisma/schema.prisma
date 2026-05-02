@@ -155,12 +155,14 @@ model ExamQuestionInstance {
   acceptedAnswers    Json
   microscopyConfig   Json?
   variationType      VariationType?
-  fingerprint        String            @unique
+  fingerprint        String
 
   examInstance       ExamInstance      @relation(fields: [examInstanceId], references: [id], onDelete: Cascade)
   questionTemplate   Question?         @relation(fields: [questionTemplateId], references: [id], onDelete: SetNull)
   sample             Sample            @relation(fields: [sampleId], references: [id], onDelete: Cascade)
   variation          Variation?        @relation(fields: [variationId], references: [id], onDelete: SetNull)
+
+  @@unique([examInstanceId, fingerprint])
 }
 
 model StudentAccount {
