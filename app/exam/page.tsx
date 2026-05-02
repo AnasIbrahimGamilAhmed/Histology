@@ -20,7 +20,10 @@ function ExamContent() {
   const [loadState, setLoadState] = useState<LoadState>("idle");
   const [error, setError] = useState<string | null>(null);
   const [limit, setLimit] = useState(8);
-  const [forceRegen, setForceRegen] = useState(false);
+  // Counter instead of boolean: every increment is a new value, so useEffect always re-fires.
+  // Fixes the bug where clicking "Try Again" after a failed attempt did nothing because
+  // setForceRegen(true) was a no-op when forceRegen was already true.
+  const [regenCount, setRegenCount] = useState(0);
 
   // Initialize from URL params
   useEffect(() => {
@@ -45,7 +48,7 @@ function ExamContent() {
         const category = searchParams.get("category");
         
         let url = `/api/exam/questions?mode=${fetchMode}&limit=${limit}`;
-        if (forceRegen) url += "&regen=1";
+        if (regenCount > 0) url += "&regen=1";
         if (isDrill) url += "&drill=1";
         if (category) url += `&category=${category}`;
 
@@ -59,7 +62,6 @@ function ExamContent() {
         setExamId(data.examId ?? null);
         setQuestions(data.questions ?? []);
         setLoadState("ready");
-        setForceRegen(false);
       } catch (err) {
         if (controller.signal.aborted) return;
         setError(err instanceof Error ? err.message : "Unable to generate the exam.");
@@ -69,11 +71,11 @@ function ExamContent() {
 
     void fetchExam();
     return () => controller.abort();
-  }, [mode, limit, loadState, searchParams, forceRegen]);
+  }, [mode, limit, loadState, searchParams, regenCount]);
 
   const startExam = (selectedMode: LiveExamMode) => {
     setMode(selectedMode);
-    setForceRegen(true);
+    setRegenCount((c) => c + 1);
     setQuestions([]);
     setExamId(null);
     setError(null);
@@ -82,7 +84,7 @@ function ExamContent() {
 
   const regenerateExam = () => {
     if (!mode) return;
-    setForceRegen(true);
+    setRegenCount((c) => c + 1);
     setError(null);
     setLoadState("loading");
   };

@@ -612,10 +612,25 @@ async function createExamInstance(userId: string, options: { mode: ExamMode; lim
 
   try {
     previousPatterns = await getPreviousExamSamplePatterns(userId);
+    // Scope fingerprint history to the last 2 exam instances only.
+    // This prevents the seen-pool from growing unbounded and blocking generation
+    // for students who have completed many exams.
+    const recentExams = await prisma.examInstance.findMany({
+      where: { userId },
+      orderBy: { createdAt: "desc" },
+      take: 2,
+      select: { id: true }
+    });
+    const recentExamIds = recentExams.map((e) => e.id);
     existingFingerprints = new Set(
-      (await prisma.examQuestionInstance.findMany({ 
-        where: { examInstance: { userId } },
-        select: { fingerprint: true } 
+      (await prisma.examQuestionInstance.findMany({
+        where: {
+          examInstance: {
+            userId,
+            id: { in: recentExamIds }
+          }
+        },
+        select: { fingerprint: true }
       })).map((item) => item.fingerprint)
     );
   } catch (e) {
@@ -790,14 +805,22 @@ async function createExamInstance(userId: string, options: { mode: ExamMode; lim
   }
 
   if (questions.length === 0) {
+    // Fallback chain — each step relaxes one constraint:
+    // 1) Allow questions the student has seen before (no new fresh restriction)
     if (!options.allowSeen) {
-      // Fallback: if all questions have been seen, allow them instead of failing
+      console.warn(`[ExamService] No fresh questions for user ${userId}. Falling back to allowSeen=true.`);
       return createExamInstance(userId, { ...options, allowSeen: true });
     }
+    // 2) If a category was requested but still empty, widen to all categories
     if (options.category) {
+      console.warn(`[ExamService] No questions for category "${options.category}". Widening to full bank.`);
       return createExamInstance(userId, { ...options, category: undefined });
     }
-    throw new Error("Critical: No questions could be generated even with duplicates allowed.");
+    // 3) This should never be reached — every sample generates at least one question
+    throw new Error(
+      "[ExamService] Critical: No questions generated even with all constraints relaxed. " +
+      "Check that specimens have micro-image variations in the database."
+    );
   }
 
   // Ensure unique signature never conflicts even if exact same questions are generated

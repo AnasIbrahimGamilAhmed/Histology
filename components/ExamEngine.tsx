@@ -44,10 +44,13 @@ function isCorrectAnswer(question: ExamQuestion, userAnswer: string): boolean {
   };
 
   const isFuzzyMatch = (s1: string, s2: string) => {
-    if (s1.length <= 3) return s1 === s2;
+    // len ≤ 2  → exact only (e.g. single letters)
+    // len 3    → 1 error allowed (covers abbreviations like RBC, RBC vs RBCs)
+    // len 4-8  → 2 errors allowed (typical scientific terms)
+    // len > 8  → 3 errors allowed (long compound terms)
+    if (s1.length <= 2) return s1 === s2;
     const distance = getLevenshteinDistance(s1, s2);
-    // Extremely lenient: allow 2 errors for short words, 3 for long ones
-    const threshold = s1.length > 8 ? 3 : 2;
+    const threshold = s1.length > 8 ? 3 : s1.length > 3 ? 2 : 1;
     return distance <= threshold;
   };
 
@@ -216,9 +219,11 @@ export function ExamEngine({ questions, mode }: ExamEngineProps) {
              currentQuestion.type === "compare_samples" ? "Comparative Histology" :
              currentQuestion.type === "interpret_partial_slide" ? "Microscopic Interpretation" :
              currentQuestion.type === "list_features" ? "Diagnostic Features" :
+             currentQuestion.type === "describe_features" ? "Describe Features" :
              currentQuestion.type === "identify_location" ? "Anatomical Location" :
              currentQuestion.type === "high_power_id" ? "High-Power Field (400×)" :
              currentQuestion.type === "clinical_correlation" ? "Clinical Correlation" :
+             currentQuestion.type === "negative_feature" ? "Feature Exception (EXCEPT)" :
              "Practical Assessment"}
           </h2>
         </div>
