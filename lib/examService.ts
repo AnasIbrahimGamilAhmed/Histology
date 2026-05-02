@@ -638,6 +638,7 @@ async function createExamInstance(userId: string, options: { mode: ExamMode; lim
   }
 
   const samplePool = await getUniqueSamplePool(userId, options.limit, options.mode, options.forceConfusionDrill, options.category);
+  const localFingerprints = new Set<string>();
   const questions = [] as Array<{
     sampleId: string;
     variationId?: string;
@@ -721,6 +722,13 @@ async function createExamInstance(userId: string, options: { mode: ExamMode; lim
       finalPrompt = `[ELITE CHALLENGE] ${finalPrompt} (Artifacts & poor focus simulated)`;
     }
 
+    // Ensure uniqueness within the current exam instance
+    let finalFingerprint = isAlreadySeen ? `${fingerprint}|challenge|${Math.random()}` : fingerprint;
+    if (localFingerprints.has(finalFingerprint)) {
+      finalFingerprint = `${fingerprint}|pad|${Math.random()}`;
+    }
+    localFingerprints.add(finalFingerprint);
+
     questions.push({
       sampleId: sample.id,
       variationId: variation.id,
@@ -733,7 +741,7 @@ async function createExamInstance(userId: string, options: { mode: ExamMode; lim
       acceptedAnswers: template.acceptedAnswers,
       reasoningPattern: template.reasoningPattern,
       microscopyConfig,
-      fingerprint: isAlreadySeen ? `${fingerprint}|challenge|${Math.random()}` : fingerprint
+      fingerprint: finalFingerprint
     });
   }
 
@@ -787,6 +795,13 @@ async function createExamInstance(userId: string, options: { mode: ExamMode; lim
         continue;
       }
 
+      // Ensure uniqueness within the current exam instance
+      let finalFingerprint = existingFingerprints.has(fingerprint) ? `${fingerprint}|pad|${Math.random()}` : fingerprint;
+      if (localFingerprints.has(finalFingerprint)) {
+        finalFingerprint = `${fingerprint}|pad|${Math.random()}`;
+      }
+      localFingerprints.add(finalFingerprint);
+
       questions.push({
         sampleId: sample.id,
         variationId: variation.id,
@@ -799,7 +814,7 @@ async function createExamInstance(userId: string, options: { mode: ExamMode; lim
         acceptedAnswers: template.acceptedAnswers,
         reasoningPattern: template.reasoningPattern,
         microscopyConfig: buildMicroscopyConfig(variation),
-        fingerprint: existingFingerprints.has(fingerprint) ? `${fingerprint}|pad|${Math.random()}` : fingerprint
+        fingerprint: finalFingerprint
       });
     }
   }
