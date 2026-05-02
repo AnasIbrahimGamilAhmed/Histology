@@ -11,7 +11,7 @@ type FeedbackRequestBody = {
   questionType: ExamQuestionType;
   prompt: string;
   variationType: "stain_variation" | "section_variation" | "magnification_variation" | "region_variation" | "exam_tricky_view" | null;
-  mode?: "standard" | "pressure";
+  mode?: "standard" | "pressure" | "drill";
   timeSpentSeconds?: number;
   userAnswer: string;
   isCorrect: boolean;
@@ -41,13 +41,13 @@ export async function POST(request: Request) {
       questionId: body.questionId,
       questionType: body.questionType,
       variationType: body.variationType,
-      mode: body.mode,
+      mode: body.mode === "drill" ? "standard" : body.mode,
       timeSpentSeconds: body.timeSpentSeconds,
       isCorrect: body.isCorrect,
       chosenSampleName: body.chosenSample
     });
   } catch (error) {
-    console.warn("Skipping attempt tracking due to DB write error (Vercel SQLite read-only)", error);
+    console.warn("Skipping attempt tracking due to DB write error:", error);
   }
 
   const feedback = await generateTutorFeedback(body);
