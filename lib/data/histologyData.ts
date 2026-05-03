@@ -9,7 +9,7 @@ export type TissueSection = {
   confusionWarning?: string;
   confusionWarningAr?: string;
   imageUrl?: string;
-  imageUrls?: string[]; 
+  imageUrls?: string[];
   subSections?: TissueSection[];
   extraStudy?: {
     title: string;
@@ -46,8 +46,8 @@ export const histologyData: TissueSection[] = [
         titleAr: "حرشفية بسيطة",
         description: "Single layer of flat, scale-like cells.",
         descriptionAr: "طبقة واحدة من الخلايا المسطحة التي تشبه القشور.",
-        practicalTips: ["Nuclei are flat/bulging.", "Found in blood vessels (endothelium), lung alveoli, and Bowman's capsule in kidney."],
-        practicalTipsAr: ["الأنوية مسطحة أو بارزة قليلاً.", "توجد في الأوعية الدموية وحويصلات الرئة ومحفظة بومان في الكلى."],
+        practicalTips: ["Nuclei are flat/bulging.", "Found in blood vessels (endothelium), lung alveoli, and Bowman's capsule in kidney.", "Forms the Serosa (Coelomic epithelium) covering organs like the Liver and Stomach.", "Found in the Descending Loop of Henle in the kidney."],
+        practicalTipsAr: ["الأنوية مسطحة أو بارزة قليلاً.", "توجد في الأوعية الدموية وحويصلات الرئة ومحفظة بومان في الكلى.", "تكون طبقة الـ Serosa (Coelomic epithelium) التي تغطي الأعضاء مثل الكبد والمعدة.", "توجد في الجزء الهابط من ثنية هنلي (Loop of Henle) في الكلية."],
         confusionWarning: "Do not confuse with Simple Cuboidal. Look at the nucleus: if it's flat/squashed, it's squamous. If it's perfectly round, it's cuboidal.",
         confusionWarningAr: "لا تخلط بينها وبين المكعبية البسيطة. انظر للنواة: إذا كانت مسطحة فهي حرشفية، وإذا كانت مستديرة تماماً فهي مكعبية.",
         imageUrl: "/images/simple squamous/simple squamous.png",
@@ -102,7 +102,7 @@ export const histologyData: TissueSection[] = [
         confusionWarning: "Unlike keratinized epithelium, the surface cells here are alive and have nuclei. Look for dark dots at the very top.",
         imageUrl: "/images/non keratinized stratified/non keratinized.png",
         imageUrls: [
-          "/images/non keratinized stratified/non keratinized.png", 
+          "/images/non keratinized stratified/non keratinized.png",
           "/images/non keratinized stratified/non keratinized micro.png"
         ]
       },
@@ -116,7 +116,7 @@ export const histologyData: TissueSection[] = [
         confusionWarning: "Look for the flaky, pink/red keratin layer on top with no nuclei. This distinguishes it from the non-keratinized type.",
         imageUrl: "/images/keratized stratified/keratized .png",
         imageUrls: [
-          "/images/keratized stratified/keratized .png", 
+          "/images/keratized stratified/keratized .png",
           "/images/keratized stratified/kertaized micro.png",
           "/images/keratized stratified/layers.png"
         ],
@@ -194,7 +194,7 @@ export const histologyData: TissueSection[] = [
         id: "reticular-ct",
         title: "Reticular Tissue",
         description: "Network of reticular fibers forming a scaffold for organs.",
-        practicalTips: ["Branching dark reticular fibers resembling a cherry tree.", "Found in spleen, lymph nodes."],
+        practicalTips: ["Branching dark reticular fibers resembling a cherry tree.", "Usually requires Silver Stain, making the fibers appear black.", "Found in spleen, lymph nodes, and bone marrow."],
         confusionWarning: "Requires special silver stains to see the fibers clearly, which makes them look black.",
         imageUrl: "/images/reticular tissue/reticular tissue.png",
         imageUrls: ["/images/reticular tissue/reticular tissue.png", "/images/reticular tissue/reticular tissue micro.png"]
@@ -430,7 +430,7 @@ export const histologyData: TissueSection[] = [
     subSections: [
       {
         id: "pancreas",
-        title: "Pancreas",
+        title: "T.S. of Pancreas of Rat",
         titleAr: "البنكرياس",
         description: "Mixed exocrine and endocrine gland.",
         descriptionAr: "غدة مختلطة (قنوية ولا قنوية).",
@@ -447,7 +447,7 @@ export const histologyData: TissueSection[] = [
       },
       {
         id: "ileum",
-        title: "Ileum (Small Intestine)",
+        title: "T.S. of Ileum of Rabbit",
         titleAr: "اللفائفي (الأمعاء الدقيقة)",
         description: "Part of the small intestine specialized for absorption.",
         descriptionAr: "جزء من الأمعاء الدقيقة مخصص لامتصاص الغذاء.",
@@ -466,7 +466,7 @@ export const histologyData: TissueSection[] = [
       },
       {
         id: "kidney",
-        title: "Kidney",
+        title: "T.S. of Kidney of Rabbit",
         titleAr: "الكلية",
         description: "Organ for filtration.",
         descriptionAr: "عضو مخصص لترشيح الدم وتكوين البول.",
@@ -483,7 +483,7 @@ export const histologyData: TissueSection[] = [
       },
       {
         id: "esophagus",
-        title: "Esophagus",
+        title: "T.S. of Esophagus of Rabbit",
         titleAr: "المريء",
         description: "Muscular tube.",
         descriptionAr: "أنبوب عضلي لنقل الطعام.",
@@ -502,7 +502,7 @@ export const histologyData: TissueSection[] = [
       },
       {
         id: "skin",
-        title: "Skin (V.S.)",
+        title: "V.S. of Skin of Pig",
         description: "Integumentary system.",
         practicalTips: [
           "Thick Keratinized Stratified Squamous Epithelium.",
@@ -516,7 +516,7 @@ export const histologyData: TissueSection[] = [
       },
       {
         id: "testis",
-        title: "Testis",
+        title: "T.S. of Testis of Rat",
         description: "Male reproductive organ.",
         practicalTips: [
           "Composed of many circular Seminiferous Tubules."
@@ -527,13 +527,14 @@ export const histologyData: TissueSection[] = [
       },
       {
         id: "liver",
-        title: "Liver",
+        title: "T.S. of Liver of Pig",
         titleAr: "الكبد",
         description: "Large metabolic organ.",
         descriptionAr: "عضو تمثيل غذائي كبير.",
         practicalTips: [
           "Arranged in distinct hexagonal Hepatic Lobules.",
           "Central Vein in the middle.",
+          "Covered by Glisson's capsule (Dense Irregular CT) and an outer layer of Serosa (Simple Squamous).",
           "Lab source: Liver of Pig (كبد الخنزير) shows the clearest hexagonal lobules."
         ],
         practicalTipsAr: [
@@ -547,7 +548,7 @@ export const histologyData: TissueSection[] = [
       },
       {
         id: "trachea",
-        title: "Trachea",
+        title: "T.S. of Trachea of Rabbit",
         description: "Windpipe.",
         practicalTips: [
           "Pseudostratified Ciliated Columnar Epithelium.",
@@ -559,7 +560,7 @@ export const histologyData: TissueSection[] = [
       },
       {
         id: "stomach",
-        title: "Stomach",
+        title: "T.S. of Stomach of Rabbit",
         description: "Digestion organ.",
         practicalTips: [
           "Surface has deep Gastric pits.",
@@ -607,12 +608,12 @@ export const histologyData: TissueSection[] = [
           "RBCs are large, oval, and nucleated."
         ],
         practicalTipsAr: [
-          "خلايا الدم الحمراء كبيرة، بيضاوية، وتحتوي على أنوية."
+          "خلايا الدم الحمراء كبيرة، بيضاوية، وتحتوي على أنوية واضحة."
         ],
         confusionWarning: "Large nuclei in every RBC.",
         confusionWarningAr: "وجود أنوية كبيرة في كل خلية دم حمراء.",
-        imageUrl: "/images/blood film of toad/blood film toad.png",
-        imageUrls: ["/images/blood film of toad/blood film toad.png", "/images/blood film of toad/blood film of toad micro.png"]
+        imageUrl: "/images/toad_blood/gross.png",
+        imageUrls: ["/images/toad_blood/gross.png", "/images/toad_blood/micro.png"]
       }
     ]
   }
