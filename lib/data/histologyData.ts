@@ -46,8 +46,8 @@ export const histologyData: TissueSection[] = [
         titleAr: "حرشفية بسيطة",
         description: "Single layer of flat, scale-like cells.",
         descriptionAr: "طبقة واحدة من الخلايا المسطحة التي تشبه القشور.",
-        practicalTips: ["Nuclei are flat/bulging.", "Found in blood vessels (endothelium) and lung alveoli."],
-        practicalTipsAr: ["الأنوية مسطحة أو بارزة قليلاً.", "توجد في الأوعية الدموية وحويصلات الرئة."],
+        practicalTips: ["Nuclei are flat/bulging.", "Found in blood vessels (endothelium), lung alveoli, and Bowman's capsule in kidney."],
+        practicalTipsAr: ["الأنوية مسطحة أو بارزة قليلاً.", "توجد في الأوعية الدموية وحويصلات الرئة ومحفظة بومان في الكلى."],
         confusionWarning: "Do not confuse with Simple Cuboidal. Look at the nucleus: if it's flat/squashed, it's squamous. If it's perfectly round, it's cuboidal.",
         confusionWarningAr: "لا تخلط بينها وبين المكعبية البسيطة. انظر للنواة: إذا كانت مسطحة فهي حرشفية، وإذا كانت مستديرة تماماً فهي مكعبية.",
         imageUrl: "/images/simple squamous/simple squamous.png",
@@ -97,8 +97,8 @@ export const histologyData: TissueSection[] = [
         title: "Non-Keratinized Stratified Squamous",
         titleAr: "حرشفية طبقية غير متقرنة",
         description: "Multiple layers of cells, where the top layers are flat and retain their nuclei.",
-        practicalTips: ["Top layers have visible nuclei (alive cells).", "Lining of wet surfaces like the esophagus and vagina."],
-        practicalTipsAr: ["الطبقات السطحية تحتوي على أنوية واضحة.", "تبطن الأسطح الرطبة مثل المريء والمهبل."],
+        practicalTips: ["Top layers have visible nuclei (alive cells).", "Lining of wet surfaces like the esophagus (Rabbit) and vagina."],
+        practicalTipsAr: ["الطبقات السطحية تحتوي على أنوية واضحة.", "تبطن الأسطح الرطبة مثل المريء (أرنب) والمهبل."],
         confusionWarning: "Unlike keratinized epithelium, the surface cells here are alive and have nuclei. Look for dark dots at the very top.",
         imageUrl: "/images/non keratinized stratified/non keratinized.png",
         imageUrls: [
@@ -111,8 +111,8 @@ export const histologyData: TissueSection[] = [
         title: "Keratinized Stratified Squamous",
         titleAr: "حرشفية طبقية متقرنة",
         description: "Multiple layers where the surface cells are dead, flat, and filled with keratin (no nuclei).",
-        practicalTips: ["Surface layers are dead and have no nuclei.", "Contains a thick layer of keratin on top for protection.", "Forms the epidermis of the skin."],
-        practicalTipsAr: ["الطبقات السطحية ميتة ولا تحتوي على أنوية.", "تحتوي على طبقة سميكة من الكيراتين للحماية.", "تكون طبقة البشرة في الجلد."],
+        practicalTips: ["Surface layers are dead and have no nuclei.", "Contains a thick layer of keratin on top for protection.", "Forms the epidermis of the skin.", "Classic lab example: Skin of Toad (no hair follicles)."],
+        practicalTipsAr: ["الطبقات السطحية ميتة ولا تحتوي على أنوية.", "تحتوي على طبقة سميكة من الكيراتين للحماية.", "تكون طبقة البشرة في الجلد.", "مثال المعمل الشهير: جلد الضفدع (يتميز بعدم وجود بصيلات شعر)."],
         confusionWarning: "Look for the flaky, pink/red keratin layer on top with no nuclei. This distinguishes it from the non-keratinized type.",
         imageUrl: "/images/keratized stratified/keratized .png",
         imageUrls: [
@@ -339,12 +339,14 @@ export const histologyData: TissueSection[] = [
         practicalTips: [
           "Nerve fibers are grouped into distinct bundles (fascicles).",
           "Outer protective layer called Epineurium.",
-          "Looks like a collection of tiny circles (axons surrounded by myelin)."
+          "Looks like a collection of tiny circles in T.S. (axons surrounded by myelin).",
+          "Lab source: Usually Sciatic Nerve of Cat (العصب الوركي للقطة)."
         ],
         practicalTipsAr: [
           "الألياف العصبية مجمعة في حزم واضحة (Fascicles).",
           "طبقة حماية خارجية تسمى Epineurium.",
-          "تشبه مجموعة من الدوائر الصغيرة (المحاور محاطة بالمايلين)."
+          "تظهر كمجموعة من الدوائر الصغيرة في القطاع العرضي (المحاور محاطة بالمايلين).",
+          "مصدر المعمل: غالباً العصب الوركي للقطة."
         ],
         confusionWarning: "In cross section, it looks like bundles of tiny bubbles/circles clustered together. Don't confuse with Smooth Muscle in T.S.",
         imageUrl: "/images/sciatic nerve/sciatic micro.png",
@@ -486,10 +488,12 @@ export const histologyData: TissueSection[] = [
         description: "Muscular tube.",
         descriptionAr: "أنبوب عضلي لنقل الطعام.",
         practicalTips: [
-          "Lined by a very thick Non-keratinized Stratified Squamous Epithelium."
+          "Lined by a very thick Non-keratinized Stratified Squamous Epithelium.",
+          "Lab sample: Usually Oesophagus of Rabbit (مريء الأرنب)."
         ],
         practicalTipsAr: [
-          "مبطن بنسيج طلائي حرشفي طبقي غير متقرن سميك جداً."
+          "مبطن بنسيج طلائي حرشفي طبقي غير متقرن سميك جداً.",
+          "عينة المعمل: غالباً مريء الأرنب."
         ],
         confusionWarning: "Distinct thick muscularis layer and folded mucosa.",
         confusionWarningAr: "يتميز بطبقة عضلية سميكة وغشاء مخاطي مطوي.",
@@ -502,7 +506,9 @@ export const histologyData: TissueSection[] = [
         description: "Integumentary system.",
         practicalTips: [
           "Thick Keratinized Stratified Squamous Epithelium.",
-          "Hair Follicles and Sebaceous glands."
+          "Forms the skin epidermis with a dead, flaky keratin layer on top.",
+          "If Human: Hair Follicles and Sebaceous glands are present.",
+          "If Toad: No hair follicles, thinner keratin layer."
         ],
         confusionWarning: "Dead, flaky top keratin layer.",
         imageUrl: "/images/skin/skin.png",
@@ -527,7 +533,8 @@ export const histologyData: TissueSection[] = [
         descriptionAr: "عضو تمثيل غذائي كبير.",
         practicalTips: [
           "Arranged in distinct hexagonal Hepatic Lobules.",
-          "Central Vein in the middle."
+          "Central Vein in the middle.",
+          "Lab source: Liver of Pig (كبد الخنزير) shows the clearest hexagonal lobules."
         ],
         practicalTipsAr: [
           "مرتب في فصيصات كبدية سداسية الشكل.",
