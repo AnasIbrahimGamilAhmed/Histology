@@ -55,7 +55,7 @@ export const histologyData: TissueSection[] = [
       },
       {
         id: "simple-cuboidal",
-        title: "Simple Cuboidal",
+        title: "Simple Cuboidal (T.S. of kidney of rabbit)",
         titleAr: "مكعبية بسيطة",
         description: "Single layer of cube-shaped cells.",
         descriptionAr: "طبقة واحدة من الخلايا مكعبة الشكل.",
@@ -68,7 +68,7 @@ export const histologyData: TissueSection[] = [
       },
       {
         id: "simple-columnar",
-        title: "Simple Columnar",
+        title: "Simple Columnar (T.S. of ileum of rabbit)",
         titleAr: "عمودية بسيطة",
         description: "Single layer of tall, column-like cells.",
         descriptionAr: "طبقة واحدة من الخلايا الطويلة التي تشبه الأعمدة.",
@@ -81,7 +81,7 @@ export const histologyData: TissueSection[] = [
       },
       {
         id: "pseudostratified",
-        title: "Pseudostratified Columnar",
+        title: "Pseudostratified Ciliated Columnar (T.S. of trachea of rabbit)",
         titleAr: "عمودية طبقية كاذبة",
         description: "Looks like multiple layers but is actually one. Not all cells reach the surface, but all touch the basement membrane.",
         descriptionAr: "تبدو كعدة طبقات ولكنها طبقة واحدة؛ الأنوية في مستويات مختلفة.",
@@ -231,7 +231,7 @@ export const histologyData: TissueSection[] = [
       },
       {
         id: "hyaline-cartilage",
-        title: "Hyaline Cartilage",
+        title: "Hyaline Cartilage (T.S. of trachea of rabbit)",
         description: "Most common. Glassy matrix.",
         practicalTips: ["Matrix looks smooth and uniform (fibers are invisible).", "Found in trachea rings and joint surfaces."],
         practicalTipsAr: ["المادة الخلالية تبدو ناعمة ومنتظمة (الألياف غير مرئية).", "توجد في حلقات القصبة الهوائية وأسطح المفاصل."],
@@ -362,7 +362,7 @@ export const histologyData: TissueSection[] = [
     subSections: [
       {
         id: "skeletal-muscle",
-        title: "Skeletal Muscle",
+        title: "Skeletal Muscle (L.S. striated)",
         description: "Voluntary, attached to bones.",
         practicalTips: [
           "Fibers are very long, cylindrical, and unbranched.",
@@ -381,7 +381,7 @@ export const histologyData: TissueSection[] = [
       },
       {
         id: "cardiac-muscle",
-        title: "Cardiac Muscle",
+        title: "Cardiac Muscle (L.S. from wall of the heart)",
         description: "Involuntary, heart.",
         practicalTips: [
           "Fibers are cylindrical but branched.",
@@ -400,7 +400,7 @@ export const histologyData: TissueSection[] = [
       },
       {
         id: "smooth-muscle",
-        title: "Smooth Muscle",
+        title: "Smooth Muscle (L.S. unstriated) from wall of urinary bladder",
         description: "Involuntary, walls of hollow organs.",
         practicalTips: [
           "Fibers are spindle-shaped (tapered at ends).",

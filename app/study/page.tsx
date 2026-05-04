@@ -470,7 +470,7 @@ function StudyContent() {
                             <div className="p-3 bg-indigo-500/10 text-indigo-400 rounded-2xl">
                               <Microscope size={24} />
                             </div>
-                            Diagnostic Identification
+                            Diagnostic Identification | التشخيص والتعرف
                           </h4>
                           <ul className="space-y-6">
                             {selectedSection.practicalTips?.map((tip, idx) => (
