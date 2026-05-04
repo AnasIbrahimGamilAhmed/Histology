@@ -135,6 +135,7 @@ export const histologyData: TissueSection[] = [
         title: "Transitional Epithelium",
         description: "Specialized to stretch.",
         practicalTips: ["Top cells are large and dome-shaped (umbrella cells) when empty, flattened when stretched.", "Found in the urinary bladder and ureter."],
+        practicalTipsAr: ["الخلايا السطحية كبيرة وقبية الشكل (خلايا المظلة) عندما تكون فارغة، وتتسطح عند التمدد.", "توجد في المثانة البولية والحالب."],
         confusionWarning: "Often confused with Non-keratinized Stratified Squamous. Look at the topmost cells: if they are big, puffy, and dome-like (umbrella cells), it's transitional.",
         imageUrl: "/images/transitional epithelem/transitional.png",
         imageUrls: ["/images/transitional epithelem/transitional.png", "/images/transitional epithelem/transitional micro.png"]
@@ -195,6 +196,7 @@ export const histologyData: TissueSection[] = [
         title: "Reticular Tissue",
         description: "Network of reticular fibers forming a scaffold for organs.",
         practicalTips: ["Branching dark reticular fibers resembling a cherry tree.", "Usually requires Silver Stain, making the fibers appear black.", "Found in spleen, lymph nodes, and bone marrow."],
+        practicalTipsAr: ["ألياف شبكية داكنة متفرعة تشبه شجرة الكرز.", "عادة تتطلب صبغة فضية، مما يجعل الألياف تظهر باللون الأسود.", "توجد في الطحال، العقد الليمفاوية، ونخاع العظام."],
         confusionWarning: "Requires special silver stains to see the fibers clearly, which makes them look black.",
         imageUrl: "/images/reticular tissue/reticular tissue.png",
         imageUrls: ["/images/reticular tissue/reticular tissue.png", "/images/reticular tissue/reticular tissue micro.png"]
@@ -204,6 +206,7 @@ export const histologyData: TissueSection[] = [
         title: "Dense Regular CT",
         description: "Mainly collagen fibers running in parallel.",
         practicalTips: ["Collagen fibers are parallel (Tendons/Ligaments).", "Fibroblast nuclei are squashed between fibers."],
+        practicalTipsAr: ["ألياف الكولاجين متوازية (الأوتار/الأربطة).", "أنوية الخلايا الليفية منضغطة بين الألياف."],
         confusionWarning: "Often confused with Smooth Muscle! Dense Regular CT has wavy, glassy collagen fibers and the nuclei are very thin/dark and outside the fibers. Smooth muscle cells are the fibers themselves, and nuclei are inside.",
         imageUrl: "/images/demse ct/dense ct.png",
         imageUrls: ["/images/demse ct/dense ct.png", "/images/demse ct/dense ct micro.png"],
@@ -256,6 +259,7 @@ export const histologyData: TissueSection[] = [
         title: "Fibrocartilage",
         description: "Tough cartilage with thick collagen bundles.",
         practicalTips: ["Chondrocytes often arranged in distinct rows between thick collagen bundles.", "NO perichondrium.", "Found in intervertebral discs."],
+        practicalTipsAr: ["الخلايا الغضروفية غالباً ما تكون مرتبة في صفوف واضحة بين حزم الكولاجين السميكة.", "لا يوجد غشاء غضروفي (Perichondrium).", "توجد في الأقراص بين الفقرات."],
         confusionWarning: "Can be confused with Dense Regular CT. The key difference: Fibrocartilage has chondrocytes trapped in distinct rounded lacunae (bubbles), whereas Dense Regular CT has squashed flat fibroblasts.",
         imageUrl: "/images/fibrocartilage/fibrocartilage.png",
         imageUrls: ["/images/fibrocartilage/fibrocartilage.png"]
@@ -265,6 +269,7 @@ export const histologyData: TissueSection[] = [
         title: "Compact Bone",
         description: "Dense outer layer.",
         practicalTips: ["Arranged in distinct cylindrical structures called Osteons (Haversian systems).", "Look for central canals surrounded by concentric lamellae."],
+        practicalTipsAr: ["مرتبة في تراكيب أسطوانية واضحة تسمى أجهزة هافرس (Osteons).", "ابحث عن القنوات المركزية المحاطة بصفائح مركزية."],
         confusionWarning: "Almost impossible to confuse if cut in a cross-section (looks like tree rings).",
         imageUrl: "/images/compact bone/compact bone .png",
         imageUrls: ["/images/compact bone/compact bone .png", "/images/compact bone/compact bone micro.png"]
@@ -274,6 +279,7 @@ export const histologyData: TissueSection[] = [
         title: "Spongy (Cancellous) Bone",
         description: "Inner meshwork.",
         practicalTips: ["No osteons.", "Consists of irregular bony trabeculae with large bone marrow cavities in between."],
+        practicalTipsAr: ["لا توجد أجهزة هافرس.", "تتكون من عوارض عظمية غير منتظمة (Trabeculae) مع تجاويف نخاع عظم كبيرة بينها."],
         confusionWarning: "Confused with compact bone. Spongy bone lacks the distinct organized 'tree ring' osteons and instead looks like a random pink sponge filled with red/purple marrow.",
         imageUrl: "/images/spongy bone/spongy bone.png",
         imageUrls: ["/images/spongy bone/spongy bone.png", "/images/spongy bone/spongy bone micro.png"]
@@ -510,6 +516,12 @@ export const histologyData: TissueSection[] = [
           "If Human: Hair Follicles and Sebaceous glands are present.",
           "If Toad: No hair follicles, thinner keratin layer."
         ],
+        practicalTipsAr: [
+          "نسيج طلائي حرشفي طبقي متقرن سميك.",
+          "يكون بشرة الجلد مع طبقة كيراتين ميتة ومتقشرة في الأعلى.",
+          "في الإنسان: توجد بصيلات شعر وغدد دهنية.",
+          "في الضفدع: لا توجد بصيلات شعر، وطبقة الكيراتين أرق."
+        ],
         confusionWarning: "Dead, flaky top keratin layer.",
         imageUrl: "/images/skin/skin.png",
         imageUrls: ["/images/skin/skin.png", "/images/skin/skin micro.png"]
@@ -520,6 +532,9 @@ export const histologyData: TissueSection[] = [
         description: "Male reproductive organ.",
         practicalTips: [
           "Composed of many circular Seminiferous Tubules."
+        ],
+        practicalTipsAr: [
+          "يتكون من العديد من الأنيبيبات المنوية الدائرية (Seminiferous Tubules)."
         ],
         confusionWarning: "Testis tubules contain multiple layers of maturing sperm cells.",
         imageUrl: "/images/testes/tesesss.png",
@@ -539,7 +554,9 @@ export const histologyData: TissueSection[] = [
         ],
         practicalTipsAr: [
           "مرتب في فصيصات كبدية سداسية الشكل.",
-          "وجود وريد مركزي (Central Vein) في المنتصف."
+          "وجود وريد مركزي (Central Vein) في المنتصف.",
+          "مغطى بمحفظة جليسون (نسيج ضام كثيف غير منتظم) وطبقة خارجية من الغشاء المصلي (حرشفي بسيط).",
+          "مصدر المعمل: كبد الخنزير يظهر أوضح فصيصات سداسية."
         ],
         confusionWarning: "Highly distinctive repeating hexagonal lobules.",
         confusionWarningAr: "يتميز بالفصيصات السداسية المتكررة.",
@@ -554,6 +571,10 @@ export const histologyData: TissueSection[] = [
           "Pseudostratified Ciliated Columnar Epithelium.",
           "Distinct C-shaped ring of Hyaline Cartilage."
         ],
+        practicalTipsAr: [
+          "نسيج طلائي عمودي طبقي كاذب مهدب.",
+          "حلقة واضحة من الغضروف الزجاجي على شكل حرف C."
+        ],
         confusionWarning: "Combination of ciliated epithelium and hyaline cartilage ring.",
         imageUrl: "/images/trachea/trachea.png",
         imageUrls: ["/images/trachea/trachea.png", "/images/trachea/trachea micro.png"]
@@ -565,6 +586,10 @@ export const histologyData: TissueSection[] = [
         practicalTips: [
           "Surface has deep Gastric pits.",
           "NO goblet cells."
+        ],
+        practicalTipsAr: [
+          "السطح يحتوي على وهدات معدية (Gastric pits) عميقة.",
+          "لا توجد خلايا كأسية (Goblet cells)."
         ],
         confusionWarning: "Do not confuse with Ileum. Stomach has inward gastric pits and NO goblet cells, while Ileum has outward villi and many goblet cells.",
         confusionWarningAr: "لا تخلط بينه وبين اللفائفي. المعدة لها وهدات (pits) للداخل ولا تحتوي على خلايا كأسية، بينما اللفائفي له خملات بارزة للخارج وكثير من الخلايا الكأسية.",
