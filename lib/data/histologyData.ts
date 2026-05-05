@@ -436,7 +436,7 @@ export const histologyData: TissueSection[] = [
     subSections: [
       {
         id: "pancreas",
-        title: "T.S. of Pancreas of Rat",
+        title: "S. of Pancreas of Rat",
         titleAr: "البنكرياس",
         description: "Mixed exocrine and endocrine gland.",
         descriptionAr: "غدة مختلطة (قنوية ولا قنوية).",
@@ -542,7 +542,7 @@ export const histologyData: TissueSection[] = [
       },
       {
         id: "liver",
-        title: "T.S. of Liver of Pig",
+        title: "S. of Liver of Pig",
         titleAr: "الكبد",
         description: "Large metabolic organ.",
         descriptionAr: "عضو تمثيل غذائي كبير.",
