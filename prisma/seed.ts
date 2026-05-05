@@ -69,17 +69,17 @@ function getShortStructureName(sampleName: string, originalTip: string): string 
 // ─── LOCATION MAP ────────────────────────────────────────────────────────────
 
 const LOCATION_MAP: Record<string, string> = {
-  "Simple Squamous": "Blood vessel walls & lung alveoli",
+  "Simple Squamous (T.S. of kidney of rabbit)": "Blood vessel walls & lung alveoli",
   "Simple Cuboidal (T.S. of kidney of rabbit)": "Kidney tubules & thyroid follicles",
   "Simple Columnar (T.S. of ileum of rabbit)": "Stomach & intestinal lining",
   "Pseudostratified Ciliated Columnar (T.S. of trachea of rabbit)": "Trachea & upper airways",
-  "Non-Keratinized Stratified Squamous": "Esophagus & oral cavity",
-  "Keratinized Stratified Squamous": "Skin epidermis",
+  "Non-Keratinized Stratified Squamous (T.S. of esophagus of rabbit)": "Esophagus & oral cavity",
+  "Keratinized Stratified Squamous (V.S. of skin of toad)": "Skin epidermis",
   "Transitional Epithelium": "Urinary bladder & ureter",
-  "Mucous Connective Tissue": "Umbilical cord (Wharton's Jelly)",
+  "Mucous Connective Tissue (T.S. of umbilical cord)": "Umbilical cord (Wharton's Jelly)",
   "Loose (Areolar) CT": "Beneath epithelial layers throughout the body",
   "Adipose Tissue (Fat)": "Subcutaneous tissue & omentum",
-  "Reticular Tissue": "Spleen, lymph nodes & bone marrow",
+  "Reticular Tissue (S. of lymph gland)": "Spleen, lymph nodes & bone marrow",
   "Dense Regular CT": "Tendons & ligaments",
   "Elastic Connective Tissue": "Aorta & elastic arteries",
   "Hyaline Cartilage (T.S. of trachea of rabbit)": "Trachea rings & articular joint surfaces",
@@ -111,12 +111,12 @@ const ALL_LOCATIONS = Object.values(LOCATION_MAP);
 // ─── CLINICAL SCENARIO MAP ───────────────────────────────────────────────────
 
 const CLINICAL_MAP: Record<string, string> = {
-  "Simple Squamous": "A student examines a lung slide. They see an extremely thin, flat single-layer lining in the alveolar walls. What tissue type is this?",
+  "Simple Squamous (T.S. of kidney of rabbit)": "A student examines a lung slide. They see an extremely thin, flat single-layer lining in the alveolar walls. What tissue type is this?",
   "Simple Cuboidal (T.S. of kidney of rabbit)": "A kidney biopsy shows tubular structures lined by a single layer of cube-shaped cells with round central nuclei. What epithelium is this?",
   "Simple Columnar (T.S. of ileum of rabbit)": "A patient undergoes a gastric biopsy. The lining shows tall, single-layered cells with basal oval nuclei and goblet cells. What tissue is seen?",
   "Pseudostratified Ciliated Columnar (T.S. of trachea of rabbit)": "A respiratory tract biopsy shows cells at different heights, all touching the basement membrane, with cilia on the surface. What epithelium is this?",
-  "Non-Keratinized Stratified Squamous": "An esophageal biopsy shows multiple cell layers. The surface cells are flat but have visible nuclei. What tissue is this?",
-  "Keratinized Stratified Squamous": "A skin biopsy shows multiple cell layers. The outermost consists of anucleated dead cells packed with keratin. What tissue is this?",
+  "Non-Keratinized Stratified Squamous (T.S. of esophagus of rabbit)": "An esophageal biopsy shows multiple cell layers. The surface cells are flat but have visible nuclei. What tissue is this?",
+  "Keratinized Stratified Squamous (V.S. of skin of toad)": "A skin biopsy shows multiple cell layers. The outermost consists of anucleated dead cells packed with keratin. What tissue is this?",
   "Transitional Epithelium": "A bladder biopsy shows a special epithelium that stretches. The surface has large dome-shaped 'umbrella cells'. What tissue is this?",
   "Hyaline Cartilage (T.S. of trachea of rabbit)": "A joint biopsy shows a glassy, homogeneous matrix with chondrocytes in lacunae. What cartilage is this?",
   "Elastic Cartilage": "The ear pinna biopsy shows dark branching elastic fibers in the cartilage matrix. What cartilage is this?",

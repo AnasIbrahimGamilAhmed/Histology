@@ -42,7 +42,7 @@ export const histologyData: TissueSection[] = [
     subSections: [
       {
         id: "simple-squamous",
-        title: "Simple Squamous",
+        title: "Simple Squamous (T.S. of kidney of rabbit)",
         titleAr: "حرشفية بسيطة",
         description: "Single layer of flat, scale-like cells.",
         descriptionAr: "طبقة واحدة من الخلايا المسطحة التي تشبه القشور.",
@@ -94,7 +94,7 @@ export const histologyData: TissueSection[] = [
       },
       {
         id: "non-keratinized-stratified-squamous",
-        title: "Non-Keratinized Stratified Squamous",
+        title: "Non-Keratinized Stratified Squamous (T.S. of esophagus of rabbit)",
         titleAr: "حرشفية طبقية غير متقرنة",
         description: "Multiple layers of cells, where the top layers are flat and retain their nuclei.",
         practicalTips: ["Top layers have visible nuclei (alive cells).", "Lining of wet surfaces like the esophagus (Rabbit) and vagina."],
@@ -108,7 +108,7 @@ export const histologyData: TissueSection[] = [
       },
       {
         id: "keratinized-stratified-squamous",
-        title: "Keratinized Stratified Squamous",
+        title: "Keratinized Stratified Squamous (V.S. of skin of toad)",
         titleAr: "حرشفية طبقية متقرنة",
         description: "Multiple layers where the surface cells are dead, flat, and filled with keratin (no nuclei).",
         practicalTips: ["Surface layers are dead and have no nuclei.", "Contains a thick layer of keratin on top for protection.", "Forms the epidermis of the skin.", "Classic lab example: Skin of Toad (no hair follicles)."],
@@ -157,7 +157,7 @@ export const histologyData: TissueSection[] = [
     subSections: [
       {
         id: "mucous-ct",
-        title: "Mucous Connective Tissue",
+        title: "Mucous Connective Tissue (T.S. of umbilical cord)",
         titleAr: "نسيج ضام مخاطي",
         description: "Jelly-like ground substance rich in hyaluronic acid.",
         descriptionAr: "مادة بين خلوية هلامية غنية بحمض الهيالورونيك.",
@@ -193,7 +193,7 @@ export const histologyData: TissueSection[] = [
       },
       {
         id: "reticular-ct",
-        title: "Reticular Tissue",
+        title: "Reticular Tissue (S. of lymph gland)",
         description: "Network of reticular fibers forming a scaffold for organs.",
         practicalTips: ["Branching dark reticular fibers resembling a cherry tree.", "Usually requires Silver Stain, making the fibers appear black.", "Found in spleen, lymph nodes, and bone marrow."],
         practicalTipsAr: ["ألياف شبكية داكنة متفرعة تشبه شجرة الكرز.", "عادة تتطلب صبغة فضية، مما يجعل الألياف تظهر باللون الأسود.", "توجد في الطحال، العقد الليمفاوية، ونخاع العظام."],
